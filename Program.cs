@@ -1,5 +1,9 @@
 using FlowerSelling.Data;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
+using FlowerSellingWebsite.Repositories.Interfaces;
+using FlowerSellingWebsite.Repositories.Implementations;
+using FlowerSellingWebsite.Services.Interfaces;
+using FlowerSellingWebsite.Services.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -27,6 +31,12 @@ var jwtSettings = jwtSection.Get<JwtSettings>() ?? throw new InvalidOperationExc
 // JWT Service
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Repository Services
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+// Application Services
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Authentication
 var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
@@ -59,6 +69,19 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
 });
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:5062", "http://127.0.0.1:5062", "http://localhost:5081", "http://127.0.0.1:5081")
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials()
+               .SetIsOriginAllowed(origin => true); // Allow any origin for development
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -67,6 +90,7 @@ var app = builder.Build();
 
 // Middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
