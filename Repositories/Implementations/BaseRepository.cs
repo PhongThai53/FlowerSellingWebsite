@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FlowerSelling.Data;
 //using ProjectGreenLens.Infrastructure.dbContext;
 using FlowerSellingWebsite.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 using ProjectGreenLens.Repositories.Interfaces;
-using FlowerSelling.Data;
 
 namespace ProjectGreenLens.Repositories.Implementations
 {
@@ -19,7 +19,6 @@ namespace ProjectGreenLens.Repositories.Implementations
         }
         public async Task<T> createAsync(T entity)
         {
-            entity.Id = Guid.NewGuid();
             await _context.Set<T>().AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -30,7 +29,7 @@ namespace ProjectGreenLens.Repositories.Implementations
             _context.Set<T>().Update(entity);
             await _context.SaveChangesAsync();
         }
-        public async Task<T?> getByIdAsync(Guid id)
+        public async Task<T?> getByIdAsync(int id)
         {
             return await _context.Set<T>().FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
         }

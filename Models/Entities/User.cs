@@ -1,32 +1,47 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
     public class User : BaseEntity
     {
         [Required]
-        [MaxLength(100)]
-        public required string UserName { get; set; }
+        [StringLength(100)]
+        public string UserName { get; set; } = string.Empty;
 
-        [MaxLength(256)]
+        [StringLength(256)]
         public string? PasswordHash { get; set; }
 
-        [MaxLength(150)]
+        [StringLength(150)]
         public string? FullName { get; set; }
 
-        [MaxLength(50)]
+        [StringLength(50)]
+        [EmailAddress]
         public string? Email { get; set; }
 
-        [MaxLength(20)]
+        [StringLength(20)]
+        [Phone]
         public string? Phone { get; set; }
 
-        [MaxLength(300)]
+        [StringLength(300)]
         public string? Address { get; set; }
 
-        public Guid RoleId { get; set; }
+        [Required]
+        public int RoleId { get; set; }
+
+        public bool IsCustomer { get; set; } = false;
+
+        public bool IsSupplier { get; set; } = false;
 
         // Navigation Properties
-        public virtual Role? Role { get; set; }
-        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        [ForeignKey("RoleId")]
+        public virtual Role Role { get; set; } = null!;
+
+        public virtual ICollection<Order> CreatedOrders { get; set; } = new List<Order>();
+        public virtual ICollection<Order> CustomerOrders { get; set; } = new List<Order>();
+        public virtual ICollection<FlowerDamageLog> DamageReports { get; set; } = new List<FlowerDamageLog>();
+        public virtual ICollection<SystemLog> SystemLogs { get; set; } = new List<SystemLog>();
+        public virtual ICollection<SystemNotification> Notifications { get; set; } = new List<SystemNotification>();
     }
+
 }

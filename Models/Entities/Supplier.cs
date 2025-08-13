@@ -1,26 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
+    [Table("Suppliers")]
     public class Supplier : BaseEntity
     {
         [Required]
-        [MaxLength(150)]
-        public required string SupplierName { get; set; }
+        [StringLength(150)]
+        public string SupplierName { get; set; } = string.Empty;
 
-        [MaxLength(100)]
+        [StringLength(100)]
         public string? ContactPerson { get; set; }
 
-        [MaxLength(20)]
+        [StringLength(20)]
+        [Phone]
         public string? Phone { get; set; }
 
-        [MaxLength(100)]
+        [StringLength(100)]
+        [EmailAddress]
         public string? Email { get; set; }
 
-        [MaxLength(300)]
+        [StringLength(300)]
         public string? Address { get; set; }
 
         // Navigation Properties
-        public virtual ICollection<Flower> Flowers { get; set; } = new List<Flower>();
+        public virtual ICollection<FlowerBatch> FlowerBatches { get; set; } = new List<FlowerBatch>();
+        public virtual ICollection<SupplierListing> SupplierListings { get; set; } = new List<SupplierListing>();
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

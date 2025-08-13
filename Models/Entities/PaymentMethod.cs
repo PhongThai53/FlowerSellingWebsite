@@ -3,17 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
-    [Table("Permissions")]
-    public class Permission : BaseEntity
+    [Table("PaymentMethods")]
+    public class PaymentMethod : BaseEntity
     {
         [Required]
         [StringLength(100)]
-        public string PermissionName { get; set; } = string.Empty;
+        public string MethodName { get; set; } = string.Empty;
 
         [StringLength(200)]
         public string? Description { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         // Navigation Properties
-        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using FlowerSellingWebsite.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Linq.Expressions;
 
 namespace FlowerSelling.Data
 {
@@ -11,767 +10,444 @@ namespace FlowerSelling.Data
         {
         }
 
-        // Parameterless constructor for design time
-        public FlowerSellingDbContext() : base()
-        {
-        }
-
-        // DbSets
+        // ========== DbSets ==========
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<FlowerCategory> FlowerCategories { get; set; }
+        public DbSet<Flower> Flowers { get; set; }
+        public DbSet<FlowerBatch> FlowerBatches { get; set; }
+        public DbSet<FlowerDamageLog> FlowerDamageLogs { get; set; }
+        public DbSet<FlowerPhoto> FlowerPhotos { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductFlower> ProductFlowers { get; set; }
+        public DbSet<ProductPhoto> ProductPhotos { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<SupplierListing> SupplierListings { get; set; }
+        public DbSet<SupplierListingPhoto> SupplierListingPhotos { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Delivery> Deliveries { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<Flower> Flowers { get; set; }
-        public DbSet<FlowerBatch> FlowerBatches { get; set; }
-        public DbSet<FlowerBatchDetail> FlowerBatchDetails { get; set; }
-        public DbSet<FlowerDamageLog> FlowerDamageLogs { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderDetail> OrderDetails { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<Delivery> Deliveries { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<SystemLog> SystemLogs { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<ProductFlower> ProductFlowers { get; set; }
-        public DbSet<ProductFlowerBatchUsage> ProductFlowerBatchUsages { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Try to read from configuration
-                try
-                {
-                    var configuration = new ConfigurationBuilder()
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", optional: true)
-                        .AddJsonFile("appsettings.Development.json", optional: true)
-                        .AddEnvironmentVariables()
-                        .Build();
-
-                    var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-                    if (!string.IsNullOrEmpty(connectionString))
-                    {
-                        optionsBuilder.UseSqlServer(connectionString);
-                    }
-                    else
-                    {
-                        // Fallback connection string
-                        optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FlowerSellingDB;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true");
-                    }
-                }
-                catch
-                {
-                    // If configuration fails, use default connection string
-                    optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FlowerSellingDB;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true");
-                }
-            }
-
-            optionsBuilder.ConfigureWarnings(warnings =>
-        warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
-        }
+        public DbSet<SystemNotification> SystemNotifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Primary Keys
-            ConfigurePrimaryKeys(modelBuilder);
+            // Configure BaseEntity for all entities
+            ConfigureBaseEntity(modelBuilder);
 
-            // Configure Foreign Keys and Relationships
-            ConfigureRelationships(modelBuilder);
+            // Configure relationships
+            ConfigureSupplierRelationships(modelBuilder);
+            ConfigureFlowerRelationships(modelBuilder);
+            ConfigureProductRelationships(modelBuilder);
+            ConfigureOrderRelationships(modelBuilder);
+            ConfigureUserRelationships(modelBuilder);
+            ConfigureSystemRelationships(modelBuilder);
 
-            // Configure Indexes
+            // Configure indexes for performance
             ConfigureIndexes(modelBuilder);
 
-            // Configure Column Types and Constraints
-            ConfigureColumnTypes(modelBuilder);
+            // Configure constraints and validations
+            ConfigureConstraints(modelBuilder);
 
-            // Configure Decimal Precision
-            ConfigureDecimalPrecision(modelBuilder);
-
-            // Configure Table Constraints (NET 8.0 compatible)
-            ConfigureTableConstraints(modelBuilder);
-
-            // Configure Soft Delete Global Query Filter
-            ConfigureSoftDelete(modelBuilder);
-
-            // Seed Default Data
-            SeedDefaultData(modelBuilder);
+            // Seed initial data
+            SeedData(modelBuilder);
         }
 
-        private void ConfigurePrimaryKeys(ModelBuilder modelBuilder)
+        private void ConfigureBaseEntity(ModelBuilder modelBuilder)
         {
-            // All entities inherit from BaseEntity with Guid Id as primary key
-            // EF Core will automatically configure this, but we can be explicit
-            modelBuilder.Entity<Supplier>().HasKey(s => s.Id);
-            modelBuilder.Entity<User>().HasKey(u => u.Id);
-            modelBuilder.Entity<Role>().HasKey(r => r.Id);
-            modelBuilder.Entity<Permission>().HasKey(p => p.Id);
-            modelBuilder.Entity<RolePermission>().HasKey(rp => rp.Id);
-            modelBuilder.Entity<Flower>().HasKey(f => f.Id);
-            modelBuilder.Entity<FlowerBatch>().HasKey(fb => fb.Id);
-            modelBuilder.Entity<FlowerBatchDetail>().HasKey(fbd => fbd.Id);
-            modelBuilder.Entity<FlowerDamageLog>().HasKey(fdl => fdl.Id);
-            modelBuilder.Entity<Order>().HasKey(o => o.Id);
-            modelBuilder.Entity<OrderDetail>().HasKey(od => od.Id);
-            modelBuilder.Entity<Payment>().HasKey(p => p.Id);
-            modelBuilder.Entity<Delivery>().HasKey(d => d.Id);
-            modelBuilder.Entity<SystemLog>().HasKey(sl => sl.Id);
-            modelBuilder.Entity<Product>().HasKey(p => p.Id);
-            modelBuilder.Entity<ProductFlower>().HasKey(pf => pf.Id);
-            modelBuilder.Entity<ProductFlowerBatchUsage>().HasKey(pfbu => pfbu.Id);
+            // Configure all entities that inherit from BaseEntity
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType)))
+            {
+                // Primary Key
+                modelBuilder.Entity(entityType.ClrType).HasKey("Id");
+
+                // PublicId Index
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasIndex("PublicId")
+                    .IsUnique()
+                    .HasDatabaseName($"IX_{entityType.GetTableName()}_PublicId");
+
+                // Soft Delete Query Filter
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasQueryFilter(GetSoftDeleteFilter(entityType.ClrType));
+            }
         }
 
-        private void ConfigureRelationships(ModelBuilder modelBuilder)
+        private static LambdaExpression GetSoftDeleteFilter(Type entityType)
         {
-            // User - Role relationship
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
+            var parameter = Expression.Parameter(entityType, "e");
+            var property = Expression.Property(parameter, "IsDeleted");
+            var condition = Expression.Equal(property, Expression.Constant(false));
+            return Expression.Lambda(condition, parameter);
+        }
 
-            // RolePermission relationships
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePermissions)
-                .HasForeignKey(rp => rp.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Permission)
-                .WithMany(p => p.RolePermissions)
-                .HasForeignKey(rp => rp.PermissionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Flower - Supplier relationship
-            modelBuilder.Entity<Flower>()
-                .HasOne(f => f.Supplier)
-                .WithMany(s => s.Flowers)
-                .HasForeignKey(f => f.SupplierId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // FlowerBatch relationships
+        private static void ConfigureSupplierRelationships(ModelBuilder modelBuilder)
+        {
+            // Supplier -> FlowerBatch (One-to-Many)
             modelBuilder.Entity<FlowerBatch>()
                 .HasOne(fb => fb.Supplier)
-                .WithMany()
+                .WithMany(s => s.FlowerBatches)
                 .HasForeignKey(fb => fb.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Supplier -> SupplierListing (One-to-Many)
+            modelBuilder.Entity<SupplierListing>()
+                .HasOne(sl => sl.Supplier)
+                .WithMany(s => s.SupplierListings)
+                .HasForeignKey(sl => sl.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Supplier -> Order (One-to-Many)
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Supplier)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(o => o.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private static void ConfigureFlowerRelationships(ModelBuilder modelBuilder)
+        {
+            // FlowerCategory -> Flower (One-to-Many)
+            modelBuilder.Entity<Flower>()
+                .HasOne(f => f.FlowerCategory)
+                .WithMany(fc => fc.Flowers)
+                .HasForeignKey(f => f.FlowerCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Flower -> FlowerBatch (One-to-Many)
             modelBuilder.Entity<FlowerBatch>()
                 .HasOne(fb => fb.Flower)
                 .WithMany(f => f.FlowerBatches)
                 .HasForeignKey(fb => fb.FlowerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // FlowerBatchDetail relationships
-            modelBuilder.Entity<FlowerBatchDetail>()
-                .HasOne(fbd => fbd.FlowerBatch)
-                .WithMany(fb => fb.FlowerBatchDetails)
-                .HasForeignKey(fbd => fbd.FlowerBatchId)
+            // Flower -> FlowerPhoto (One-to-Many)
+            modelBuilder.Entity<FlowerPhoto>()
+                .HasOne(fp => fp.Flower)
+                .WithMany(f => f.FlowerPhotos)
+                .HasForeignKey(fp => fp.FlowerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<FlowerBatchDetail>()
-                .HasOne(fbd => fbd.Flower)
-                .WithMany()
-                .HasForeignKey(fbd => fbd.FlowerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // FlowerDamageLog relationship
-            modelBuilder.Entity<FlowerDamageLog>()
-                .HasOne(fdl => fdl.FlowerBatchDetail)
-                .WithMany(fbd => fbd.FlowerDamageLogs)
-                .HasForeignKey(fdl => fdl.FlowerBatchDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Order - User relationship
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // OrderDetail relationships
-            modelBuilder.Entity<OrderDetail>()
-                .HasOne(od => od.Order)
-                .WithMany(o => o.OrderDetails)
-                .HasForeignKey(od => od.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<OrderDetail>()
-                .HasOne(od => od.Product)
-                .WithMany(p => p.OrderDetails)
-                .HasForeignKey(od => od.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Payment - Order relationship
-            modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Order)
-                .WithMany(o => o.Payments)
-                .HasForeignKey(p => p.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Delivery - Order relationship
-            modelBuilder.Entity<Delivery>()
-                .HasOne(d => d.Order)
-                .WithMany(o => o.Deliveries)
-                .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // SystemLog relationships
-            modelBuilder.Entity<SystemLog>()
-                .HasOne(sl => sl.User)
-                .WithMany()
-                .HasForeignKey(sl => sl.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<SystemLog>()
-                .HasOne(sl => sl.Order)
-                .WithMany(o => o.SystemLogs)
-                .HasForeignKey(sl => sl.RecordId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // ProductFlower relationships
-            modelBuilder.Entity<ProductFlower>()
-                .HasOne(pf => pf.Product)
-                .WithMany(p => p.ProductFlowers)
-                .HasForeignKey(pf => pf.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            // Flower -> ProductFlower (One-to-Many)
             modelBuilder.Entity<ProductFlower>()
                 .HasOne(pf => pf.Flower)
                 .WithMany(f => f.ProductFlowers)
                 .HasForeignKey(pf => pf.FlowerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ProductFlowerBatchUsage relationships
-            modelBuilder.Entity<ProductFlowerBatchUsage>()
-                .HasOne(pfbu => pfbu.Product)
-                .WithMany(p => p.ProductFlowerBatchUsages)
-                .HasForeignKey(pfbu => pfbu.ProductId)
+            // Flower -> SupplierListing (One-to-Many)
+            modelBuilder.Entity<SupplierListing>()
+                .HasOne(sl => sl.Flower)
+                .WithMany(f => f.SupplierListings)
+                .HasForeignKey(sl => sl.FlowerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // FlowerBatch -> FlowerDamageLog (One-to-Many)
+            modelBuilder.Entity<FlowerDamageLog>()
+                .HasOne(fdl => fdl.FlowerBatch)
+                .WithMany(fb => fb.FlowerDamageLogs)
+                .HasForeignKey(fdl => fdl.FlowerBatchId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProductFlowerBatchUsage>()
-                .HasOne(pfbu => pfbu.FlowerBatchDetail)
-                .WithMany()
-                .HasForeignKey(pfbu => pfbu.FlowerBatchDetailId)
+            // FlowerBatch -> OrderDetail (One-to-Many)
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.FlowerBatch)
+                .WithMany(fb => fb.OrderDetails)
+                .HasForeignKey(od => od.FlowerBatchId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        private void ConfigureIndexes(ModelBuilder modelBuilder)
+        private static void ConfigureProductRelationships(ModelBuilder modelBuilder)
         {
-            // User indexes
+            // Product -> ProductFlower (One-to-Many)
+            modelBuilder.Entity<ProductFlower>()
+                .HasOne(pf => pf.Product)
+                .WithMany(p => p.ProductFlowers)
+                .HasForeignKey(pf => pf.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Product -> ProductPhoto (One-to-Many)
+            modelBuilder.Entity<ProductPhoto>()
+                .HasOne(pp => pp.Product)
+                .WithMany(p => p.ProductPhotos)
+                .HasForeignKey(pp => pp.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Product -> OrderDetail (One-to-Many)
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Product)
+                .WithMany(p => p.OrderDetails)
+                .HasForeignKey(od => od.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // SupplierListing -> SupplierListingPhoto (One-to-Many)
+            modelBuilder.Entity<SupplierListingPhoto>()
+                .HasOne(slp => slp.SupplierListing)
+                .WithMany(sl => sl.SupplierListingPhotos)
+                .HasForeignKey(slp => slp.SupplierListingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // SupplierListing -> OrderDetail (One-to-Many)
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.SupplierListing)
+                .WithMany(sl => sl.OrderDetails)
+                .HasForeignKey(od => od.SupplierListingId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private static void ConfigureOrderRelationships(ModelBuilder modelBuilder)
+        {
+            // Order -> OrderDetail (One-to-Many)
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(od => od.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Order -> Payment (One-to-Many)
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithMany(o => o.Payments)
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Order -> Delivery (One-to-Many)
+            modelBuilder.Entity<Delivery>()
+                .HasOne(d => d.Order)
+                .WithMany(o => o.Deliveries)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PaymentMethod -> Payment (One-to-Many)
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany(pm => pm.Payments)
+                .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private static void ConfigureUserRelationships(ModelBuilder modelBuilder)
+        {
+            // Role -> User (One-to-Many)
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.UserName)
-                .IsUnique();
+                .HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique()
-                .HasFilter("[Email] IS NOT NULL");
-
-            // Role index
-            modelBuilder.Entity<Role>()
-                .HasIndex(r => r.RoleName)
-                .IsUnique();
-
-            // Permission index
-            modelBuilder.Entity<Permission>()
-                .HasIndex(p => p.PermissionName)
-                .IsUnique();
-
-            // RolePermission composite index
+            // Role -> RolePermission (One-to-Many)
             modelBuilder.Entity<RolePermission>()
-                .HasIndex(rp => new { rp.RoleId, rp.PermissionId })
-                .IsUnique();
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Permission -> RolePermission (One-to-Many)
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // User -> Order relationships
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.CreatedByUser)
+                .WithMany(u => u.CreatedOrders)
+                .HasForeignKey(o => o.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Customer)
+                .WithMany(u => u.CustomerOrders)
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // User -> FlowerDamageLog
+            modelBuilder.Entity<FlowerDamageLog>()
+                .HasOne(fdl => fdl.ReportedByUser)
+                .WithMany(u => u.DamageReports)
+                .HasForeignKey(fdl => fdl.ReportedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private static void ConfigureSystemRelationships(ModelBuilder modelBuilder)
+        {
+            // User -> SystemLog
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.User)
+                .WithMany(u => u.SystemLogs)
+                .HasForeignKey(sl => sl.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Order -> SystemLog
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.Order)
+                .WithMany(o => o.SystemLogs)
+                .HasForeignKey(sl => sl.OrderId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // User -> SystemNotification
+            modelBuilder.Entity<SystemNotification>()
+                .HasOne(sn => sn.RecipientUser)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(sn => sn.RecipientUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        private static void ConfigureIndexes(ModelBuilder modelBuilder)
+        {
+            // Supplier indexes
+            modelBuilder.Entity<Supplier>()
+                .HasIndex(s => s.Email)
+                .HasDatabaseName("IX_Suppliers_Email");
 
             // Flower indexes
             modelBuilder.Entity<Flower>()
-                .HasIndex(f => f.Name);
+                .HasIndex(f => f.Name)
+                .HasDatabaseName("IX_Flowers_Name");
 
             modelBuilder.Entity<Flower>()
-                .HasIndex(f => f.SupplierId);
+                .HasIndex(f => f.FlowerCategoryId)
+                .HasDatabaseName("IX_Flowers_FlowerCategoryId");
+
+            // FlowerBatch indexes
+            modelBuilder.Entity<FlowerBatch>()
+                .HasIndex(fb => fb.BatchCode)
+                .HasDatabaseName("IX_FlowerBatches_BatchCode");
+
+            modelBuilder.Entity<FlowerBatch>()
+                .HasIndex(fb => fb.ExpiryDate)
+                .HasDatabaseName("IX_FlowerBatches_ExpiryDate");
 
             // Order indexes
             modelBuilder.Entity<Order>()
-                .HasIndex(o => o.UserId);
+                .HasIndex(o => o.OrderNumber)
+                .IsUnique()
+                .HasDatabaseName("IX_Orders_OrderNumber");
 
             modelBuilder.Entity<Order>()
-                .HasIndex(o => o.CreatedAt);
+                .HasIndex(o => o.OrderDate)
+                .HasDatabaseName("IX_Orders_OrderDate");
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.Status)
+                .HasDatabaseName("IX_Orders_Status");
+
+            // User indexes
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.UserName)
+                .IsUnique()
+                .HasDatabaseName("IX_Users_UserName");
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .HasDatabaseName("IX_Users_Email");
+
+            // SystemNotification indexes
+            modelBuilder.Entity<SystemNotification>()
+                .HasIndex(sn => new { sn.RecipientUserId, sn.IsRead })
+                .HasDatabaseName("IX_SystemNotifications_RecipientUserId_IsRead");
 
             // SystemLog indexes
             modelBuilder.Entity<SystemLog>()
-                .HasIndex(sl => sl.UserId);
-
-            modelBuilder.Entity<SystemLog>()
-                .HasIndex(sl => sl.CreatedAt);
-
-            // ProductFlower composite index
-            modelBuilder.Entity<ProductFlower>()
-                .HasIndex(pf => new { pf.ProductId, pf.FlowerId })
-                .IsUnique();
+                .HasIndex(sl => sl.CreatedAt)
+                .HasDatabaseName("IX_SystemLogs_CreatedAt");
         }
 
-        private void ConfigureColumnTypes(ModelBuilder modelBuilder)
+        private static void ConfigureConstraints(ModelBuilder modelBuilder)
         {
-            // Configure string column types and lengths
-
-            // Supplier
-            modelBuilder.Entity<Supplier>(entity =>
-            {
-                entity.Property(e => e.SupplierName)
-                    .HasColumnType("nvarchar(150)")
-                    .IsRequired();
-                entity.Property(e => e.ContactPerson)
-                    .HasColumnType("nvarchar(100)");
-                entity.Property(e => e.Phone)
-                    .HasColumnType("nvarchar(20)");
-                entity.Property(e => e.Email)
-                    .HasColumnType("nvarchar(100)");
-                entity.Property(e => e.Address)
-                    .HasColumnType("nvarchar(300)");
-            });
-
-            // User
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.Property(e => e.UserName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-                entity.Property(e => e.PasswordHash)
-                    .HasColumnType("nvarchar(256)");
-                entity.Property(e => e.FullName)
-                    .HasColumnType("nvarchar(150)");
-                entity.Property(e => e.Email)
-                    .HasColumnType("nvarchar(50)");
-                entity.Property(e => e.Phone)
-                    .HasColumnType("nvarchar(20)");
-                entity.Property(e => e.Address)
-                    .HasColumnType("nvarchar(300)");
-            });
-
-            // Role
-            modelBuilder.Entity<Role>(entity =>
-            {
-                entity.Property(e => e.RoleName)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-                entity.Property(e => e.Description)
-                    .HasColumnType("nvarchar(200)");
-            });
-
-            // Permission
-            modelBuilder.Entity<Permission>(entity =>
-            {
-                entity.Property(e => e.PermissionName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-                entity.Property(e => e.Description)
-                    .HasColumnType("nvarchar(200)");
-            });
-
-            // Flower
-            modelBuilder.Entity<Flower>(entity =>
-            {
-                entity.Property(e => e.Name)
-                    .HasColumnType("nvarchar(150)")
-                    .IsRequired();
-                entity.Property(e => e.Description)
-                    .HasColumnType("nvarchar(300)");
-                entity.Property(e => e.Price)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // FlowerBatch
-            modelBuilder.Entity<FlowerBatch>(entity =>
-            {
-                entity.Property(e => e.Notes)
-                    .HasColumnType("nvarchar(300)");
-                entity.Property(e => e.TotalAmount)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // FlowerBatchDetail
-            modelBuilder.Entity<FlowerBatchDetail>(entity =>
-            {
-                entity.Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // FlowerDamageLog
-            modelBuilder.Entity<FlowerDamageLog>(entity =>
-            {
-                entity.Property(e => e.DamageReason)
-                    .HasColumnType("nvarchar(300)");
-            });
-
-            // Order
-            modelBuilder.Entity<Order>(entity =>
-            {
-                entity.Property(e => e.TotalAmount)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // OrderDetail
-            modelBuilder.Entity<OrderDetail>(entity =>
-            {
-                entity.Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // Payment
-            modelBuilder.Entity<Payment>(entity =>
-            {
-                entity.Property(e => e.PaymentStatus)
-                    .HasColumnType("nvarchar(50)");
-                entity.Property(e => e.Amount)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            // Delivery
-            modelBuilder.Entity<Delivery>(entity =>
-            {
-                entity.Property(e => e.DeliveryStatus)
-                    .HasColumnType("nvarchar(50)");
-                entity.Property(e => e.DeliveryAddress)
-                    .HasColumnType("nvarchar(300)");
-            });
-
-            // SystemLog
-            modelBuilder.Entity<SystemLog>(entity =>
-            {
-                entity.Property(e => e.Action)
-                    .HasColumnType("nvarchar(100)");
-                entity.Property(e => e.TableName)
-                    .HasColumnType("nvarchar(100)");
-                entity.Property(e => e.IPAddress)
-                    .HasColumnType("nvarchar(45)");
-            });
-
-            // Product
-            modelBuilder.Entity<Product>(entity =>
-            {
-                entity.Property(e => e.Name)
-                    .HasColumnType("nvarchar(150)");
-                entity.Property(e => e.Description)
-                    .HasColumnType("nvarchar(300)");
-                entity.Property(e => e.Price)
-                    .HasColumnType("decimal(18,2)");
-            });
-            // Configure decimal precision for financial fields
-            modelBuilder.Entity<Flower>()
-                .Property(f => f.Price)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FlowerBatch>()
-                    .Property(fb => fb.TotalAmount)
-                    .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FlowerBatchDetail>()
-                    .Property(fbd => fbd.UnitPrice)
-                    .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Order>()
-                    .Property(o => o.TotalAmount)
-                    .HasPrecision(18, 2);
-
-            modelBuilder.Entity<OrderDetail>()
-                    .Property(od => od.UnitPrice)
-                    .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Payment>()
-                    .Property(p => p.Amount)
-                    .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Product>()
-                    .Property(p => p.Price)
-                    .HasPrecision(18, 2);
-        }
-
-
-
-
-        private void ConfigureDecimalPrecision(ModelBuilder modelBuilder)
-        {
-            // Configure decimal precision for financial fields (backup configuration)
-            modelBuilder.Entity<Flower>()
-                .Property(f => f.Price)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FlowerBatch>()
-                .Property(fb => fb.TotalAmount)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FlowerBatchDetail>()
-                .Property(fbd => fbd.UnitPrice)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Order>()
-                .Property(o => o.TotalAmount)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<OrderDetail>()
-                .Property(od => od.UnitPrice)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Payment>()
-                .Property(p => p.Amount)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Product>()
-                .Property(p => p.Price)
-                .HasPrecision(18, 2);
-        }
-
-        private void ConfigureTableConstraints(ModelBuilder modelBuilder)
-        {
-            // NET 8.0 compatible table constraints using ToTable() method
-
-            // Supplier constraints
-            modelBuilder.Entity<Supplier>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Supplier_SupplierName_NotEmpty", "[SupplierName] != ''");
-            });
-
-            // User constraints
-            modelBuilder.Entity<User>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_User_UserName_NotEmpty", "[UserName] != ''");
-                tb.HasCheckConstraint("CK_User_Email_Format", "[Email] IS NULL OR [Email] LIKE '%@%.%'");
-                tb.HasCheckConstraint("CK_User_Phone_Format", "[Phone] IS NULL OR LEN([Phone]) >= 10");
-            });
-
-            // Role constraints
-            modelBuilder.Entity<Role>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Role_RoleName_NotEmpty", "[RoleName] != ''");
-            });
-
-            // Permission constraints
-            modelBuilder.Entity<Permission>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Permission_PermissionName_NotEmpty", "[PermissionName] != ''");
-            });
-
-            // Flower constraints
-            modelBuilder.Entity<Flower>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Flower_Name_NotEmpty", "[Name] != ''");
-                tb.HasCheckConstraint("CK_Flower_Price_NonNegative", "[Price] >= 0");
-                tb.HasCheckConstraint("CK_Flower_StockQuantity_NonNegative", "[StockQuantity] >= 0");
-            });
-
             // FlowerBatch constraints
-            modelBuilder.Entity<FlowerBatch>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_FlowerBatch_TotalAmount_NonNegative", "[TotalAmount] >= 0");
-            });
+            modelBuilder.Entity<FlowerBatch>()
+                .ToTable(t => t.HasCheckConstraint("CK_FlowerBatch_QuantityAvailable_LessOrEqual_Quantity",
+                    "[QuantityAvailable] <= [Quantity]"));
 
-            // FlowerBatchDetail constraints
-            modelBuilder.Entity<FlowerBatchDetail>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_FlowerBatchDetail_Quantity_Positive", "[Quantity] > 0");
-                tb.HasCheckConstraint("CK_FlowerBatchDetail_UnitPrice_NonNegative", "[UnitPrice] >= 0");
-                tb.HasCheckConstraint("CK_FlowerBatchDetail_QuantityAvailable_NonNegative", "[QuantityAvailable] >= 0");
-                tb.HasCheckConstraint("CK_FlowerBatchDetail_QuantityAvailable_LessOrEqualQuantity", "[QuantityAvailable] <= [Quantity]");
-            });
-
-            // FlowerDamageLog constraints
-            modelBuilder.Entity<FlowerDamageLog>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_FlowerDamageLog_DamageQuantity_Positive", "[DamageQuantity] > 0");
-            });
-
-            // Order constraints
-            modelBuilder.Entity<Order>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Order_TotalAmount_NonNegative", "[TotalAmount] >= 0");
-            });
+            modelBuilder.Entity<FlowerBatch>()
+                .ToTable(t => t.HasCheckConstraint("CK_FlowerBatch_ExpiryDate_Greater_ImportDate",
+                    "[ExpiryDate] > [ImportDate]"));
 
             // OrderDetail constraints
-            modelBuilder.Entity<OrderDetail>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_OrderDetail_Quantity_Positive", "[Quantity] > 0");
-                tb.HasCheckConstraint("CK_OrderDetail_UnitPrice_NonNegative", "[UnitPrice] >= 0");
-            });
+            modelBuilder.Entity<OrderDetail>()
+                .ToTable(t => t.HasCheckConstraint("CK_OrderDetail_ApprovedQuantity_LessOrEqual_RequestedQuantity",
+                    "[ApprovedQuantity] IS NULL OR [ApprovedQuantity] <= [RequestedQuantity]"));
 
-            // Payment constraints
-            modelBuilder.Entity<Payment>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Payment_Amount_Positive", "[Amount] > 0");
-                tb.HasCheckConstraint("CK_Payment_PaymentStatus_Valid",
-                    "[PaymentStatus] IS NULL OR [PaymentStatus] IN ('Pending', 'Processing', 'Completed', 'Failed', 'Cancelled', 'Refunded', 'PartialRefund')");
-            });
+            // FlowerPhoto primary photo constraint
+            modelBuilder.Entity<FlowerPhoto>()
+                .HasIndex(fp => new { fp.FlowerId, fp.IsPrimary })
+                .HasFilter("[IsPrimary] = 1")
+                .IsUnique()
+                .HasDatabaseName("IX_FlowerPhotos_FlowerId_IsPrimary_Unique");
 
-            // Delivery constraints
-            modelBuilder.Entity<Delivery>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Delivery_DeliveryStatus_Valid",
-                    "[DeliveryStatus] IS NULL OR [DeliveryStatus] IN ('Pending', 'Confirmed', 'Preparing', 'InTransit', 'OutForDelivery', 'Delivered', 'Failed', 'Cancelled', 'Returned')");
-            });
+            // ProductPhoto primary photo constraint
+            modelBuilder.Entity<ProductPhoto>()
+                .HasIndex(pp => new { pp.ProductId, pp.IsPrimary })
+                .HasFilter("[IsPrimary] = 1")
+                .IsUnique()
+                .HasDatabaseName("IX_ProductPhotos_ProductId_IsPrimary_Unique");
 
-            // Product constraints
-            modelBuilder.Entity<Product>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_Product_Price_NonNegative", "[Price] >= 0");
-            });
+            // SupplierListingPhoto primary photo constraint
+            modelBuilder.Entity<SupplierListingPhoto>()
+                .HasIndex(slp => new { slp.SupplierListingId, slp.IsPrimary })
+                .HasFilter("[IsPrimary] = 1")
+                .IsUnique()
+                .HasDatabaseName("IX_SupplierListingPhotos_SupplierListingId_IsPrimary_Unique");
 
-            // ProductFlower constraints
-            modelBuilder.Entity<ProductFlower>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_ProductFlower_QuantityUsed_Positive", "[QuantityUsed] > 0");
-            });
+            // RolePermission composite unique constraint
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(rp => new { rp.RoleId, rp.PermissionId })
+                .IsUnique()
+                .HasDatabaseName("IX_RolePermissions_RoleId_PermissionId_Unique");
 
-            // ProductFlowerBatchUsage constraints
-            modelBuilder.Entity<ProductFlowerBatchUsage>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_ProductFlowerBatchUsage_QuantityUsed_Positive", "[QuantityUsed] > 0");
-            });
-
-            // SystemLog constraints
-            modelBuilder.Entity<SystemLog>().ToTable(tb =>
-            {
-                tb.HasCheckConstraint("CK_SystemLog_Action_NotEmpty", "[Action] IS NULL OR [Action] != ''");
-                tb.HasCheckConstraint("CK_SystemLog_TableName_NotEmpty", "[TableName] IS NULL OR [TableName] != ''");
-            });
-
-            // Base Entity constraints (applied to all entities)
-            ConfigureBaseEntityTableConstraints(modelBuilder);
+            // ProductFlower composite unique constraint
+            modelBuilder.Entity<ProductFlower>()
+                .HasIndex(pf => new { pf.ProductId, pf.FlowerId })
+                .IsUnique()
+                .HasDatabaseName("IX_ProductFlowers_ProductId_FlowerId_Unique");
         }
 
-        private void ConfigureBaseEntityTableConstraints(ModelBuilder modelBuilder)
+        private void SeedData(ModelBuilder modelBuilder)
         {
-            var entityTypes = modelBuilder.Model.GetEntityTypes()
-                .Where(t => typeof(BaseEntity).IsAssignableFrom(t.ClrType));
-
-            foreach (var entityType in entityTypes)
-            {
-                var tableName = entityType.GetTableName();
-                var clrType = entityType.ClrType;
-
-                modelBuilder.Entity(clrType).ToTable(tb =>
-                {
-                    // CreatedAt cannot be in the future (allowing some tolerance for server time differences)
-                    tb.HasCheckConstraint($"CK_{tableName}_CreatedAt_NotFuture",
-                        "[CreatedAt] <= DATEADD(minute, 5, GETUTCDATE())");
-
-                    // UpdatedAt must be after CreatedAt if not null
-                    tb.HasCheckConstraint($"CK_{tableName}_UpdatedAt_AfterCreated",
-                        "[UpdatedAt] IS NULL OR [UpdatedAt] >= [CreatedAt]");
-
-                    // DeletedAt must be after CreatedAt if not null
-                    tb.HasCheckConstraint($"CK_{tableName}_DeletedAt_AfterCreated",
-                        "[DeletedAt] IS NULL OR [DeletedAt] >= [CreatedAt]");
-
-                    // If IsDeleted is true, DeletedAt must not be null
-                    tb.HasCheckConstraint($"CK_{tableName}_DeletedAt_RequiredWhenDeleted",
-                        "[IsDeleted] = 0 OR ([IsDeleted] = 1 AND [DeletedAt] IS NOT NULL)");
-
-                    // Id cannot be empty GUID
-                    tb.HasCheckConstraint($"CK_{tableName}_Id_NotEmpty",
-                        "[Id] != '00000000-0000-0000-0000-000000000000'");
-                });
-            }
-        }
-
-        private void ConfigureSoftDelete(ModelBuilder modelBuilder)
-        {
-            // Apply global query filter for soft delete
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-                {
-                    modelBuilder.Entity(entityType.ClrType)
-                        .HasQueryFilter(CreateIsNotDeletedFilter(entityType.ClrType));
-                }
-            }
-        }
-
-        private static System.Linq.Expressions.LambdaExpression CreateIsNotDeletedFilter(Type entityType)
-        {
-            var parameter = System.Linq.Expressions.Expression.Parameter(entityType, "e");
-            var propertyAccess = System.Linq.Expressions.Expression.PropertyOrField(parameter, nameof(BaseEntity.IsDeleted));
-            var notDeleted = System.Linq.Expressions.Expression.Equal(propertyAccess, System.Linq.Expressions.Expression.Constant(false));
-            return System.Linq.Expressions.Expression.Lambda(notDeleted, parameter);
-        }
-
-        private void SeedDefaultData(ModelBuilder modelBuilder)
-        {
-            // Seed default roles
-            var adminRoleId = Guid.NewGuid();
-            var userRoleId = Guid.NewGuid();
-            var staffRoleId = Guid.NewGuid();
-
+            // Seed Roles
             modelBuilder.Entity<Role>().HasData(
-                new Role
-                {
-                    Id = adminRoleId,
-                    RoleName = "Admin",
-                    Description = "System Administrator",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Role
-                {
-                    Id = userRoleId,
-                    RoleName = "User",
-                    Description = "Regular User",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Role
-                {
-                    Id = staffRoleId,
-                    RoleName = "Staff",
-                    Description = "Staff Member",
-                    CreatedAt = DateTime.UtcNow
-                }
+                new Role { Id = 1, RoleName = "Admin", Description = "System Administrator", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Role { Id = 2, RoleName = "Manager", Description = "Store Manager", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Role { Id = 3, RoleName = "Staff", Description = "Store Staff", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Role { Id = 4, RoleName = "Customer", Description = "Customer", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Role { Id = 5, RoleName = "Supplier", Description = "Supplier", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow }
             );
 
-            // Seed default permissions
-            var permissions = new[]
-            {
-                new { Id = Guid.NewGuid(), Name = "VIEW_USERS", Description = "View users" },
-                new { Id = Guid.NewGuid(), Name = "CREATE_USERS", Description = "Create users" },
-                new { Id = Guid.NewGuid(), Name = "EDIT_USERS", Description = "Edit users" },
-                new { Id = Guid.NewGuid(), Name = "DELETE_USERS", Description = "Delete users" },
-                new { Id = Guid.NewGuid(), Name = "VIEW_ORDERS", Description = "View orders" },
-                new { Id = Guid.NewGuid(), Name = "CREATE_ORDERS", Description = "Create orders" },
-                new { Id = Guid.NewGuid(), Name = "EDIT_ORDERS", Description = "Edit orders" },
-                new { Id = Guid.NewGuid(), Name = "DELETE_ORDERS", Description = "Delete orders" },
-                new { Id = Guid.NewGuid(), Name = "VIEW_FLOWERS", Description = "View flowers" },
-                new { Id = Guid.NewGuid(), Name = "CREATE_FLOWERS", Description = "Create flowers" },
-                new { Id = Guid.NewGuid(), Name = "EDIT_FLOWERS", Description = "Edit flowers" },
-                new { Id = Guid.NewGuid(), Name = "DELETE_FLOWERS", Description = "Delete flowers" },
-                new { Id = Guid.NewGuid(), Name = "VIEW_REPORTS", Description = "View reports" }
-            };
+            // Seed Permissions
+            modelBuilder.Entity<Permission>().HasData(
+                new Permission { Id = 1, PermissionName = "ManageUsers", Description = "Create, update, delete users", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 2, PermissionName = "ManageOrders", Description = "Create, update, delete orders", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 3, PermissionName = "ManageFlowers", Description = "Create, update, delete flowers", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 4, PermissionName = "ManageSuppliers", Description = "Create, update, delete suppliers", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 5, PermissionName = "ViewReports", Description = "View system reports", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 6, PermissionName = "PlaceOrders", Description = "Place orders", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new Permission { Id = 7, PermissionName = "ManageListings", Description = "Manage supplier listings", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow }
+            );
 
-            foreach (var permission in permissions)
-            {
-                modelBuilder.Entity<Permission>().HasData(
-                    new Permission
-                    {
-                        Id = permission.Id,
-                        PermissionName = permission.Name,
-                        Description = permission.Description,
-                        CreatedAt = DateTime.UtcNow
-                    }
-                );
-            }
+            // Seed Payment Methods
+            modelBuilder.Entity<PaymentMethod>().HasData(
+                new PaymentMethod { Id = 1, MethodName = "Cash", Description = "Cash Payment", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new PaymentMethod { Id = 2, MethodName = "Credit Card", Description = "Credit Card Payment", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new PaymentMethod { Id = 3, MethodName = "Bank Transfer", Description = "Bank Transfer Payment", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new PaymentMethod { Id = 4, MethodName = "Digital Wallet", Description = "Digital Wallet Payment", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow }
+            );
 
-            // Seed default admin user
-            var adminUserId = Guid.NewGuid();
-            modelBuilder.Entity<User>().HasData(
-                new User
-                {
-                    Id = adminUserId,
-                    UserName = "admin",
-                    PasswordHash = "AQAAAAEAACcQAAAAEJ5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8J5G8=", // admin123
-                    FullName = "System Administrator",
-                    Email = "admin@flowershop.com",
-                    RoleId = adminRoleId,
-                    CreatedAt = DateTime.UtcNow
-                }
+            // Seed Flower Categories
+            modelBuilder.Entity<FlowerCategory>().HasData(
+                new FlowerCategory { Id = 1, CategoryName = "Roses", Description = "Beautiful roses for all occasions", Color = "Red", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new FlowerCategory { Id = 2, CategoryName = "Tulips", Description = "Elegant tulips", Color = "Yellow", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new FlowerCategory { Id = 3, CategoryName = "Orchids", Description = "Exotic orchids", Color = "Purple", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new FlowerCategory { Id = 4, CategoryName = "Lilies", Description = "Graceful lilies", Color = "White", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow },
+                new FlowerCategory { Id = 5, CategoryName = "Carnations", Description = "Colorful carnations", Color = "Pink", PublicId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow }
             );
         }
 
@@ -797,7 +473,10 @@ namespace FlowerSelling.Data
                 {
                     case EntityState.Added:
                         entry.Entity.CreatedAt = DateTime.UtcNow;
-                        entry.Entity.IsDeleted = false;
+                        if (entry.Entity.PublicId == Guid.Empty)
+                        {
+                            entry.Entity.PublicId = Guid.NewGuid();
+                        }
                         break;
 
                     case EntityState.Modified:
@@ -810,63 +489,6 @@ namespace FlowerSelling.Data
                         entry.Entity.DeletedAt = DateTime.UtcNow;
                         break;
                 }
-            }
-        }
-
-        // Method to include deleted entities in query (for admin purposes)
-        public IQueryable<T> IncludeDeleted<T>() where T : BaseEntity
-        {
-            return Set<T>().IgnoreQueryFilters();
-        }
-
-        // Method to get only deleted entities
-        public IQueryable<T> OnlyDeleted<T>() where T : BaseEntity
-        {
-            return Set<T>().IgnoreQueryFilters().Where(e => e.IsDeleted);
-        }
-
-        // Method to permanently delete an entity
-        public void HardDelete<T>(T entity) where T : BaseEntity
-        {
-            Set<T>().Remove(entity);
-        }
-
-        // Design Time Factory implementation within the same class
-        public class Factory : IDesignTimeDbContextFactory<FlowerSellingDbContext>
-        {
-            public FlowerSellingDbContext CreateDbContext(string[] args)
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<FlowerSellingDbContext>();
-
-                // Try to get connection string from arguments first
-                string connectionString = null;
-                if (args.Length > 0)
-                {
-                    connectionString = args[0];
-                }
-
-                // If no connection string from args, try configuration
-                if (string.IsNullOrEmpty(connectionString))
-                {
-                    try
-                    {
-                        var configuration = new ConfigurationBuilder()
-                            .SetBasePath(Directory.GetCurrentDirectory())
-                            .AddJsonFile("appsettings.json", optional: true)
-                            .AddJsonFile("appsettings.Development.json", optional: true)
-                            .AddEnvironmentVariables()
-                            .Build();
-
-                        connectionString = configuration.GetConnectionString("DefaultConnection");
-                    }
-                    catch
-                    {
-                        // Ignore configuration errors
-                    }
-                }
-
-                optionsBuilder.UseSqlServer(connectionString);
-                return new FlowerSellingDbContext(optionsBuilder.Options);
             }
         }
     }

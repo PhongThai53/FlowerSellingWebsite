@@ -1,14 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
+    [Table("Roles")]
     public class Role : BaseEntity
     {
         [Required]
-        [MaxLength(50)]
-        public required string RoleName { get; set; }
+        [StringLength(50)]
+        public string RoleName { get; set; } = string.Empty;
 
-        [MaxLength(200)]
+        [StringLength(200)]
         public string? Description { get; set; }
 
         // Navigation Properties

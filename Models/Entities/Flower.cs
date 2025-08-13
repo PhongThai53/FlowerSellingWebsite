@@ -1,26 +1,36 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
+    [Table("Flowers")]
     public class Flower : BaseEntity
     {
         [Required]
-        [MaxLength(150)]
-        public required string Name { get; set; }
+        [StringLength(150)]
+        public string Name { get; set; } = string.Empty;
 
-        [MaxLength(300)]
+        [StringLength(300)]
         public string? Description { get; set; }
 
-        public decimal Price { get; set; }
 
-        public int StockQuantity { get; set; }
+        [Required]
+        public int FlowerCategoryId { get; set; }
 
-        public Guid SupplierId { get; set; }
+
+        [StringLength(50)]
+        public string? Color { get; set; }
+
+        [StringLength(50)]
+        public string? Size { get; set; }
+
+        [ForeignKey("FlowerCategoryId")]
+        public virtual FlowerCategory FlowerCategory { get; set; } = null!;
 
         // Navigation Properties
-        public virtual Supplier? Supplier { get; set; }
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual ICollection<FlowerBatch> FlowerBatches { get; set; } = new List<FlowerBatch>();
+        public virtual ICollection<FlowerPhoto> FlowerPhotos { get; set; } = new List<FlowerPhoto>();
         public virtual ICollection<ProductFlower> ProductFlowers { get; set; } = new List<ProductFlower>();
+        public virtual ICollection<SupplierListing> SupplierListings { get; set; } = new List<SupplierListing>();
     }
 }

@@ -18,7 +18,7 @@ namespace ProjectGreenLens.Services.Implementations
             return await _repository.getAllAsync();
         }
 
-        public async Task<T> getByIdAsync(Guid id)
+        public async Task<T> getByIdAsync(int id)
         {
             var entity = await _repository.getByIdAsync(id);
             if (entity == null)
@@ -42,7 +42,7 @@ namespace ProjectGreenLens.Services.Implementations
             return entity;
         }
 
-        public async Task<bool> deleteAsync(Guid id)
+        public async Task<bool> deleteAsync(int id)
         {
             var entity = await _repository.getByIdAsync(id);
             if (entity == null)

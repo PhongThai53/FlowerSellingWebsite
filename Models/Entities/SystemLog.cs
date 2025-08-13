@@ -1,24 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
+    [Table("SystemLogs")]
     public class SystemLog : BaseEntity
     {
-        public Guid UserId { get; set; }
+        [Required]
+        public int UserId { get; set; }
 
-        [MaxLength(100)]
+        [StringLength(100)]
         public string? Action { get; set; }
 
-        public Guid RecordId { get; set; }
+        public int RecordId { get; set; }
 
-        [MaxLength(100)]
+        [StringLength(100)]
         public string? TableName { get; set; }
 
-        [MaxLength(45)]
+        [StringLength(45)]
         public string? IPAddress { get; set; }
 
+        public int? OrderId { get; set; }
+
         // Navigation Properties
-        public virtual User? User { get; set; }
+        [ForeignKey("UserId")]
+        public virtual User User { get; set; } = null!;
+
+        [ForeignKey("OrderId")]
         public virtual Order? Order { get; set; }
     }
 }

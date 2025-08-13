@@ -22,7 +22,7 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
             {
                 await _next(context);
             }
-            catch (ValidationException vex) // lỗi validation
+            catch (ValidationException vex)
             {
                 _logger.LogWarning(vex, "Validation failed");
 
