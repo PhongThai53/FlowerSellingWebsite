@@ -15,7 +15,7 @@ namespace ProjectGreenLens.Services.Implementations
         public JwtService(JwtSettings jwtSettings)
         {
             _jwtSettings = jwtSettings;
-            _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+            _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         }
 
         public Task<string> GenerateTokenAsync(string userId, string role)

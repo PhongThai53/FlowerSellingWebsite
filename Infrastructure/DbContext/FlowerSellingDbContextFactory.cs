@@ -1,0 +1,17 @@
+﻿using FlowerSelling.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace FlowerSellingWebsite.Infrastructure.DbContext
+{
+    public class FlowerSellingDbContextFactory : IDesignTimeDbContextFactory<FlowerSellingDbContext>
+    {
+        public FlowerSellingDbContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<FlowerSellingDbContext>();
+            optionsBuilder.UseSqlServer("Server=localhost;Database=FlowerSellingDB;User Id=sa;Password=123abc@;Trusted_Connection=False;MultipleActiveResultSets=True;Encrypt=False");
+
+            return new FlowerSellingDbContext(optionsBuilder.Options);
+        }
+    }
+}

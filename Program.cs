@@ -3,45 +3,33 @@ using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using ProjectGreenLens.Repositories.Implementations;
-using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
+using ProjectGreenLens.Settings;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
+// Load appsettings.json
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile("secretsettings.json", optional: true, reloadOnChange: true);
 
+// DbContext
 builder.Services.AddDbContext<FlowerSellingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// JWT Settings
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSection);
+var jwtSettings = jwtSection.Get<JwtSettings>() ?? throw new InvalidOperationException("JWT settings not configured.");
 
-// Repositoies
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
-// Services
-builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+// JWT Service
+builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-
-
-// Thêm JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key is not configured."));
-var issuer = jwtSettings["Issuer"];
-var audience = jwtSettings["Audience"];
-
+// Authentication
+var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,51 +42,40 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = issuer,
-
+        ValidIssuer = jwtSettings.Issuer,
         ValidateAudience = true,
-        ValidAudience = audience,
-
+        ValidAudience = jwtSettings.Audience,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
 });
 
-// Authrorization policies can be added here if needed
+// Authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
-    options.AddPolicy("NurseryOnly", policy => policy.RequireRole("Nursery"));
 });
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 // Middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseMiddleware<ApiResponseMiddleware>();
-
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
-
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
