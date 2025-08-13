@@ -256,63 +256,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDatabaseName("IX_FlowerCategories_PublicId");
 
                     b.ToTable("FlowerCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoryName = "Roses",
-                            Color = "Red",
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Beautiful roses for all occasions",
-                            IsActive = true,
-                            IsDeleted = false,
-                            PublicId = new Guid("aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa")
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoryName = "Tulips",
-                            Color = "Yellow",
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Elegant tulips",
-                            IsActive = true,
-                            IsDeleted = false,
-                            PublicId = new Guid("bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb")
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoryName = "Orchids",
-                            Color = "Purple",
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Exotic orchids",
-                            IsActive = true,
-                            IsDeleted = false,
-                            PublicId = new Guid("cccccccc-3333-3333-3333-cccccccccccc")
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoryName = "Lilies",
-                            Color = "White",
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Graceful lilies",
-                            IsActive = true,
-                            IsDeleted = false,
-                            PublicId = new Guid("dddddddd-4444-4444-4444-dddddddddddd")
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CategoryName = "Carnations",
-                            Color = "Pink",
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Colorful carnations",
-                            IsActive = true,
-                            IsDeleted = false,
-                            PublicId = new Guid("eeeeeeee-5555-5555-5555-eeeeeeeeeeee")
-                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerDamageLog", b =>
@@ -681,48 +624,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDatabaseName("IX_PaymentMethods_PublicId");
 
                     b.ToTable("PaymentMethods");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Cash Payment",
-                            IsActive = true,
-                            IsDeleted = false,
-                            MethodName = "Cash",
-                            PublicId = new Guid("11111111-aaaa-aaaa-aaaa-111111111111")
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Credit Card Payment",
-                            IsActive = true,
-                            IsDeleted = false,
-                            MethodName = "Credit Card",
-                            PublicId = new Guid("22222222-bbbb-bbbb-bbbb-222222222222")
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Bank Transfer Payment",
-                            IsActive = true,
-                            IsDeleted = false,
-                            MethodName = "Bank Transfer",
-                            PublicId = new Guid("33333333-cccc-cccc-cccc-333333333333")
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Digital Wallet Payment",
-                            IsActive = true,
-                            IsDeleted = false,
-                            MethodName = "Digital Wallet",
-                            PublicId = new Guid("44444444-dddd-dddd-dddd-444444444444")
-                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Permission", b =>
@@ -764,71 +665,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDatabaseName("IX_Permissions_PublicId");
 
                     b.ToTable("Permissions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Create, update, delete users",
-                            IsDeleted = false,
-                            PermissionName = "ManageUsers",
-                            PublicId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Create, update, delete orders",
-                            IsDeleted = false,
-                            PermissionName = "ManageOrders",
-                            PublicId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Create, update, delete flowers",
-                            IsDeleted = false,
-                            PermissionName = "ManageFlowers",
-                            PublicId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Create, update, delete suppliers",
-                            IsDeleted = false,
-                            PermissionName = "ManageSuppliers",
-                            PublicId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd")
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "View system reports",
-                            IsDeleted = false,
-                            PermissionName = "ViewReports",
-                            PublicId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Place orders",
-                            IsDeleted = false,
-                            PermissionName = "PlaceOrders",
-                            PublicId = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff")
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Manage supplier listings",
-                            IsDeleted = false,
-                            PermissionName = "ManageListings",
-                            PublicId = new Guid("99999999-9999-9999-9999-999999999999")
-                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Product", b =>
@@ -1019,53 +855,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDatabaseName("IX_Roles_PublicId");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "System Administrator",
-                            IsDeleted = false,
-                            PublicId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Store Manager",
-                            IsDeleted = false,
-                            PublicId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            RoleName = "Manager"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Store Staff",
-                            IsDeleted = false,
-                            PublicId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            RoleName = "Staff"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Customer",
-                            IsDeleted = false,
-                            PublicId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            RoleName = "Customer"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Supplier",
-                            IsDeleted = false,
-                            PublicId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            RoleName = "Supplier"
-                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.RolePermission", b =>

@@ -55,8 +55,6 @@ namespace FlowerSelling.Data
             // Configure constraints and validations
             ConfigureConstraints(modelBuilder);
 
-            // Seed initial data
-            SeedData(modelBuilder);
         }
 
         private void ConfigureBaseEntity(ModelBuilder modelBuilder)
@@ -409,46 +407,6 @@ namespace FlowerSelling.Data
                 .HasIndex(pf => new { pf.ProductId, pf.FlowerId })
                 .IsUnique()
                 .HasDatabaseName("IX_ProductFlowers_ProductId_FlowerId_Unique");
-        }
-
-        private void SeedData(ModelBuilder modelBuilder)
-        {
-            // Seed Roles
-            modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, RoleName = "Admin", Description = "System Administrator", PublicId = Guid.Parse("11111111-1111-1111-1111-111111111111"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Role { Id = 2, RoleName = "Manager", Description = "Store Manager", PublicId = Guid.Parse("22222222-2222-2222-2222-222222222222"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Role { Id = 3, RoleName = "Staff", Description = "Store Staff", PublicId = Guid.Parse("33333333-3333-3333-3333-333333333333"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Role { Id = 4, RoleName = "Customer", Description = "Customer", PublicId = Guid.Parse("44444444-4444-4444-4444-444444444444"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Role { Id = 5, RoleName = "Supplier", Description = "Supplier", PublicId = Guid.Parse("55555555-5555-5555-5555-555555555555"), CreatedAt = new DateTime(2025, 8, 13) }
-            );
-
-            // Seed Permissions
-            modelBuilder.Entity<Permission>().HasData(
-                new Permission { Id = 1, PermissionName = "ManageUsers", Description = "Create, update, delete users", PublicId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 2, PermissionName = "ManageOrders", Description = "Create, update, delete orders", PublicId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 3, PermissionName = "ManageFlowers", Description = "Create, update, delete flowers", PublicId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 4, PermissionName = "ManageSuppliers", Description = "Create, update, delete suppliers", PublicId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 5, PermissionName = "ViewReports", Description = "View system reports", PublicId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 6, PermissionName = "PlaceOrders", Description = "Place orders", PublicId = Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff"), CreatedAt = new DateTime(2025, 8, 13) },
-                new Permission { Id = 7, PermissionName = "ManageListings", Description = "Manage supplier listings", PublicId = Guid.Parse("99999999-9999-9999-9999-999999999999"), CreatedAt = new DateTime(2025, 8, 13) }
-            );
-
-            // Seed Payment Methods
-            modelBuilder.Entity<PaymentMethod>().HasData(
-                new PaymentMethod { Id = 1, MethodName = "Cash", Description = "Cash Payment", PublicId = Guid.Parse("11111111-aaaa-aaaa-aaaa-111111111111"), CreatedAt = new DateTime(2025, 8, 13) },
-                new PaymentMethod { Id = 2, MethodName = "Credit Card", Description = "Credit Card Payment", PublicId = Guid.Parse("22222222-bbbb-bbbb-bbbb-222222222222"), CreatedAt = new DateTime(2025, 8, 13) },
-                new PaymentMethod { Id = 3, MethodName = "Bank Transfer", Description = "Bank Transfer Payment", PublicId = Guid.Parse("33333333-cccc-cccc-cccc-333333333333"), CreatedAt = new DateTime(2025, 8, 13) },
-                new PaymentMethod { Id = 4, MethodName = "Digital Wallet", Description = "Digital Wallet Payment", PublicId = Guid.Parse("44444444-dddd-dddd-dddd-444444444444"), CreatedAt = new DateTime(2025, 8, 13) }
-            );
-
-            // Seed Flower Categories
-            modelBuilder.Entity<FlowerCategory>().HasData(
-                new FlowerCategory { Id = 1, CategoryName = "Roses", Description = "Beautiful roses for all occasions", Color = "Red", PublicId = Guid.Parse("aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa"), CreatedAt = new DateTime(2025, 8, 13) },
-                new FlowerCategory { Id = 2, CategoryName = "Tulips", Description = "Elegant tulips", Color = "Yellow", PublicId = Guid.Parse("bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb"), CreatedAt = new DateTime(2025, 8, 13) },
-                new FlowerCategory { Id = 3, CategoryName = "Orchids", Description = "Exotic orchids", Color = "Purple", PublicId = Guid.Parse("cccccccc-3333-3333-3333-cccccccccccc"), CreatedAt = new DateTime(2025, 8, 13) },
-                new FlowerCategory { Id = 4, CategoryName = "Lilies", Description = "Graceful lilies", Color = "White", PublicId = Guid.Parse("dddddddd-4444-4444-4444-dddddddddddd"), CreatedAt = new DateTime(2025, 8, 13) },
-                new FlowerCategory { Id = 5, CategoryName = "Carnations", Description = "Colorful carnations", Color = "Pink", PublicId = Guid.Parse("eeeeeeee-5555-5555-5555-eeeeeeeeeeee"), CreatedAt = new DateTime(2025, 8, 13) }
-            );
         }
 
         public override int SaveChanges()

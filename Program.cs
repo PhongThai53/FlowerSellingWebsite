@@ -52,18 +52,26 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Authorization policies
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
-});
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+
+// Seed Data
+/*
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+    await db.Database.MigrateAsync();
+    SeedData.Initialize(db);
+}
+*/
+
 
 // Middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -78,4 +86,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+
+
 app.Run();
