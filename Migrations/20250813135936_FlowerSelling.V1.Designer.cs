@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    [Migration("20250813102104_FlowerSelling.V1")]
+    [Migration("20250813135936_FlowerSelling.V1")]
     partial class FlowerSellingV1
     {
         /// <inheritdoc />
@@ -266,55 +266,55 @@ namespace FlowerSellingWebsite.Migrations
                             Id = 1,
                             CategoryName = "Roses",
                             Color = "Red",
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6102),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Beautiful roses for all occasions",
                             IsActive = true,
                             IsDeleted = false,
-                            PublicId = new Guid("3ba20820-78be-49d8-9f92-6d35a3574aef")
+                            PublicId = new Guid("aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa")
                         },
                         new
                         {
                             Id = 2,
                             CategoryName = "Tulips",
                             Color = "Yellow",
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6108),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Elegant tulips",
                             IsActive = true,
                             IsDeleted = false,
-                            PublicId = new Guid("74687d93-68ae-4b0a-a6a8-284f93018527")
+                            PublicId = new Guid("bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb")
                         },
                         new
                         {
                             Id = 3,
                             CategoryName = "Orchids",
                             Color = "Purple",
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6110),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Exotic orchids",
                             IsActive = true,
                             IsDeleted = false,
-                            PublicId = new Guid("c688ec2e-d0a4-4b0a-8724-d81ebfb293ed")
+                            PublicId = new Guid("cccccccc-3333-3333-3333-cccccccccccc")
                         },
                         new
                         {
                             Id = 4,
                             CategoryName = "Lilies",
                             Color = "White",
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6113),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Graceful lilies",
                             IsActive = true,
                             IsDeleted = false,
-                            PublicId = new Guid("3af73774-6148-4d10-a0b0-9475a9dbe465")
+                            PublicId = new Guid("dddddddd-4444-4444-4444-dddddddddddd")
                         },
                         new
                         {
                             Id = 5,
                             CategoryName = "Carnations",
                             Color = "Pink",
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6120),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Colorful carnations",
                             IsActive = true,
                             IsDeleted = false,
-                            PublicId = new Guid("24dc63ef-f312-4f5a-9152-6789e6b0547a")
+                            PublicId = new Guid("eeeeeeee-5555-5555-5555-eeeeeeeeeeee")
                         });
                 });
 
@@ -689,42 +689,42 @@ namespace FlowerSellingWebsite.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4500),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Cash Payment",
                             IsActive = true,
                             IsDeleted = false,
                             MethodName = "Cash",
-                            PublicId = new Guid("d7c631e8-e499-419f-a994-3ef598e605c1")
+                            PublicId = new Guid("11111111-aaaa-aaaa-aaaa-111111111111")
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4507),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Credit Card Payment",
                             IsActive = true,
                             IsDeleted = false,
                             MethodName = "Credit Card",
-                            PublicId = new Guid("825e21fd-85ce-4172-96f5-adc6796b5c35")
+                            PublicId = new Guid("22222222-bbbb-bbbb-bbbb-222222222222")
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4510),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Bank Transfer Payment",
                             IsActive = true,
                             IsDeleted = false,
                             MethodName = "Bank Transfer",
-                            PublicId = new Guid("ddcaf265-3fc5-45b2-a2ab-29351affb04c")
+                            PublicId = new Guid("33333333-cccc-cccc-cccc-333333333333")
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4512),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Digital Wallet Payment",
                             IsActive = true,
                             IsDeleted = false,
                             MethodName = "Digital Wallet",
-                            PublicId = new Guid("492ce459-ccaf-40c2-bc85-21c396a7492b")
+                            PublicId = new Guid("44444444-dddd-dddd-dddd-444444444444")
                         });
                 });
 
@@ -772,65 +772,65 @@ namespace FlowerSellingWebsite.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2816),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Create, update, delete users",
                             IsDeleted = false,
                             PermissionName = "ManageUsers",
-                            PublicId = new Guid("b56e1fd6-e9fe-43b6-a3b2-27d030d58227")
+                            PublicId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2822),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Create, update, delete orders",
                             IsDeleted = false,
                             PermissionName = "ManageOrders",
-                            PublicId = new Guid("f9bc76b0-43b2-445f-a07d-afa9dd3e2367")
+                            PublicId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2825),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Create, update, delete flowers",
                             IsDeleted = false,
                             PermissionName = "ManageFlowers",
-                            PublicId = new Guid("982ada07-aacb-4c63-8d9f-30115f9e7f55")
+                            PublicId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2834),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Create, update, delete suppliers",
                             IsDeleted = false,
                             PermissionName = "ManageSuppliers",
-                            PublicId = new Guid("a207f0e9-527e-4176-9868-199f2daea347")
+                            PublicId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd")
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2837),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "View system reports",
                             IsDeleted = false,
                             PermissionName = "ViewReports",
-                            PublicId = new Guid("2804f087-777d-44bb-a35c-d36f2e6612e2")
+                            PublicId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
                         },
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2839),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Place orders",
                             IsDeleted = false,
                             PermissionName = "PlaceOrders",
-                            PublicId = new Guid("a830fc8f-7fad-4e5e-b56e-0daf251191b8")
+                            PublicId = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff")
                         },
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2842),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Manage supplier listings",
                             IsDeleted = false,
                             PermissionName = "ManageListings",
-                            PublicId = new Guid("81dcaeb0-bd39-4fc8-9858-bf349f8d0523")
+                            PublicId = new Guid("99999999-9999-9999-9999-999999999999")
                         });
                 });
 
@@ -1027,46 +1027,46 @@ namespace FlowerSellingWebsite.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(6944),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "System Administrator",
                             IsDeleted = false,
-                            PublicId = new Guid("8b532e6c-9975-44de-a93e-aa69beecb77e"),
+                            PublicId = new Guid("11111111-1111-1111-1111-111111111111"),
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7168),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Store Manager",
                             IsDeleted = false,
-                            PublicId = new Guid("95042347-3c12-4b5d-8398-8be7a502f644"),
+                            PublicId = new Guid("22222222-2222-2222-2222-222222222222"),
                             RoleName = "Manager"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7171),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Store Staff",
                             IsDeleted = false,
-                            PublicId = new Guid("f394e6fd-7937-4074-85e9-99a542305fea"),
+                            PublicId = new Guid("33333333-3333-3333-3333-333333333333"),
                             RoleName = "Staff"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7193),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Customer",
                             IsDeleted = false,
-                            PublicId = new Guid("5ae87f09-2d21-4f99-8575-e1833dc1170b"),
+                            PublicId = new Guid("44444444-4444-4444-4444-444444444444"),
                             RoleName = "Customer"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7204),
+                            CreatedAt = new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Supplier",
                             IsDeleted = false,
-                            PublicId = new Guid("1aed43b7-5f31-4cd7-abe4-6f0f161d3321"),
+                            PublicId = new Guid("55555555-5555-5555-5555-555555555555"),
                             RoleName = "Supplier"
                         });
                 });

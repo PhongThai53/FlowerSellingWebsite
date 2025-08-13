@@ -689,11 +689,11 @@ namespace FlowerSellingWebsite.Migrations
                 columns: new[] { "Id", "CategoryName", "Color", "CreatedAt", "DeletedAt", "Description", "IsActive", "IsDeleted", "PublicId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, "Roses", "Red", new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6102), null, "Beautiful roses for all occasions", true, false, new Guid("3ba20820-78be-49d8-9f92-6d35a3574aef"), null },
-                    { 2, "Tulips", "Yellow", new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6108), null, "Elegant tulips", true, false, new Guid("74687d93-68ae-4b0a-a6a8-284f93018527"), null },
-                    { 3, "Orchids", "Purple", new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6110), null, "Exotic orchids", true, false, new Guid("c688ec2e-d0a4-4b0a-8724-d81ebfb293ed"), null },
-                    { 4, "Lilies", "White", new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6113), null, "Graceful lilies", true, false, new Guid("3af73774-6148-4d10-a0b0-9475a9dbe465"), null },
-                    { 5, "Carnations", "Pink", new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(6120), null, "Colorful carnations", true, false, new Guid("24dc63ef-f312-4f5a-9152-6789e6b0547a"), null }
+                    { 1, "Roses", "Red", new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Beautiful roses for all occasions", true, false, new Guid("aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa"), null },
+                    { 2, "Tulips", "Yellow", new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Elegant tulips", true, false, new Guid("bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb"), null },
+                    { 3, "Orchids", "Purple", new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Exotic orchids", true, false, new Guid("cccccccc-3333-3333-3333-cccccccccccc"), null },
+                    { 4, "Lilies", "White", new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Graceful lilies", true, false, new Guid("dddddddd-4444-4444-4444-dddddddddddd"), null },
+                    { 5, "Carnations", "Pink", new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Colorful carnations", true, false, new Guid("eeeeeeee-5555-5555-5555-eeeeeeeeeeee"), null }
                 });
 
             migrationBuilder.InsertData(
@@ -701,10 +701,10 @@ namespace FlowerSellingWebsite.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "IsActive", "IsDeleted", "MethodName", "PublicId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4500), null, "Cash Payment", true, false, "Cash", new Guid("d7c631e8-e499-419f-a994-3ef598e605c1"), null },
-                    { 2, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4507), null, "Credit Card Payment", true, false, "Credit Card", new Guid("825e21fd-85ce-4172-96f5-adc6796b5c35"), null },
-                    { 3, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4510), null, "Bank Transfer Payment", true, false, "Bank Transfer", new Guid("ddcaf265-3fc5-45b2-a2ab-29351affb04c"), null },
-                    { 4, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(4512), null, "Digital Wallet Payment", true, false, "Digital Wallet", new Guid("492ce459-ccaf-40c2-bc85-21c396a7492b"), null }
+                    { 1, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Cash Payment", true, false, "Cash", new Guid("11111111-aaaa-aaaa-aaaa-111111111111"), null },
+                    { 2, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Credit Card Payment", true, false, "Credit Card", new Guid("22222222-bbbb-bbbb-bbbb-222222222222"), null },
+                    { 3, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Bank Transfer Payment", true, false, "Bank Transfer", new Guid("33333333-cccc-cccc-cccc-333333333333"), null },
+                    { 4, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Digital Wallet Payment", true, false, "Digital Wallet", new Guid("44444444-dddd-dddd-dddd-444444444444"), null }
                 });
 
             migrationBuilder.InsertData(
@@ -712,13 +712,13 @@ namespace FlowerSellingWebsite.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "IsDeleted", "PermissionName", "PublicId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2816), null, "Create, update, delete users", false, "ManageUsers", new Guid("b56e1fd6-e9fe-43b6-a3b2-27d030d58227"), null },
-                    { 2, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2822), null, "Create, update, delete orders", false, "ManageOrders", new Guid("f9bc76b0-43b2-445f-a07d-afa9dd3e2367"), null },
-                    { 3, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2825), null, "Create, update, delete flowers", false, "ManageFlowers", new Guid("982ada07-aacb-4c63-8d9f-30115f9e7f55"), null },
-                    { 4, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2834), null, "Create, update, delete suppliers", false, "ManageSuppliers", new Guid("a207f0e9-527e-4176-9868-199f2daea347"), null },
-                    { 5, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2837), null, "View system reports", false, "ViewReports", new Guid("2804f087-777d-44bb-a35c-d36f2e6612e2"), null },
-                    { 6, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2839), null, "Place orders", false, "PlaceOrders", new Guid("a830fc8f-7fad-4e5e-b56e-0daf251191b8"), null },
-                    { 7, new DateTime(2025, 8, 13, 10, 21, 3, 490, DateTimeKind.Utc).AddTicks(2842), null, "Manage supplier listings", false, "ManageListings", new Guid("81dcaeb0-bd39-4fc8-9858-bf349f8d0523"), null }
+                    { 1, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Create, update, delete users", false, "ManageUsers", new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), null },
+                    { 2, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Create, update, delete orders", false, "ManageOrders", new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null },
+                    { 3, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Create, update, delete flowers", false, "ManageFlowers", new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null },
+                    { 4, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Create, update, delete suppliers", false, "ManageSuppliers", new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null },
+                    { 5, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "View system reports", false, "ViewReports", new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null },
+                    { 6, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Place orders", false, "PlaceOrders", new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"), null },
+                    { 7, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Manage supplier listings", false, "ManageListings", new Guid("99999999-9999-9999-9999-999999999999"), null }
                 });
 
             migrationBuilder.InsertData(
@@ -726,11 +726,11 @@ namespace FlowerSellingWebsite.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "IsDeleted", "PublicId", "RoleName", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(6944), null, "System Administrator", false, new Guid("8b532e6c-9975-44de-a93e-aa69beecb77e"), "Admin", null },
-                    { 2, new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7168), null, "Store Manager", false, new Guid("95042347-3c12-4b5d-8398-8be7a502f644"), "Manager", null },
-                    { 3, new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7171), null, "Store Staff", false, new Guid("f394e6fd-7937-4074-85e9-99a542305fea"), "Staff", null },
-                    { 4, new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7193), null, "Customer", false, new Guid("5ae87f09-2d21-4f99-8575-e1833dc1170b"), "Customer", null },
-                    { 5, new DateTime(2025, 8, 13, 10, 21, 3, 489, DateTimeKind.Utc).AddTicks(7204), null, "Supplier", false, new Guid("1aed43b7-5f31-4cd7-abe4-6f0f161d3321"), "Supplier", null }
+                    { 1, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "System Administrator", false, new Guid("11111111-1111-1111-1111-111111111111"), "Admin", null },
+                    { 2, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Store Manager", false, new Guid("22222222-2222-2222-2222-222222222222"), "Manager", null },
+                    { 3, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Store Staff", false, new Guid("33333333-3333-3333-3333-333333333333"), "Staff", null },
+                    { 4, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Customer", false, new Guid("44444444-4444-4444-4444-444444444444"), "Customer", null },
+                    { 5, new DateTime(2025, 8, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Supplier", false, new Guid("55555555-5555-5555-5555-555555555555"), "Supplier", null }
                 });
 
             migrationBuilder.CreateIndex(
