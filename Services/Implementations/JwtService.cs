@@ -35,7 +35,7 @@ namespace ProjectGreenLens.Services.Implementations
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpiryMinutes),
-                SigningCredentials = credentials;
+                SigningCredentials = credentials,
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

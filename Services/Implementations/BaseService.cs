@@ -1,4 +1,4 @@
-﻿using ProjectGreenLens.Models.Entities;
+﻿using FlowerSellingWebsite.Models.Entities;
 using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Interfaces;
 
@@ -18,7 +18,7 @@ namespace ProjectGreenLens.Services.Implementations
             return await _repository.getAllAsync();
         }
 
-        public async Task<T> getByIdAsync(int id)
+        public async Task<T> getByIdAsync(Guid id)
         {
             var entity = await _repository.getByIdAsync(id);
             if (entity == null)
@@ -34,15 +34,15 @@ namespace ProjectGreenLens.Services.Implementations
 
         public async Task<T> updateAsync(T entity)
         {
-            var existing = await _repository.getByIdAsync(entity.id);
+            var existing = await _repository.getByIdAsync(entity.Id);
             if (existing == null)
-                throw new KeyNotFoundException($"{typeof(T).Name} with Id={entity.id} was not found.");
+                throw new KeyNotFoundException($"{typeof(T).Name} with Id={entity.Id} was not found.");
 
             await _repository.updateAsync(entity);
             return entity;
         }
 
-        public async Task<bool> deleteAsync(int id)
+        public async Task<bool> deleteAsync(Guid id)
         {
             var entity = await _repository.getByIdAsync(id);
             if (entity == null)

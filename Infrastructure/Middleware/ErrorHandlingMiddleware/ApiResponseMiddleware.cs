@@ -1,7 +1,8 @@
-﻿using ProjectGreenLens.Models.DTOs;
+﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.Entities;
 using System.Text.Json;
 
-namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
+namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
 {
     public class ApiResponseMiddleware
     {
@@ -31,8 +32,7 @@ namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
                 {
                     var data = string.IsNullOrWhiteSpace(body) ? null : JsonSerializer.Deserialize<object>(body);
 
-                    // Ensure 'data' is not null before passing it to ApiResponse<object>.Ok
-                    var response = ApiResponse<object>.Ok(data ?? new object(), "Request processed successfully");
+                    var response = ApiResponse<object>.Ok(data ?? new object());
 
                     var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
                     {

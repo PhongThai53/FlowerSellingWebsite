@@ -1,9 +1,9 @@
-﻿using ProjectGreenLens.Models.DTOs;
+﻿using FlowerSellingWebsite.Models.DTOs;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
 
-namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
+namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
 {
     public class ErrorHandlingMiddleware
     {
@@ -30,8 +30,8 @@ namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
                 var response = ApiResponse<object>.Fail(
-                    message: "Validation failed",
-                    errors: new List<string> { vex.Message }
+                    "Validation failed",
+                    new List<string> { vex.Message }
                 );
 
                 await WriteJsonResponse(context, response);
@@ -44,8 +44,8 @@ namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
                 var response = ApiResponse<object>.Fail(
-                    message: "Unauthorized",
-                    errors: new List<string> { uex.Message }
+                    "Unauthorized",
+                    new List<string> { uex.Message }
                 );
 
                 await WriteJsonResponse(context, response);
@@ -58,8 +58,8 @@ namespace ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
                 var response = ApiResponse<object>.Fail(
-                    message: "An unexpected error occurred",
-                    errors: new List<string> { ex.Message }
+                    "An unexpected error occurred",
+                    new List<string> { ex.Message }
                 );
 
                 await WriteJsonResponse(context, response);

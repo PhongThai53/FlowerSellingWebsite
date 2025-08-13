@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlowerSellingWebsite.Migrations
 {
-    [DbContext(typeof(FlowerSellingContext))]
+    [DbContext(typeof(FlowerSellingDbContext))]
     partial class FlowerSellingContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

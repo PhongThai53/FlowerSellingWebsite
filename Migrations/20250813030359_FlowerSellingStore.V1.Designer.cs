@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlowerSellingWebsite.Migrations
 {
-    [DbContext(typeof(FlowerSellingContext))]
+    [DbContext(typeof(FlowerSellingDbContext))]
     [Migration("20250813030359_FlowerSellingStore.V1")]
     partial class FlowerSellingStoreV1
     {

@@ -1,8 +1,8 @@
 using FlowerSelling.Data;
+using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using ProjectGreenLens.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using ProjectGreenLens.Repositories.Implementations;
 using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Implementations;
