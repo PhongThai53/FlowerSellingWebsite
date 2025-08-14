@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Hoa</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/supplier.css">
+</head>
+<body>
+    <header class="supplier-header">
+        <h1>Trang Quản Lý Nhà Cung Cấp - Floda</h1>
+    </header>
+    <nav class="supplier-nav">
+        <a href="view-flower-list.html">Danh Sách Hoa</a>
+        <a href="add-flower.html">Thêm Hoa</a>
+        <a href="view-order-list.html">Danh Sách Đơn Hàng</a>
+        <a href="view-feedback-order.html">Phản Hồi</a>
+        <a href="view-report.html">Báo Cáo</a>
+    </nav>
+    <div class="supplier-container">
+        <h2>Thêm Hoa Mới</h2>
+        <form>
+            <div class="form-group">
+                <label for="name">Tên Hoa</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Giá (VNĐ)</label>
+                <input type="number" id="price" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Đường Dẫn Ảnh</label>
+                <input type="text" id="image" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô Tả</label>
+                <textarea id="description" required></textarea>
+            </div>
+            <button type="submit" class="btn">Thêm Hoa</button>
+        </form>
+    </div>
+    <footer class="footer-wrapper">
+        <!-- Same footer content as above -->
+    </footer>
+    <script src="/js/supplier-logic.js"></script>
+</body>
+</html>
