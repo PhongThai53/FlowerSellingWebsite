@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
-    [Table("RolePermissions")]
-    public class RolePermission : BaseEntity
+    public class RolePermissions : BaseEntity
     {
         [Required]
         public int RoleId { get; set; }
@@ -14,9 +13,9 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation Properties
         [ForeignKey("RoleId")]
-        public virtual Role Role { get; set; } = null!;
+        public virtual Roles Role { get; set; } = null!;
 
         [ForeignKey("PermissionId")]
-        public virtual Permission Permission { get; set; } = null!;
+        public virtual Permissions Permission { get; set; } = null!;
     }
 }

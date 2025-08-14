@@ -3,11 +3,7 @@ using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
 using ProjectGreenLens.Services.Interfaces;
-using BCrypt.Net;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
@@ -40,7 +36,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var user = await _userRepository.GetByEmailAsync(request.Email);
                 if (user == null)
                 {
-                    _logger.LogWarning("Login failed: User not found for email {Email}", request.Email);
+                    _logger.LogWarning("Login failed: Users not found for email {Email}", request.Email);
                     throw new UnauthorizedAccessException("Invalid email or password");
                 }
 
@@ -73,7 +69,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<UserDTO> RegisterAsync(RegisterRequestDTO request)
         {
-            _logger.LogInformation("Starting registration process for username: {UserName}, email: {Email}", 
+            _logger.LogInformation("Starting registration process for username: {UserName}, email: {Email}",
                 request.UserName, request.Email);
 
             try
@@ -96,7 +92,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 // Create new user - assuming Customer role by default
-                var newUser = new User
+                var newUser = new Users
                 {
                     FullName = request.FullName,
                     UserName = request.UserName,
@@ -105,8 +101,8 @@ namespace FlowerSellingWebsite.Services.Implementations
                     Phone = request.PhoneNumber,
                     Address = request.Address,
                     RoleId = 4, // Customer role ID from your seeded data
-                    IsCustomer = true,
-                    IsSupplier = false
+                    //IsCustomer = true,
+                    //IsSupplier = false
                 };
 
                 // Save user to database using the merged repository
@@ -117,14 +113,14 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new InvalidOperationException("Failed to create user account");
                 }
 
-                _logger.LogInformation("Registration successful for user {UserName} ({Email}) with PublicId: {PublicId}", 
+                _logger.LogInformation("Registration successful for user {UserName} ({Email}) with PublicId: {PublicId}",
                     createdUser.UserName, createdUser.Email, createdUser.PublicId);
 
                 return MapToUserDTO(createdUser);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during registration for username: {UserName}, email: {Email}", 
+                _logger.LogError(ex, "Error during registration for username: {UserName}, email: {Email}",
                     request.UserName, request.Email);
                 throw;
             }
@@ -137,7 +133,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var user = await _userRepository.GetByPublicIdAsync(publicId);
                 if (user == null)
                 {
-                    throw new KeyNotFoundException($"User with ID {publicId} not found");
+                    throw new KeyNotFoundException($"Users with ID {publicId} not found");
                 }
 
                 return MapToUserDTO(user);
@@ -176,7 +172,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 // Create new user
-                var newUser = new User
+                var newUser = new Users
                 {
                     FullName = request.FullName,
                     Email = request.Email,
@@ -184,8 +180,8 @@ namespace FlowerSellingWebsite.Services.Implementations
                     Phone = request.PhoneNumber,
                     Address = request.Address,
                     RoleId = GetRoleIdByName(request.RoleName),
-                    IsCustomer = request.RoleName.Equals("Customer", StringComparison.OrdinalIgnoreCase),
-                    IsSupplier = request.RoleName.Equals("Supplier", StringComparison.OrdinalIgnoreCase)
+                    //IsCustomer = request.RoleName.Equals("Customer", StringComparison.OrdinalIgnoreCase),
+                    //IsSupplier = request.RoleName.Equals("Supplier", StringComparison.OrdinalIgnoreCase)
                 };
 
                 await _userRepository.AddAsync(newUser);
@@ -212,7 +208,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var user = await _userRepository.GetByPublicIdAsync(publicId);
                 if (user == null)
                 {
-                    throw new KeyNotFoundException($"User with ID {publicId} not found");
+                    throw new KeyNotFoundException($"Users with ID {publicId} not found");
                 }
 
                 // Update user properties
@@ -261,7 +257,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var user = await _userRepository.GetByPublicIdAsync(publicId);
                 if (user == null)
                 {
-                    throw new KeyNotFoundException($"User with ID {publicId} not found");
+                    throw new KeyNotFoundException($"Users with ID {publicId} not found");
                 }
 
                 if (string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
@@ -337,7 +333,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
-        private static UserDTO MapToUserDTO(User user)
+        private static UserDTO MapToUserDTO(Users user)
         {
             return new UserDTO
             {

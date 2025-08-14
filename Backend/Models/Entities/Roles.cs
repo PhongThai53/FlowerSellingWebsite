@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
-    [Table("Roles")]
-    public class Role : BaseEntity
+    public class Roles : BaseEntity
     {
         [Required]
         [StringLength(50)]
@@ -14,7 +12,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? Description { get; set; }
 
         // Navigation Properties
-        public virtual ICollection<User> Users { get; set; } = new List<User>();
-        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+        public virtual ICollection<Users> Users { get; set; } = new List<Users>();
+        public virtual ICollection<RolePermissions> RolePermissions { get; set; } = new List<RolePermissions>();
     }
 }

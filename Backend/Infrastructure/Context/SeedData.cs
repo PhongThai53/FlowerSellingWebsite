@@ -1,5 +1,4 @@
-﻿using FlowerSelling.Data;
-using FlowerSellingWebsite.Infrastructure.Authorization;
+﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
 
 namespace FlowerSellingWebsite.Infrastructure.DbContext
@@ -9,13 +8,13 @@ namespace FlowerSellingWebsite.Infrastructure.DbContext
         public static void Initialize(FlowerSellingDbContext context)
         {
             // 1. Seed Permissions
-            foreach (var rolePerms in RolePermissions.DefaultRolePermissions)
+            foreach (var rolePerms in Authorization.RolePermissions.DefaultRolePermissions)
             {
                 foreach (var permName in rolePerms.Value)
                 {
                     if (!context.Permissions.Any(p => p.PermissionName == permName))
                     {
-                        context.Permissions.Add(new Permission
+                        context.Permissions.Add(new Permissions
                         {
                             PermissionName = permName,
                             Description = null
@@ -26,11 +25,11 @@ namespace FlowerSellingWebsite.Infrastructure.DbContext
             context.SaveChanges();
 
             // 2. Seed Roles
-            foreach (var roleName in RolePermissions.DefaultRolePermissions.Keys)
+            foreach (var roleName in Authorization.RolePermissions.DefaultRolePermissions.Keys)
             {
                 if (!context.Roles.Any(r => r.RoleName == roleName))
                 {
-                    context.Roles.Add(new Role
+                    context.Roles.Add(new Roles
                     {
                         RoleName = roleName,
                         Description = null
@@ -39,8 +38,8 @@ namespace FlowerSellingWebsite.Infrastructure.DbContext
             }
             context.SaveChanges();
 
-            // 3. Seed RolePermissions
-            foreach (var rolePair in RolePermissions.DefaultRolePermissions)
+            // 3. Seed RolePermissions (quan hệ Role - Permission)
+            foreach (var rolePair in Authorization.RolePermissions.DefaultRolePermissions)
             {
                 var role = context.Roles.First(r => r.RoleName == rolePair.Key);
 
@@ -50,7 +49,7 @@ namespace FlowerSellingWebsite.Infrastructure.DbContext
 
                     if (!context.RolePermissions.Any(rp => rp.RoleId == role.Id && rp.PermissionId == perm.Id))
                     {
-                        context.RolePermissions.Add(new RolePermission
+                        context.RolePermissions.Add(new RolePermissions
                         {
                             RoleId = role.Id,
                             PermissionId = perm.Id

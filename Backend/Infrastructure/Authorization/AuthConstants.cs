@@ -3,13 +3,13 @@
     public static class Roles
     {
         public const string Admin = "Admin";
-        public const string User = "User";
+        public const string User = "Users";
         public const string Staff = "Staff";
         public const string Supplier = "Supplier";
     }
     public static class Permissions
     {
-        // User Management
+        // Users Management
         public const string ViewUsers = "users.view";
         public const string CreateUsers = "users.create";
         public const string UpdateUsers = "users.update";
