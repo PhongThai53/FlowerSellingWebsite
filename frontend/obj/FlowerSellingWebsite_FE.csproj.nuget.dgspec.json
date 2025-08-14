@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\frontend\\FlowerSellingWebsite_FE.csproj": {}
+    "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\Frontend\\FlowerSellingWebsite_FE.csproj": {}
   },
   "projects": {
-    "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\frontend\\FlowerSellingWebsite_FE.csproj": {
+    "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\Frontend\\FlowerSellingWebsite_FE.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\frontend\\FlowerSellingWebsite_FE.csproj",
+        "projectUniqueName": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\Frontend\\FlowerSellingWebsite_FE.csproj",
         "projectName": "FlowerSellingWebsite_Frontend",
-        "projectPath": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\frontend\\FlowerSellingWebsite_FE.csproj",
+        "projectPath": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\Frontend\\FlowerSellingWebsite_FE.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\frontend\\obj\\",
+        "outputPath": "D:\\Data\\Academic\\IT\\SWP391\\FlowerSellingWebsite\\Frontend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Microsoft\\Shared\\NuGetPackages"
