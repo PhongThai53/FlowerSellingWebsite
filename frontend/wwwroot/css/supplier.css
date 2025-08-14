@@ -1,0 +1,144 @@
+﻿/* Kiểu dành riêng cho nhà cung cấp */
+.supplier-header {
+    background-color: #ffc0cb;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #ff69b4;
+}
+
+.supplier-nav {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+    background-color: #fff;
+    padding: 10px;
+}
+
+    .supplier-nav a {
+        margin: 0 15px;
+        text-decoration: none;
+        color: #ff69b4;
+        font-weight: bold;
+    }
+
+        .supplier-nav a:hover {
+            color: #ff1493;
+        }
+
+.supplier-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+    .card img {
+        max-width: 100%;
+        height: auto;
+    }
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+.btn {
+    background-color: #ff69b4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+    .btn:hover {
+        background-color: #ff1493;
+    }
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #ffc0cb;
+    }
+
+.search-input {
+    width: 300px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+/* Kiểu footer */
+.footer-wrapper {
+    background-color: #f8f8f8;
+    padding: 40px 0;
+    color: #333;
+}
+
+.footer-widget-area .footer-widget-item {
+    margin-bottom: 30px;
+}
+
+.footer-widget-title h5 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.footer-widget-body ul {
+    list-style: none;
+    padding: 0;
+}
+
+    .footer-widget-body ul li {
+        margin-bottom: 10px;
+    }
+
+        .footer-widget-body ul li a {
+            color: #333;
+            text-decoration: none;
+        }
+
+            .footer-widget-body ul li a:hover {
+                color: #ff69b4;
+            }
+
+.payment-method img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Thêm icon font cho footer */
+@import url('https://cdn.linearicons.com/free/1.0.0/icon-font.min.css');
