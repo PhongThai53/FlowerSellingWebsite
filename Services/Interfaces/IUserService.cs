@@ -1,6 +1,6 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
 
-namespace FlowerSellingWebsite.Services.Implementations
+namespace FlowerSellingWebsite.Services.Interfaces
 {
     public interface IUserService
     {

@@ -10,99 +10,86 @@ namespace FlowerSellingWebsite.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(IUserService userService, ILogger<AuthController> logger)
         {
-            _authService = authService;
+            _userService = userService;
             _logger = logger;
         }
 
-        /// <summary>
-        /// User login endpoint
-        /// </summary>
-        /// <param name="loginRequest">Login credentials</param>
-        /// <returns>Authentication response with JWT token</returns>
+   
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResponseDTO>> Login([FromBody] LoginRequestDTO loginRequest)
+        public async Task<ActionResult<ApiResponse<LoginResponseDTO>>> Login([FromBody] LoginRequestDTO loginRequest)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new AuthenticationResponseDTO
+                if (!ModelState.IsValid)
                 {
-                    Success = false,
-                    Message = "Invalid input data",
-                });
-            }
+                    return BadRequest(ApiResponse<LoginResponseDTO>.Fail("Invalid input data"));
+                }
 
-            var result = await _authService.LoginAsync(loginRequest);
-            
-            if (!result.Success)
-            {
-                return Unauthorized(result);
-            }
+                var result = await _userService.LoginAsync(loginRequest);
 
-            // Set HTTP-only cookie for additional security (optional)
-            if (!string.IsNullOrEmpty(result.Token))
-            {
-                var cookieOptions = new CookieOptions
+                // Set HTTP-only cookie for additional security (optional)
+                if (!string.IsNullOrEmpty(result.Token))
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = result.TokenExpiry
-                };
-                Response.Cookies.Append("auth_token", result.Token, cookieOptions);
-            }
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = result.ExpiresAt
+                    };
+                    Response.Cookies.Append("auth_token", result.Token, cookieOptions);
+                }
 
-            return Ok(result);
+                return Ok(ApiResponse<LoginResponseDTO>.Ok(result, "Login successful"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ApiResponse<LoginResponseDTO>.Fail(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during login for email: {Email}", loginRequest.Email);
+                return StatusCode(500, ApiResponse<LoginResponseDTO>.Fail("An error occurred during login. Please try again."));
+            }
         }
 
-        /// <summary>
-        /// User registration endpoint
-        /// </summary>
-        /// <param name="registerRequest">Registration data</param>
-        /// <returns>Authentication response with JWT token</returns>
+
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticationResponseDTO>> Register([FromBody] RegisterRequestDTO registerRequest)
+        public async Task<ActionResult<ApiResponse<UserDTO>>> Register([FromBody] RegisterRequestDTO registerRequest)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new AuthenticationResponseDTO
+                if (!ModelState.IsValid)
                 {
-                    Success = false,
-                    Message = "Invalid input data"
-                });
-            }
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    return BadRequest(ApiResponse<UserDTO>.Fail("Invalid input data", errors));
+                }
 
-            var result = await _authService.RegisterAsync(registerRequest);
-            
-            if (!result.Success)
+                var result = await _userService.RegisterAsync(registerRequest);
+
+                return Ok(ApiResponse<UserDTO>.Ok(result, "Registration successful"));
+            }
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(result);
+                return BadRequest(ApiResponse<UserDTO>.Fail(ex.Message));
             }
-
-            // Set HTTP-only cookie for additional security (optional)
-            if (!string.IsNullOrEmpty(result.Token))
+            catch (Exception ex)
             {
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = result.TokenExpiry
-                };
-                Response.Cookies.Append("auth_token", result.Token, cookieOptions);
+                _logger.LogError(ex, "Error during registration for email: {Email}", registerRequest.Email);
+                return StatusCode(500, ApiResponse<UserDTO>.Fail("An error occurred during registration. Please try again."));
             }
-
-            return Ok(result);
         }
 
-        /// <summary>
-        /// User logout endpoint
-        /// </summary>
-        /// <returns>Success message</returns>
+
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
@@ -113,120 +100,76 @@ namespace FlowerSellingWebsite.Controllers
             return Ok(ApiResponse<string>.Ok("", "Logged out successfully"));
         }
 
-        /// <summary>
-        /// Get current user profile
-        /// </summary>
-        /// <returns>User profile data</returns>
         [HttpGet("profile")]
         [Authorize]
         public async Task<ActionResult<ApiResponse<UserDTO>>> GetProfile()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userPublicId))
+            try
             {
-                            return Unauthorized(ApiResponse<UserDTO>.Fail("Invalid user token"));
+                var userProfile = await _userService.GetCurrentUserAsync();
+                return Ok(ApiResponse<UserDTO>.Ok(userProfile, "Profile retrieved successfully"));
             }
-
-            var userProfile = await _authService.GetUserProfileAsync(userPublicId);
-            if (userProfile == null)
+            catch (UnauthorizedAccessException ex)
             {
-                            return NotFound(ApiResponse<UserDTO>.Fail("User not found"));
+                return Unauthorized(ApiResponse<UserDTO>.Fail(ex.Message));
             }
-
-            return Ok(ApiResponse<UserDTO>.Ok(userProfile, "Profile retrieved successfully"));
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<UserDTO>.Fail(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user profile");
+                return StatusCode(500, ApiResponse<UserDTO>.Fail("An error occurred while retrieving profile"));
+            }
         }
 
-        /// <summary>
-        /// Change user password
-        /// </summary>
-        /// <param name="changePasswordRequest">Password change data</param>
-        /// <returns>Success or error response</returns>
         [HttpPost("change-password")]
         [Authorize]
-        public async Task<ActionResult<AuthenticationResponseDTO>> ChangePassword([FromBody] ChangePasswordDTO changePasswordRequest)
+        public async Task<ActionResult<ApiResponse<string>>> ChangePassword([FromBody] ChangePasswordRequestDTO changePasswordRequest)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new AuthenticationResponseDTO
+                if (!ModelState.IsValid)
                 {
-                    Success = false,
-                    Message = "Invalid input data"
-                });
-            }
+                    return BadRequest(ApiResponse<string>.Fail("Invalid input data"));
+                }
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userPublicId))
-            {
-                return Unauthorized(new AuthenticationResponseDTO
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userPublicId))
                 {
-                    Success = false,
-                    Message = "Invalid user token"
-                });
-            }
+                    return Unauthorized(ApiResponse<string>.Fail("Invalid user token"));
+                }
 
-            var result = await _authService.ChangePasswordAsync(userPublicId, changePasswordRequest);
-            
-            if (!result.Success)
+                var result = await _userService.ChangePasswordAsync(userPublicId, changePasswordRequest);
+                
+                if (result)
+                {
+                    return Ok(ApiResponse<string>.Ok("", "Password changed successfully"));
+                }
+
+                return BadRequest(ApiResponse<string>.Fail("Failed to change password"));
+            }
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(result);
+                return Unauthorized(ApiResponse<string>.Fail(ex.Message));
             }
-
-            return Ok(result);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<string>.Fail(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return StatusCode(500, ApiResponse<string>.Fail("An error occurred while changing password"));
+            }
         }
 
-        /// <summary>
-        /// Forgot password endpoint
-        /// </summary>
-        /// <param name="forgotPasswordRequest">Email for password reset</param>
-        /// <returns>Success message</returns>
-        [HttpPost("forgot-password")]
-        public async Task<ActionResult<ApiResponse<string>>> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordRequest)
-        {
-            if (!ModelState.IsValid)
-            {
-                            return BadRequest(ApiResponse<string>.Fail("Invalid email address"));
-            }
 
-            var result = await _authService.ForgotPasswordAsync(forgotPasswordRequest);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Reset password endpoint
-        /// </summary>
-        /// <param name="resetPasswordRequest">Reset password data</param>
-        /// <returns>Success or error response</returns>
-        [HttpPost("reset-password")]
-        public async Task<ActionResult<AuthenticationResponseDTO>> ResetPassword([FromBody] ResetPasswordDTO resetPasswordRequest)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new AuthenticationResponseDTO
-                {
-                    Success = false,
-                    Message = "Invalid input data"
-                });
-            }
-
-            var result = await _authService.ResetPasswordAsync(resetPasswordRequest);
-            
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Validate JWT token endpoint
-        /// </summary>
-        /// <returns>Token validation result</returns>
         [HttpGet("validate-token")]
         [Authorize]
         public IActionResult ValidateToken()
         {
-            // If we reach here, the token is valid (handled by [Authorize] attribute)
             return Ok(ApiResponse<string>.Ok("", "Token is valid"));
         }
     }

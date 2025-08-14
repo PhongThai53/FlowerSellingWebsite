@@ -2,6 +2,7 @@
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
 {
@@ -14,24 +15,51 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<bool> EmailExistsAsync(string email)
-        {
-            return await _context.Users.AnyAsync(u => u.Email == email && !u.IsDeleted).;
-        }
-
+        // User retrieval methods
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users
                 .Include(u => u.Role)
                 .ThenInclude(r => r.RolePermissions)
-                .ThenInclude(r => r.Permission)
+                .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+        }
+
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
+        }
+
+        public async Task<User?> GetByUsernameOrEmailAsync(string usernameOrEmail)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => 
+                    (u.UserName == usernameOrEmail || u.Email == usernameOrEmail) && 
+                    !u.IsDeleted);
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
         public async Task<User?> GetByPublicIdAsync(Guid publicId)
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(u => u.PublicId == publicId && !u.IsDeleted);
         }
 
@@ -45,6 +73,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             {
                 query = query.Where(u =>
                     (u.FullName != null && u.FullName.Contains(search)) ||
+                    (u.UserName != null && u.UserName.Contains(search)) ||
                     (u.Email != null && u.Email.Contains(search)));
             }
 
@@ -52,10 +81,48 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             {
                 query = query.Where(u => u.Role.RoleName == role);
             }
+
             return await query.OrderBy(u => u.FullName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
+
+        // Existence checks
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _context.Users.AnyAsync(u => u.Email == email && !u.IsDeleted);
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            return await _context.Users.AnyAsync(u => u.UserName == username && !u.IsDeleted);
+        }
+
+        // User management
+        public async Task<User> CreateUserAsync(User user)
+        {
+            // Use a database transaction to ensure atomic operation
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                
+                // Reload the role information after saving
+                await _context.Entry(user).Reference(u => u.Role).LoadAsync();
+                
+                // Commit the transaction if everything succeeded
+                await transaction.CommitAsync();
+                
+                return user;
+            }
+            catch
+            {
+                // Rollback the transaction if any error occurs
+                await transaction.RollbackAsync();
+                throw; // Re-throw the exception to be handled by the service layer
+            }
         }
 
         public async Task AddAsync(User user)
@@ -64,15 +131,45 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(User user)
+        // Password management
+        public async Task<bool> VerifyPasswordAsync(User user, string password)
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            return await Task.FromResult(
+                !string.IsNullOrEmpty(user.PasswordHash) && 
+                BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)
+            );
+        }
+
+        public async Task<bool> UpdatePasswordAsync(User user, string newPasswordHash)
+        {
+            try
+            {
+                user.PasswordHash = newPasswordHash;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // Role management
+        public async Task<Role?> GetRoleByNameAsync(string roleName)
+        {
+            return await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
         }
     }
 }

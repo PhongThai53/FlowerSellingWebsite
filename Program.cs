@@ -33,10 +33,13 @@ builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Repository Services
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Application Services
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// HTTP Context Accessor for current user access
+builder.Services.AddHttpContextAccessor();
 
 // Authentication
 var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
