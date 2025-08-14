@@ -28,5 +28,8 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
 
         // Role management
         Task<Role?> GetRoleByNameAsync(string roleName);
+
+        // Email verification (using existing fields creatively)
+        Task<User?> GetUserByEmailForVerificationAsync(string email);
     }
 }

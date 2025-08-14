@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Email Verification Failed - Floda Flower Shop"
+    />
+    <title>Email Verification Failed - Floda</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- Icon Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="/css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="/css/style.css" rel="stylesheet" />
+    <!-- Custom Auth CSS -->
+    <link href="/css/auth.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- HTMX JSON Extension for json-enc -->
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
+  </head>
+
+  <body>
+    <!-- Load Header Component -->
+    <div
+      hx-get="/html/components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></div>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>Email Verification</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="/html/common/homepage.html">Home</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Verification Failed
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- verification failed area start -->
+      <div class="login-register-wrapper section-space pb-0">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+              <div class="login-reg-form-wrap text-center">
+                <div class="verification-failed-icon mb-4">
+                  <i
+                    class="fas fa-times-circle"
+                    style="font-size: 72px; color: #dc3545"
+                  ></i>
+                </div>
+
+                <h2 class="mb-3">Email Verification Failed</h2>
+
+                <div class="alert alert-danger mb-4">
+                  <p class="mb-2">
+                    <strong>Sorry!</strong> We couldn't verify your email
+                    address.
+                  </p>
+                  <p class="mb-0">
+                    This could happen if the verification link has expired or is
+                    invalid.
+                  </p>
+                </div>
+
+                <div class="verification-help mb-4">
+                  <h5>What can you do?</h5>
+                  <ul class="list-unstyled text-start">
+                    <li class="mb-2">
+                      <i class="fas fa-arrow-right text-primary me-2"></i>
+                      Check if the verification link is complete and hasn't been
+                      truncated
+                    </li>
+                    <li class="mb-2">
+                      <i class="fas fa-arrow-right text-primary me-2"></i>
+                      Request a new verification email using the form below
+                    </li>
+                    <li class="mb-2">
+                      <i class="fas fa-arrow-right text-primary me-2"></i>
+                      Make sure you're using the most recent verification email
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Resend Verification Form -->
+                <div class="resend-verification-form">
+                  <h5>Resend Verification Email</h5>
+
+                  <form
+                    id="resend-verification-form"
+                    hx-post="http://localhost:5062/api/auth/resend-verification"
+                    hx-target="#resend-response"
+                    hx-swap="innerHTML"
+                    hx-trigger="submit"
+                    hx-headers='{"Content-Type": "application/json"}'
+                    hx-ext="json-enc"
+                  >
+                    <!-- Response Area -->
+                    <div
+                      id="resend-response"
+                      class="auth-response mb-3"
+                      style="display: none"
+                    ></div>
+
+                    <div class="single-input-item">
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email address"
+                        required
+                        maxlength="100"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
+                      <button type="submit" class="btn btn__bg">
+                        <i class="fas fa-paper-plane"></i> Resend Verification
+                        Email
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div class="verification-actions mt-4">
+                  <a
+                    href="/html/auth/login-register.html"
+                    class="btn btn-outline-primary me-3"
+                  >
+                    <i class="fas fa-user-plus"></i> Register Again
+                  </a>
+                  <a
+                    href="/html/common/homepage.html"
+                    class="btn btn-outline-secondary"
+                  >
+                    <i class="fas fa-home"></i> Go to Homepage
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- verification failed area end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <div
+      hx-get="/html/components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></div>
+
+    <!-- Scroll to top start -->
+    <div class="scroll-top not-visible">
+      <i class="fa fa-angle-up"></i>
+    </div>
+    <!-- Scroll to Top End -->
+
+    <!-- All vendor & plugins & active js include here -->
+    <script src="/js/vendor.js"></script>
+    <script src="/js/active.js"></script>
+    <script src="/js/auth.js"></script>
+  </body>
+</html>

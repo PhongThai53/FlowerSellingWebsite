@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite", "FlowerSellingWebsite.csproj", "{3906ECE9-46DC-4A8E-AC8D-A6A75B06C414}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite_FE", "..\FlowerSellingWebsite_FE\FlowerSellingWebsite_FE.csproj", "{27891173-CD68-4985-B452-3D95FF5FCD84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite_FE", "..\frontend\FlowerSellingWebsite_FE.csproj", "{E5807CB9-6537-EADC-F108-8BF5F0302AD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{3906ECE9-46DC-4A8E-AC8D-A6A75B06C414}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3906ECE9-46DC-4A8E-AC8D-A6A75B06C414}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3906ECE9-46DC-4A8E-AC8D-A6A75B06C414}.Release|Any CPU.Build.0 = Release|Any CPU
-		{27891173-CD68-4985-B452-3D95FF5FCD84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27891173-CD68-4985-B452-3D95FF5FCD84}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27891173-CD68-4985-B452-3D95FF5FCD84}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27891173-CD68-4985-B452-3D95FF5FCD84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5807CB9-6537-EADC-F108-8BF5F0302AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5807CB9-6537-EADC-F108-8BF5F0302AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5807CB9-6537-EADC-F108-8BF5F0302AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5807CB9-6537-EADC-F108-8BF5F0302AD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

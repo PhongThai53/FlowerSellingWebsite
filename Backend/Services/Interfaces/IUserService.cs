@@ -15,5 +15,9 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<IEnumerable<UserDTO>> GetUsersAsync(int page = 1, int pageSize = 10, string? search = null, string? role = null);
         Task<bool> ActivateUserAsync(Guid publicId);
         Task<bool> DeactivateUserAsync(Guid publicId);
+        
+        // Email verification methods
+        Task<bool> VerifyEmailAsync(string token);
+        Task<bool> ResendVerificationEmailAsync(string email);
     }
 }

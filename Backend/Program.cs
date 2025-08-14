@@ -37,6 +37,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
+builder.Services.AddSingleton<IPendingUserService, PendingUserService>();
+
+// Background Services
+builder.Services.AddHostedService<EmailVerificationCleanupService>();
 
 // HTTP Context Accessor for current user access
 builder.Services.AddHttpContextAccessor();

@@ -2,6 +2,7 @@ using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
 namespace FlowerSellingWebsite.Controllers
@@ -12,11 +13,13 @@ namespace FlowerSellingWebsite.Controllers
     {
         private readonly IUserService _userService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService, ILogger<AuthController> logger)
+        public AuthController(IUserService userService, ILogger<AuthController> logger, IConfiguration configuration)
         {
             _userService = userService;
             _logger = logger;
+            _configuration = configuration;
         }
 
    
@@ -171,6 +174,66 @@ namespace FlowerSellingWebsite.Controllers
         public IActionResult ValidateToken()
         {
             return Ok(ApiResponse<string>.Ok("", "Token is valid"));
+        }
+
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    // Redirect to a failed page with an error message
+                    return Redirect($"{_configuration["FrontendUrl"]}/html/auth/verification-failed.html?error=invalid_token");
+                }
+
+                var result = await _userService.VerifyEmailAsync(token);
+
+                if (result)
+                {
+                    // Redirect to a success page
+                    return Redirect($"{_configuration["FrontendUrl"]}/html/auth/verification-success.html");
+                }
+                else
+                {
+                    // Redirect to a failed page
+                    return Redirect($"{_configuration["FrontendUrl"]}/html/auth/verification-failed.html?error=verification_failed");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during email verification");
+                // Redirect to a generic error page
+                return Redirect($"{_configuration["FrontendUrl"]}/html/auth/verification-failed.html?error=server_error");
+            }
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<ActionResult<ApiResponse<string>>> ResendVerificationEmail([FromBody] ResendVerificationRequestDTO request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("Invalid input data"));
+                }
+
+                var result = await _userService.ResendVerificationEmailAsync(request.Email);
+
+                if (result)
+                {
+                    return Ok(ApiResponse<string>.Ok("", "Verification email sent successfully"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<string>.Fail("Failed to resend verification email. Please check if the email is valid and pending verification."));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending verification email for: {Email}", request.Email);
+                return StatusCode(500, ApiResponse<string>.Fail("An error occurred while resending verification email"));
+            }
         }
     }
 }

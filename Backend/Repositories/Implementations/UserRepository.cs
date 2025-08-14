@@ -171,5 +171,13 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             return await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
         }
+
+        // Email verification (using existing fields creatively)
+        public async Task<User?> GetUserByEmailForVerificationAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
     }
 }
