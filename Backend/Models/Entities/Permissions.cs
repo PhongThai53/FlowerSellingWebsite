@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
-    [Table("Permissions")]
-    public class Permission : BaseEntity
+    public class Permissions : BaseEntity
     {
         [Required]
         [StringLength(100)]
@@ -14,6 +12,6 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? Description { get; set; }
 
         // Navigation Properties
-        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+        public virtual ICollection<RolePermissions> RolePermissions { get; set; } = new List<RolePermissions>();
     }
 }

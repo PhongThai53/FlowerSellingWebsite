@@ -1,8 +1,7 @@
-﻿using FlowerSelling.Data;
+﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
 {
@@ -15,8 +14,8 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             _context = context;
         }
 
-        // User retrieval methods
-        public async Task<User?> GetByEmailAsync(string email)
+        // Users retrieval methods
+        public async Task<Users?> GetByEmailAsync(string email)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -25,7 +24,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
 
-        public async Task<User?> GetByUsernameAsync(string username)
+        public async Task<Users?> GetByUsernameAsync(string username)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -34,18 +33,18 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
         }
 
-        public async Task<User?> GetByUsernameOrEmailAsync(string usernameOrEmail)
+        public async Task<Users?> GetByUsernameOrEmailAsync(string usernameOrEmail)
         {
             return await _context.Users
                 .Include(u => u.Role)
                 .ThenInclude(r => r.RolePermissions)
                 .ThenInclude(rp => rp.Permission)
-                .FirstOrDefaultAsync(u => 
-                    (u.UserName == usernameOrEmail || u.Email == usernameOrEmail) && 
+                .FirstOrDefaultAsync(u =>
+                    (u.UserName == usernameOrEmail || u.Email == usernameOrEmail) &&
                     !u.IsDeleted);
         }
 
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<Users?> GetByIdAsync(int id)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -54,7 +53,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
-        public async Task<User?> GetByPublicIdAsync(Guid publicId)
+        public async Task<Users?> GetByPublicIdAsync(Guid publicId)
         {
             return await _context.Users
                 .Include(u => u.Role)
@@ -63,7 +62,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.PublicId == publicId && !u.IsDeleted);
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync(int page, int pageSize, string? search, string? role)
+        public async Task<IEnumerable<Users>> GetUsersAsync(int page, int pageSize, string? search, string? role)
         {
             var query = _context.Users
                 .Include(u => u.Role)
@@ -99,8 +98,8 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return await _context.Users.AnyAsync(u => u.UserName == username && !u.IsDeleted);
         }
 
-        // User management
-        public async Task<User> CreateUserAsync(User user)
+        // Users management
+        public async Task<Users> CreateUserAsync(Users user)
         {
             // Use a database transaction to ensure atomic operation
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -108,13 +107,13 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             {
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
-                
+
                 // Reload the role information after saving
                 await _context.Entry(user).Reference(u => u.Role).LoadAsync();
-                
+
                 // Commit the transaction if everything succeeded
                 await transaction.CommitAsync();
-                
+
                 return user;
             }
             catch
@@ -125,13 +124,13 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             }
         }
 
-        public async Task AddAsync(User user)
+        public async Task AddAsync(Users user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(User user)
+        public async Task UpdateAsync(Users user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
@@ -143,15 +142,15 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         }
 
         // Password management
-        public async Task<bool> VerifyPasswordAsync(User user, string password)
+        public async Task<bool> VerifyPasswordAsync(Users user, string password)
         {
             return await Task.FromResult(
-                !string.IsNullOrEmpty(user.PasswordHash) && 
+                !string.IsNullOrEmpty(user.PasswordHash) &&
                 BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)
             );
         }
 
-        public async Task<bool> UpdatePasswordAsync(User user, string newPasswordHash)
+        public async Task<bool> UpdatePasswordAsync(Users user, string newPasswordHash)
         {
             try
             {
@@ -167,7 +166,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         }
 
         // Role management
-        public async Task<Role?> GetRoleByNameAsync(string roleName)
+        public async Task<Roles?> GetRoleByNameAsync(string roleName)
         {
             return await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
         }

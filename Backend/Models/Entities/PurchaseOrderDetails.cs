@@ -3,21 +3,25 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
-    public class ProductFlowers : BaseEntity
+    public class PurchaseOrderDetails : BaseEntity
     {
         [Required]
-        [ForeignKey("Product")]
-        public int ProductId { get; set; }
+        [ForeignKey("PurchaseOrder")]
+        public int PurchaseOrderId { get; set; }
 
         [Required]
         [ForeignKey("Flower")]
         public int FlowerId { get; set; }
 
         [Required]
-        public int QuantityNeeded { get; set; }
+        public int Quantity { get; set; }
+        [Required]
+        public decimal UnitPrice { get; set; }
+        [Required]
+        public decimal LineTotal { get; set; }
 
         // Navigation properties
-        public virtual Products Product { get; set; } = null!;
+        public virtual PurchaseOrders PurchaseOrder { get; set; } = null!;
         public virtual Flowers Flower { get; set; } = null!;
     }
 }

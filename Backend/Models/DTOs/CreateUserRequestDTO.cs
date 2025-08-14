@@ -18,7 +18,7 @@ namespace FlowerSellingWebsite.Models.DTOs
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
 
-        [Required(ErrorMessage = "Role is required")]
+        [Required(ErrorMessage = "Roles is required")]
         public string RoleName { get; set; } = string.Empty;
     }
 }
