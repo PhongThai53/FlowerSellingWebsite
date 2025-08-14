@@ -34,9 +34,11 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Repository Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // HTTP Context Accessor for current user access
 builder.Services.AddHttpContextAccessor();
@@ -83,7 +85,30 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Enhanced Swagger configuration
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Flower Selling Website API",
+        Version = "v1",
+        Description = "API for managing flower categories, products, and orders",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Admin",
+            Email = "admin@flowershop.com"
+        }
+    });
+    
+    // Enable XML comments
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 var app = builder.Build();
 
@@ -106,11 +131,15 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// Make Swagger available in all environments
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Flower Selling Website API v1");
+    options.RoutePrefix = "swagger";
+    options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+    options.DefaultModelsExpandDepth(0); // Hide schemas section by default
+});
 
 app.MapControllers();
 
