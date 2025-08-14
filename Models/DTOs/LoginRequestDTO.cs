@@ -5,7 +5,7 @@ namespace FlowerSellingWebsite.Models.DTOs
     public class LoginRequestDTO
     {
         [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", ErrorMessage = "Invalid email format.")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required")]

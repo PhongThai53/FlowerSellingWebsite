@@ -1,0 +1,129 @@
+/* Authentication Styles */
+
+/* Response Messages */
+.auth-response {
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.auth-response.success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.auth-response.error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.auth-response.info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+/* Loading States */
+.btn .fa-spinner {
+  margin-right: 5px;
+}
+
+/* Form Validation States */
+.single-input-item input.invalid,
+.single-input-item textarea.invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.single-input-item input.valid,
+.single-input-item textarea.valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Field Error Messages */
+.field-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.password-strength.weak {
+  color: #dc3545;
+}
+
+.password-strength.medium {
+  color: #ffc107;
+}
+
+.password-strength.strong {
+  color: #28a745;
+}
+
+/* Custom Checkbox Styling */
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+  .login-register-wrapper .row > div {
+    margin-bottom: 30px;
+  }
+
+  .auth-response {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+}
+
+/* Animation for form transitions */
+.auth-form-slide {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.auth-form-slide.fade-out {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.auth-form-slide.fade-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* User Menu Dropdown Styles */
+.user-authenticated .dropdown-list {
+  min-width: 200px;
+}
+
+.user-authenticated .dropdown-list li a {
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+}
+
+.user-authenticated .dropdown-list li a i {
+  margin-right: 8px;
+  width: 16px;
+}
+
+
+
+
