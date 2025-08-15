@@ -12,5 +12,6 @@ namespace FlowerSellingWebsite.Models.Entities
         public virtual ICollection<Flowers> Flowers { get; set; } = new HashSet<Flowers>();
         public virtual ICollection<FlowerCategoryImages> FlowerCategoryImages { get; set; } = new HashSet<FlowerCategoryImages>();
         public virtual ICollection<FlowerPricing> FlowerPricings { get; set; } = new HashSet<FlowerPricing>();
+        public virtual ICollection<Blog> Blogs { get; set; } = new HashSet<Blog>();
     }
 }
