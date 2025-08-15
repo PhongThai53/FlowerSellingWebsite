@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite", "FlowerSellingWebsite.csproj", "{3906ECE9-46DC-4A8E-AC8D-A6A75B06C414}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite_FE", "..\Frontend\FlowerSellingWebsite_FE.csproj", "{E5807CB9-6537-EADC-F108-8BF5F0302AD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerSellingWebsite_FE", "..\frontend\FlowerSellingWebsite_FE.csproj", "{E5807CB9-6537-EADC-F108-8BF5F0302AD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

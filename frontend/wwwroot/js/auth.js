@@ -89,16 +89,22 @@ class AuthManager {
 
         if (formType === "login") {
           setTimeout(() => {
-            window.location.href = "../common/homepage.html";
+            window.location.href = "/html/common/homepage.html";
           }, 1500);
         } else {
+          // Registration successful - show email verification message
+          const verificationMessage = `
+            <div class="alert alert-info">
+              <h5><i class="fas fa-envelope"></i> Registration Successful!</h5>
+              <p><strong>Please check your email inbox to verify your account.</strong></p>
+              <p>We've sent a verification link to your email address. Click the link to activate your account and complete the registration process.</p>
+              <p class="mb-0"><small>Didn't receive the email? Check your spam folder or <a href="/html/auth/verification-failed.html">request a new verification email</a>.</small></p>
+            </div>
+          `;
+          this.showSuccessMessage(responseContainer, verificationMessage);
+
           // Clear the form fields on successful registration
           event.target.reset();
-          setTimeout(() => {
-            document
-              .getElementById("login-form")
-              .scrollIntoView({ behavior: "smooth" });
-          }, 2000);
         }
       } else {
         // This handles cases where Succeeded is false but not a 4xx/5xx error
@@ -398,7 +404,7 @@ class AuthManager {
       // Update desktop user menu for authenticated users
       if (userDropdown) {
         userDropdown.innerHTML = `
-          <li><a href="my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
+          <li><a href="/html/auth/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
           <li><a href="#" onclick="authManager.logout()"><i class="lnr lnr-exit"></i> Logout</a></li>
         `;
       }
@@ -406,7 +412,7 @@ class AuthManager {
       // Update mobile user menu for authenticated users
       if (mobileUserMenu) {
         mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="my-account.html">My Account</a>
+          <a class="dropdown-item" href="/html/auth/my-account.html">My Account</a>
           <a class="dropdown-item" href="#" onclick="authManager.logout()">Logout</a>
         `;
       }
@@ -414,16 +420,16 @@ class AuthManager {
       // Update desktop user menu for non-authenticated users
       if (userDropdown) {
         userDropdown.innerHTML = `
-          <li><a href="login-register.html">Login</a></li>
-          <li><a href="login-register.html">Register</a></li>
+          <li><a href="/html/auth/login-register.html">Login</a></li>
+          <li><a href="/html/auth/login-register.html">Register</a></li>
         `;
       }
 
       // Update mobile user menu for non-authenticated users
       if (mobileUserMenu) {
         mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="login-register.html">Login</a>
-          <a class="dropdown-item" href="login-register.html">Register</a>
+          <a class="dropdown-item" href="/html/auth/login-register.html">Login</a>
+          <a class="dropdown-item" href="/html/auth/login-register.html">Register</a>
         `;
       }
     }
@@ -453,8 +459,8 @@ class AuthManager {
       // Clear local auth data regardless of API call success
       this.clearAuthData();
 
-      // Redirect to login page
-      window.location.href = "auth/login-register.html";
+      // Redirect to homepage
+      window.location.href = "/html/common/homepage.html";
     }
   }
 

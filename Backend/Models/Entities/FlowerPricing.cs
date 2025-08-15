@@ -5,14 +5,9 @@ namespace FlowerSellingWebsite.Models.Entities
 {
     public class FlowerPricing : BaseEntity
     {
-        [ForeignKey("FlowerCategory")]
-        public int? FlowerCategoryId { get; set; }  // NULL = applies to all categories
-
-        [ForeignKey("FlowerType")]
-        public int? FlowerTypeId { get; set; }      // NULL = applies to all types
-
-        [ForeignKey("FlowerColor")]
-        public int? FlowerColorId { get; set; }     // NULL = applies to all colors
+        [Required]
+        [ForeignKey("Flower")]
+        public int FlowerId { get; set; }  // Only connect to Flowers
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
@@ -31,14 +26,10 @@ namespace FlowerSellingWebsite.Models.Entities
         public string PriceType { get; set; } = null!; // retail, wholesale, promotional
 
         [Required]
-        public int Priority { get; set; }            // priority level (higher = more priority)
-        [Required]
         public bool IsActive { get; set; }
 
         // Navigation properties
-        public virtual FlowerCategories? FlowerCategory { get; set; }
-        public virtual FlowerTypes? FlowerType { get; set; }
-        public virtual FlowerColors? FlowerColor { get; set; }
+        public virtual Flowers Flower { get; set; } = null!;
         public virtual ICollection<FlowerPriceHistory> FlowerPriceHistories { get; set; } = new HashSet<FlowerPriceHistory>();
     }
 }

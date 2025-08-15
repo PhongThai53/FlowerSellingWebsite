@@ -8,9 +8,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public string TypeName { get; set; } = null!;
         public string? Description { get; set; }
 
-        // Navigation properties
+        // Navigation properties - removed FlowerCategoryImages and FlowerPricings
         public virtual ICollection<Flowers> Flowers { get; set; } = new HashSet<Flowers>();
-        public virtual ICollection<FlowerCategoryImages> FlowerCategoryImages { get; set; } = new HashSet<FlowerCategoryImages>();
-        public virtual ICollection<FlowerPricing> FlowerPricings { get; set; } = new HashSet<FlowerPricing>();
     }
 }

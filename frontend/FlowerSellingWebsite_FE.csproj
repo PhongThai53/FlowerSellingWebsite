@@ -14,26 +14,6 @@
     <Folder Include="wwwroot\js\" />
     <Folder Include="wwwroot\html\" />
   </ItemGroup>
-  <Target
-        Name="Workaround_ResolveBuildCompressedStaticWebAssetsConfiguration"
-        BeforeTargets="ResolveBuildCompressedStaticWebAssetsConfiguration">
-    <!-- Remove any duplicate items from StaticWebAssets -->
-    
-    <ItemGroup>
-        <StaticWebAsset_NoDuplicates />
-    </ItemGroup>
-    
-    <RemoveDuplicates Inputs="@(StaticWebAsset)">
-        <Output TaskParameter="Filtered" ItemName="StaticWebAsset_NoDuplicates" />
-    </RemoveDuplicates>
-    
-    <ItemGroup>
-        <!-- Clear StaticWebAsset -->
-        <StaticWebAsset Remove="@(StaticWebAsset)" />
-        
-        <!-- Copy filtered list to StaticWebAsset -->
-        <StaticWebAsset Include="@(StaticWebAsset_NoDuplicates)" />
-    </ItemGroup>
-</Target>
+
 
 </Project>
