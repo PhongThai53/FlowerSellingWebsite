@@ -14,12 +14,14 @@ namespace FlowerSellingWebsite.Controllers
         private readonly IUserService _userService;
         private readonly ILogger<AuthController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IPasswordResetService _passwordResetService;
 
-        public AuthController(IUserService userService, ILogger<AuthController> logger, IConfiguration configuration)
+        public AuthController(IUserService userService, ILogger<AuthController> logger, IConfiguration configuration, IPasswordResetService passwordResetService)
         {
             _userService = userService;
             _logger = logger;
             _configuration = configuration;
+            _passwordResetService = passwordResetService;
         }
 
    
@@ -233,6 +235,50 @@ namespace FlowerSellingWebsite.Controllers
             {
                 _logger.LogError(ex, "Error resending verification email for: {Email}", request.Email);
                 return StatusCode(500, ApiResponse<string>.Fail("An error occurred while resending verification email"));
+            }
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordDto)
+        {
+            try
+            {
+                await _userService.SendPasswordResetLinkAsync(forgotPasswordDto.Email);
+                var message = "<div class='alert alert-success'>If an account with that email exists, a password reset link has been sent.</div>";
+                return Content(message, "text/html");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending password reset link for email {Email}", forgotPasswordDto.Email);
+                var message = "<div class='alert alert-danger'>An unexpected error occurred. Please try again later.</div>";
+                return Content(message, "text/html");
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetPasswordDto)
+        {
+            try
+            {
+                var success = await _userService.ResetPasswordAsync(resetPasswordDto.Token, resetPasswordDto.NewPassword);
+                if (success)
+                {
+                    var message = "<div class='alert alert-success'>Password has been reset successfully. <a href='/html/auth/login-register.html'>Click here to login</a>.</div>";
+                    return Content(message, "text/html");
+                }
+                var errorMessage = "<div class='alert alert-danger'>Invalid or expired token. Please try resetting your password again.</div>";
+                return Content(errorMessage, "text/html");
+            }
+            catch (InvalidOperationException ex)
+            {
+                var errorMessage = $"<div class='alert alert-danger'>{ex.Message}</div>";
+                return Content(errorMessage, "text/html");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting password.");
+                var errorMessage = "<div class='alert alert-danger'>An unexpected error occurred. Please try again later.</div>";
+                return Content(errorMessage, "text/html");
             }
         }
     }
