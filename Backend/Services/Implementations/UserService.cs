@@ -136,8 +136,8 @@ namespace FlowerSellingWebsite.Services.Implementations
                     PhoneNumber = request.PhoneNumber,
                     Address = request.Address,
                     RoleName = "Users",
-                    IsCustomer = true,
-                    IsSupplier = false
+                    //IsCustomer = true,
+                    //IsSupplier = false
                 };
             }
             catch (Exception ex)

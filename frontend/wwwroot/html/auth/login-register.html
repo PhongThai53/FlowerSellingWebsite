@@ -159,118 +159,73 @@
                   <h2>Sign In</h2>
 
                   <!-- Login Form -->
-                  <div id="login-form-container">
-                    <form
-                      id="login-form"
-                      hx-post="http://localhost:5062/api/auth/login"
-                      hx-target="#login-response"
-                      hx-swap="innerHTML"
-                      hx-trigger="submit"
-                      hx-headers='{"Content-Type": "application/json"}'
-                      hx-ext="json-enc"
-                    >
-                      <!-- Response Area -->
+                  <form
+                    id="login-form"
+                    hx-post="http://localhost:5062/api/auth/login"
+                    hx-target="#login-response"
+                    hx-swap="innerHTML"
+                    hx-trigger="submit"
+                    hx-headers='{"Content-Type": "application/json"}'
+                    hx-ext="json-enc"
+                  >
+                    <!-- Response Area -->
+                    <div
+                      id="login-response"
+                      class="auth-response mb-3"
+                      style="display: none"
+                    ></div>
+
+                    <div class="single-input-item">
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        required
+                        maxlength="100"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
+                      <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter your Password"
+                        required
+                        minlength="6"
+                        maxlength="100"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
                       <div
-                        id="login-response"
-                        class="auth-response mb-3"
-                        style="display: none"
-                      ></div>
-
-                      <div class="single-input-item">
-                        <input
-                          type="email"
-                          name="email"
-                          placeholder="Email"
-                          required
-                          maxlength="100"
-                        />
-                      </div>
-
-                      <div class="single-input-item">
-                        <input
-                          type="password"
-                          name="password"
-                          placeholder="Enter your Password"
-                          required
-                          minlength="6"
-                          maxlength="100"
-                        />
-                      </div>
-
-                      <div class="single-input-item">
-                        <div
-                          class="login-reg-form-meta d-flex align-items-center justify-content-between"
-                        >
-                          <div class="remember-meta">
-                            <div class="custom-control custom-checkbox">
-                              <input
-                                type="checkbox"
-                                class="custom-control-input"
-                                id="rememberMe"
-                                name="rememberMe"
-                              />
-                              <label
-                                class="custom-control-label"
-                                for="rememberMe"
-                                >Remember Me</label
-                              >
-                            </div>
+                        class="login-reg-form-meta d-flex align-items-center justify-content-between"
+                      >
+                        <div class="remember-meta">
+                          <div class="custom-control custom-checkbox">
+                            <input
+                              type="checkbox"
+                              class="custom-control-input"
+                              id="rememberMe"
+                              name="rememberMe"
+                            />
+                            <label class="custom-control-label" for="rememberMe"
+                              >Remember Me</label
+                            >
                           </div>
-                          <a
-                            href="javascript:void(0)"
-                            id="forgot-password-link"
-                            class="forget-pwd"
-                            >Forget Password?</a
-                          >
                         </div>
+                        <a href="#" class="forget-pwd">Forget Password?</a>
                       </div>
+                    </div>
 
-                      <div class="single-input-item">
-                        <button type="submit" class="btn btn__bg">
-                          <span class="btn-text">Login</span>
-                          <span class="btn-loading" style="display: none">
-                            <i class="fa fa-spinner fa-spin"></i> Logging in...
-                          </span>
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-
-                  <!-- Forgot Password Form (hidden by default) -->
-                  <div id="forgot-password-container" style="display: none">
-                    <h4>Forgot Password</h4>
-                    <form
-                      id="forgot-password-form"
-                      hx-post="http://localhost:5062/api/auth/forgot-password"
-                      hx-target="#forgot-password-container"
-                      hx-swap="outerHTML"
-                      hx-ext="json-enc"
-                    >
-                      <div
-                        id="forgot-password-response"
-                        class="auth-response mb-3"
-                      ></div>
-
-                      <div class="single-input-item">
-                        <input
-                          type="email"
-                          name="email"
-                          placeholder="Enter your email"
-                          required
-                        />
-                      </div>
-                      <div class="single-input-item">
-                        <button type="submit" class="btn btn__bg">
-                          Send Reset Link
-                        </button>
-                      </div>
-                      <div class="single-input-item">
-                        <a href="javascript:void(0)" id="back-to-login-link"
-                          >Back to Login</a
-                        >
-                      </div>
-                    </form>
-                  </div>
+                    <div class="single-input-item">
+                      <button type="submit" class="btn btn__bg">
+                        <span class="login-btn-text">Login</span>
+                        <span class="login-btn-loading" style="display: none">
+                          <i class="fa fa-spinner fa-spin"></i> Logging in...
+                        </span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
               <!-- Login Content End -->
@@ -381,8 +336,11 @@
 
                     <div class="single-input-item">
                       <button type="submit" class="btn btn__bg">
-                        <span class="btn-text">Register</span>
-                        <span class="btn-loading" style="display: none">
+                        <span class="register-btn-text">Register</span>
+                        <span
+                          class="register-btn-loading"
+                          style="display: none"
+                        >
                           <i class="fa fa-spinner fa-spin"></i> Registering...
                         </span>
                       </button>
@@ -405,6 +363,119 @@
       hx-trigger="load"
       hx-swap="outerHTML"
     ></div>
+
+    <!-- offcanvas search form start -->
+    <div class="offcanvas-search-wrapper">
+      <div class="offcanvas-search-inner">
+        <div class="offcanvas-close">
+          <i class="lnr lnr-cross"></i>
+        </div>
+        <div class="container">
+          <div class="offcanvas-search-box">
+            <form class="d-flex bdr-bottom w-100">
+              <input type="text" placeholder="Search entire storage here..." />
+              <button class="search-btn">
+                <i class="lnr lnr-magnifier"></i>search
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- offcanvas search form end -->
+
+    <!-- offcanvas mini cart start -->
+    <div class="offcanvas-minicart-wrapper">
+      <div class="minicart-inner">
+        <div class="offcanvas-overlay"></div>
+        <div class="minicart-inner-content">
+          <div class="minicart-close">
+            <i class="lnr lnr-cross"></i>
+          </div>
+          <div class="minicart-content-box">
+            <div class="minicart-item-wrapper">
+              <ul>
+                <li class="minicart-item">
+                  <div class="minicart-thumb">
+                    <a href="product-details.html">
+                      <img src="../images/cart/cart-1.jpg" alt="product" />
+                    </a>
+                  </div>
+                  <div class="minicart-content">
+                    <h3 class="product-name">
+                      <a href="product-details.html"
+                        >Flowers bouquet pink for all flower lovers</a
+                      >
+                    </h3>
+                    <p>
+                      <span class="cart-quantity"
+                        >1 <strong>&times;</strong></span
+                      >
+                      <span class="cart-price">$100.00</span>
+                    </p>
+                  </div>
+                  <button class="minicart-remove">
+                    <i class="lnr lnr-cross"></i>
+                  </button>
+                </li>
+                <li class="minicart-item">
+                  <div class="minicart-thumb">
+                    <a href="product-details.html">
+                      <img src="../images/cart/cart-2.jpg" alt="product" />
+                    </a>
+                  </div>
+                  <div class="minicart-content">
+                    <h3 class="product-name">
+                      <a href="product-details.html"
+                        >Jasmine flowers white for all flower lovers</a
+                      >
+                    </h3>
+                    <p>
+                      <span class="cart-quantity"
+                        >1 <strong>&times;</strong></span
+                      >
+                      <span class="cart-price">$80.00</span>
+                    </p>
+                  </div>
+                  <button class="minicart-remove">
+                    <i class="lnr lnr-cross"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div class="minicart-pricing-box">
+              <ul>
+                <li>
+                  <span>sub-total</span>
+                  <span><strong>$300.00</strong></span>
+                </li>
+                <li>
+                  <span>Eco Tax (-2.00)</span>
+                  <span><strong>$10.00</strong></span>
+                </li>
+                <li>
+                  <span>VAT (20%)</span>
+                  <span><strong>$60.00</strong></span>
+                </li>
+                <li class="total">
+                  <span>total</span>
+                  <span><strong>$370.00</strong></span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="minicart-button">
+              <a href="cart.html"
+                ><i class="fa fa-shopping-cart"></i> view cart</a
+              >
+              <a href="cart.html"><i class="fa fa-share"></i> checkout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- offcanvas mini cart end -->
 
     <!-- Scroll to top start -->
     <div class="scroll-top not-visible">

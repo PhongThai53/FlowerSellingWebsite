@@ -36,20 +36,6 @@ namespace FlowerSellingWebsite.Controllers
                 }
 
                 var result = await _userService.LoginAsync(loginRequest);
-
-                // Set HTTP-only cookie for additional security (optional)
-                if (!string.IsNullOrEmpty(result.Token))
-                {
-                    var cookieOptions = new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = result.ExpiresAt
-                    };
-                    Response.Cookies.Append("auth_token", result.Token, cookieOptions);
-                }
-
                 return Ok(ApiResponse<LoginResponseDTO>.Ok(result, "Login successful"));
             }
             catch (UnauthorizedAccessException ex)
