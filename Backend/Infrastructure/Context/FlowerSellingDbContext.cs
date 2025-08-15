@@ -38,6 +38,8 @@ namespace FlowerSelling.Data
             public DbSet<PaymentMethods> PaymentMethods { get; set; }
             public DbSet<Payments> Payments { get; set; }
             public DbSet<Deliveries> Deliveries { get; set; }
+            public DbSet<Blog> Blogs { get; set; }
+            public DbSet<Comment> Comments { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
