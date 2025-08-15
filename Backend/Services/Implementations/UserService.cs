@@ -16,6 +16,7 @@ namespace FlowerSellingWebsite.Services.Implementations
         private readonly IEmailService _emailService;
         private readonly IEmailVerificationService _verificationService;
         private readonly IPendingUserService _pendingUserService;
+        private readonly IPasswordResetService _passwordResetService;
 
         public UserService(
             IUserRepository userRepository,
@@ -24,7 +25,8 @@ namespace FlowerSellingWebsite.Services.Implementations
             IHttpContextAccessor httpContextAccessor,
             IEmailService emailService,
             IEmailVerificationService verificationService,
-            IPendingUserService pendingUserService)
+            IPendingUserService pendingUserService,
+            IPasswordResetService passwordResetService)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -33,6 +35,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             _emailService = emailService;
             _verificationService = verificationService;
             _pendingUserService = pendingUserService;
+            _passwordResetService = passwordResetService;
         }
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -492,6 +495,37 @@ namespace FlowerSellingWebsite.Services.Implementations
                 _logger.LogError(ex, "Error resending verification email for: {Email}", email);
                 return false;
             }
+        }
+
+        public async Task SendPasswordResetLinkAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user != null)
+            {
+                var token = _passwordResetService.GeneratePasswordResetToken(email);
+                await _emailService.SendPasswordResetAsync(email, user.FullName, token);
+            }
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            if (_passwordResetService.ValidatePasswordResetToken(token, out var email))
+            {
+                var user = await _userRepository.GetByEmailAsync(email);
+                if (user != null)
+                {
+                    // Check if the new password is the same as the old one
+                    if (BCrypt.Net.BCrypt.Verify(newPassword, user.PasswordHash))
+                    {
+                        throw new InvalidOperationException("New password cannot be the same as the old password.");
+                    }
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                    await _userRepository.UpdateAsync(user);
+                    _passwordResetService.RemovePasswordResetToken(token);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

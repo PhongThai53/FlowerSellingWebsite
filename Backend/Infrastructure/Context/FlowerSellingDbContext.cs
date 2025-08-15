@@ -24,7 +24,7 @@ namespace FlowerSelling.Data
             public DbSet<FlowerDamageLogs> FlowerDamageLogs { get; set; }
             public DbSet<FlowerPricing> FlowerPricing { get; set; }
             public DbSet<FlowerPriceHistory> FlowerPriceHistory { get; set; }
-            public DbSet<FlowerCategoryImages> FlowerCategoryImages { get; set; }
+            public DbSet<FlowerImages> FlowerImages { get; set; } // Changed from FlowerCategoryImages to FlowerImages
             public DbSet<Products> Products { get; set; }
             public DbSet<ProductPhotos> ProductPhotos { get; set; }
             public DbSet<ProductFlowers> ProductFlowers { get; set; }
@@ -58,7 +58,7 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<FlowerDamageLogs>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<FlowerPricing>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<FlowerPriceHistory>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerCategoryImages>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<FlowerImages>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Products>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<ProductPhotos>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<ProductFlowers>().HasQueryFilter(e => !e.IsDeleted);
@@ -282,18 +282,10 @@ namespace FlowerSelling.Data
                     .Property(e => e.Notes)
                     .HasColumnType("nvarchar(1000)");
 
-                // FlowerPricing
                 modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.FlowerCategoryId)
-                    .HasColumnType("int");
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.FlowerTypeId)
-                    .HasColumnType("int");
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.FlowerColorId)
-                    .HasColumnType("int");
+                    .Property(e => e.FlowerId)
+                    .HasColumnType("int")
+                    .IsRequired();
 
                 modelBuilder.Entity<FlowerPricing>()
                     .Property(e => e.Price)
@@ -317,11 +309,6 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<FlowerPricing>()
                     .Property(e => e.PriceType)
                     .HasColumnType("nvarchar(20)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.Priority)
-                    .HasColumnType("int")
                     .IsRequired();
 
                 modelBuilder.Entity<FlowerPricing>()
@@ -359,54 +346,42 @@ namespace FlowerSelling.Data
                     .HasColumnType("datetime2")
                     .IsRequired();
 
-                // FlowerCategoryImages
-                modelBuilder.Entity<FlowerCategoryImages>()
-                    .Property(e => e.FlowerCategoryId)
-                    .HasColumnType("int");
+                // FlowerImages - UPDATED: Removed old nullable FKs, added FlowerId, removed Priority
+                modelBuilder.Entity<FlowerImages>()
+                    .Property(e => e.FlowerId)
+                    .HasColumnType("int")
+                    .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
-                    .Property(e => e.FlowerTypeId)
-                    .HasColumnType("int");
-
-                modelBuilder.Entity<FlowerCategoryImages>()
-                    .Property(e => e.FlowerColorId)
-                    .HasColumnType("int");
-
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.ImageUrl)
                     .HasColumnType("nvarchar(500)")
                     .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.ImageType)
                     .HasColumnType("nvarchar(50)")
                     .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
-                    .Property(e => e.Priority)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.IsPrimary)
                     .HasColumnType("bit")
                     .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.DisplayOrder)
                     .HasColumnType("int")
                     .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.EffectiveDate)
                     .HasColumnType("datetime2")
                     .IsRequired();
 
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.ExpiryDate)
                     .HasColumnType("datetime2");
 
-                modelBuilder.Entity<FlowerCategoryImages>()
+                modelBuilder.Entity<FlowerImages>()
                     .Property(e => e.IsActive)
                     .HasColumnType("bit")
                     .IsRequired();

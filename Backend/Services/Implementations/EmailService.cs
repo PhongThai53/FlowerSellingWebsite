@@ -42,7 +42,7 @@ namespace FlowerSellingWebsite.Services.Implementations
         public async Task SendPasswordResetAsync(string email, string fullName, string resetToken)
         {
             var subject = "Password Reset Request - Floda Flower Shop";
-            var resetUrl = $"https://localhost:7062/reset-password?token={resetToken}";
+            var resetUrl = $"{_configuration["FrontendUrl"]}/html/auth/reset-password.html?token={resetToken}";
             
             var body = $@"
                 <html>

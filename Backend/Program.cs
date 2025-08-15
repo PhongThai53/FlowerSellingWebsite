@@ -40,10 +40,12 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
+builder.Services.AddSingleton<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSingleton<IPendingUserService, PendingUserService>();
 
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
+builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // HTTP Context Accessor for current user access
