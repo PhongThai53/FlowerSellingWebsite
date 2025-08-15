@@ -731,16 +731,62 @@ namespace FlowerSelling.Data
                     .HasColumnType("nvarchar(200)");
 
                 // Relationships configuration
+                // Blog configurations
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Title)
+                    .HasColumnType("nvarchar(250)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Content)
+                    .HasColumnType("nvarchar(max)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Tags)
+                    .HasColumnType("nvarchar(1000)");
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Status)
+                    .HasColumnType("int")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.RejectionReason)
+                    .HasColumnType("nvarchar(500)");
+
                 modelBuilder.Entity<Blog>()
                     .HasOne(b => b.Category)
                     .WithMany(c => c.Blogs)
                     .HasForeignKey(b => b.CategoryId)
-                    .OnDelete(DeleteBehavior.NoAction); // Thay đổi từ NoAction thành Restrict để tránh lỗi
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 modelBuilder.Entity<Blog>()
                     .HasOne(b => b.User)
                     .WithMany()
                     .HasForeignKey(b => b.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // Comment configurations
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.Content)
+                    .HasColumnType("nvarchar(max)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.IsHide)
+                    .HasColumnType("bit")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.UserId)
+                    .HasColumnType("int")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
                     .OnDelete(DeleteBehavior.NoAction);
                 modelBuilder.Entity<Comment>()
                     .HasOne(c => c.Parent)
