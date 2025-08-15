@@ -160,77 +160,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("FlowerCategories");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerCategoryImages", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("FlowerCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FlowerColorId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FlowerTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlowerCategoryId");
-
-                    b.HasIndex("FlowerColorId");
-
-                    b.HasIndex("FlowerTypeId");
-
-                    b.ToTable("FlowerCategoryImages");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerColors", b =>
                 {
                     b.Property<int>("Id")
@@ -319,6 +248,64 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("FlowerDamageLogs");
                 });
 
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerImages", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EffectiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FlowerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlowerId");
+
+                    b.ToTable("FlowerImages");
+                });
+
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPriceHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -394,13 +381,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("FlowerCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FlowerColorId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FlowerTypeId")
+                    b.Property<int>("FlowerId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -417,9 +398,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
 
@@ -428,11 +406,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FlowerCategoryId");
-
-                    b.HasIndex("FlowerColorId");
-
-                    b.HasIndex("FlowerTypeId");
+                    b.HasIndex("FlowerId");
 
                     b.ToTable("FlowerPricing");
                 });
@@ -1266,27 +1240,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerCategoryImages", b =>
-                {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", "FlowerCategory")
-                        .WithMany("FlowerCategoryImages")
-                        .HasForeignKey("FlowerCategoryId");
-
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerColors", "FlowerColor")
-                        .WithMany("FlowerCategoryImages")
-                        .HasForeignKey("FlowerColorId");
-
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerTypes", "FlowerType")
-                        .WithMany("FlowerCategoryImages")
-                        .HasForeignKey("FlowerTypeId");
-
-                    b.Navigation("FlowerCategory");
-
-                    b.Navigation("FlowerColor");
-
-                    b.Navigation("FlowerType");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerDamageLogs", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerBatches", "FlowerBatch")
@@ -1296,6 +1249,17 @@ namespace FlowerSellingWebsite.Migrations
                         .IsRequired();
 
                     b.Navigation("FlowerBatch");
+                });
+
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerImages", b =>
+                {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
+                        .WithMany("FlowerImages")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Flower");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPriceHistory", b =>
@@ -1319,23 +1283,13 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
                 {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", "FlowerCategory")
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
                         .WithMany("FlowerPricings")
-                        .HasForeignKey("FlowerCategoryId");
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerColors", "FlowerColor")
-                        .WithMany("FlowerPricings")
-                        .HasForeignKey("FlowerColorId");
-
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerTypes", "FlowerType")
-                        .WithMany("FlowerPricings")
-                        .HasForeignKey("FlowerTypeId");
-
-                    b.Navigation("FlowerCategory");
-
-                    b.Navigation("FlowerColor");
-
-                    b.Navigation("FlowerType");
+                    b.Navigation("Flower");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Flowers", b =>
@@ -1531,19 +1485,11 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerCategories", b =>
                 {
-                    b.Navigation("FlowerCategoryImages");
-
-                    b.Navigation("FlowerPricings");
-
                     b.Navigation("Flowers");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerColors", b =>
                 {
-                    b.Navigation("FlowerCategoryImages");
-
-                    b.Navigation("FlowerPricings");
-
                     b.Navigation("Flowers");
                 });
 
@@ -1554,16 +1500,16 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerTypes", b =>
                 {
-                    b.Navigation("FlowerCategoryImages");
-
-                    b.Navigation("FlowerPricings");
-
                     b.Navigation("Flowers");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Flowers", b =>
                 {
                     b.Navigation("FlowerBatches");
+
+                    b.Navigation("FlowerImages");
+
+                    b.Navigation("FlowerPricings");
 
                     b.Navigation("ProductFlowers");
 

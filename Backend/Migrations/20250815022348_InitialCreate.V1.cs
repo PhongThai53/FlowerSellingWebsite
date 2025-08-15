@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FlowerSellingWebsite.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateV1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -167,91 +167,6 @@ namespace FlowerSellingWebsite.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Suppliers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FlowerCategoryImages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FlowerCategoryId = table.Column<int>(type: "int", nullable: true),
-                    FlowerTypeId = table.Column<int>(type: "int", nullable: true),
-                    FlowerColorId = table.Column<int>(type: "int", nullable: true),
-                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    ImageType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Priority = table.Column<int>(type: "int", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FlowerCategoryImages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FlowerCategoryImages_FlowerCategories_FlowerCategoryId",
-                        column: x => x.FlowerCategoryId,
-                        principalTable: "FlowerCategories",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_FlowerCategoryImages_FlowerColors_FlowerColorId",
-                        column: x => x.FlowerColorId,
-                        principalTable: "FlowerColors",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_FlowerCategoryImages_FlowerTypes_FlowerTypeId",
-                        column: x => x.FlowerTypeId,
-                        principalTable: "FlowerTypes",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FlowerPricing",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FlowerCategoryId = table.Column<int>(type: "int", nullable: true),
-                    FlowerTypeId = table.Column<int>(type: "int", nullable: true),
-                    FlowerColorId = table.Column<int>(type: "int", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PriceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Priority = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FlowerPricing", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FlowerPricing_FlowerCategories_FlowerCategoryId",
-                        column: x => x.FlowerCategoryId,
-                        principalTable: "FlowerCategories",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_FlowerPricing_FlowerColors_FlowerColorId",
-                        column: x => x.FlowerColorId,
-                        principalTable: "FlowerColors",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_FlowerPricing_FlowerTypes_FlowerTypeId",
-                        column: x => x.FlowerTypeId,
-                        principalTable: "FlowerTypes",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -479,6 +394,67 @@ namespace FlowerSellingWebsite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FlowerImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlowerId = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ImageType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsPrimary = table.Column<bool>(type: "bit", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FlowerImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FlowerImages_Flowers_FlowerId",
+                        column: x => x.FlowerId,
+                        principalTable: "Flowers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FlowerPricing",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlowerId = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
+                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PriceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FlowerPricing", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FlowerPricing_Flowers_FlowerId",
+                        column: x => x.FlowerId,
+                        principalTable: "Flowers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductFlowers",
                 columns: table => new
                 {
@@ -506,41 +482,6 @@ namespace FlowerSellingWebsite.Migrations
                         name: "FK_ProductFlowers_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FlowerPriceHistory",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FlowerPricingId = table.Column<int>(type: "int", nullable: false),
-                    OldPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    NewPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    ChangeReason = table.Column<string>(type: "nvarchar(500)", nullable: true),
-                    ChangedByUserId = table.Column<int>(type: "int", nullable: false),
-                    ChangeDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FlowerPriceHistory", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FlowerPriceHistory_FlowerPricing_FlowerPricingId",
-                        column: x => x.FlowerPricingId,
-                        principalTable: "FlowerPricing",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FlowerPriceHistory_Users_ChangedByUserId",
-                        column: x => x.ChangedByUserId,
-                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -665,6 +606,41 @@ namespace FlowerSellingWebsite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FlowerPriceHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlowerPricingId = table.Column<int>(type: "int", nullable: false),
+                    OldPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    NewPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    ChangeReason = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    ChangedByUserId = table.Column<int>(type: "int", nullable: false),
+                    ChangeDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FlowerPriceHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FlowerPriceHistory_FlowerPricing_FlowerPricingId",
+                        column: x => x.FlowerPricingId,
+                        principalTable: "FlowerPricing",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FlowerPriceHistory_Users_ChangedByUserId",
+                        column: x => x.ChangedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Deliveries",
                 columns: table => new
                 {
@@ -777,24 +753,14 @@ namespace FlowerSellingWebsite.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FlowerCategoryImages_FlowerCategoryId",
-                table: "FlowerCategoryImages",
-                column: "FlowerCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FlowerCategoryImages_FlowerColorId",
-                table: "FlowerCategoryImages",
-                column: "FlowerColorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FlowerCategoryImages_FlowerTypeId",
-                table: "FlowerCategoryImages",
-                column: "FlowerTypeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_FlowerDamageLogs_FlowerBatchId",
                 table: "FlowerDamageLogs",
                 column: "FlowerBatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FlowerImages_FlowerId",
+                table: "FlowerImages",
+                column: "FlowerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FlowerPriceHistory_ChangedByUserId",
@@ -807,19 +773,9 @@ namespace FlowerSellingWebsite.Migrations
                 column: "FlowerPricingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FlowerPricing_FlowerCategoryId",
+                name: "IX_FlowerPricing_FlowerId",
                 table: "FlowerPricing",
-                column: "FlowerCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FlowerPricing_FlowerColorId",
-                table: "FlowerPricing",
-                column: "FlowerColorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FlowerPricing_FlowerTypeId",
-                table: "FlowerPricing",
-                column: "FlowerTypeId");
+                column: "FlowerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Flowers_FlowerCategoryId",
@@ -924,10 +880,10 @@ namespace FlowerSellingWebsite.Migrations
                 name: "Deliveries");
 
             migrationBuilder.DropTable(
-                name: "FlowerCategoryImages");
+                name: "FlowerDamageLogs");
 
             migrationBuilder.DropTable(
-                name: "FlowerDamageLogs");
+                name: "FlowerImages");
 
             migrationBuilder.DropTable(
                 name: "FlowerPriceHistory");
