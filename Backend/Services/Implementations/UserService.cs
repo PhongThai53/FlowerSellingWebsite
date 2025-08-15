@@ -132,7 +132,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                     Email = request.Email,
                     PhoneNumber = request.PhoneNumber,
                     Address = request.Address,
-                    RoleName = "Customer",
+                    RoleName = "Users",
                     IsCustomer = true,
                     IsSupplier = false
                 };
@@ -190,6 +190,13 @@ namespace FlowerSellingWebsite.Services.Implementations
                 // Hash password
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
+                // Get role from database
+                var role = await _userRepository.GetRoleByNameAsync(request.RoleName);
+                if (role == null)
+                {
+                    throw new InvalidOperationException($"Role '{request.RoleName}' not found");
+                }
+
                 // Create new user
                 var newUser = new Users
                 {
@@ -198,7 +205,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                     PasswordHash = passwordHash,
                     Phone = request.PhoneNumber,
                     Address = request.Address,
-                    RoleId = GetRoleIdByName(request.RoleName),
+                    RoleId = role.Id,
                     //IsCustomer = request.RoleName.Equals("Customer", StringComparison.OrdinalIgnoreCase),
                     //IsSupplier = request.RoleName.Equals("Supplier", StringComparison.OrdinalIgnoreCase)
                 };
@@ -403,7 +410,14 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(pendingUserData.Password);
 
                 // Create the actual user account
-                var newUser = new User
+                var customerRole = await _userRepository.GetRoleByNameAsync("Users");
+                if (customerRole == null)
+                {
+                    _logger.LogError("Users role not found in the database.");
+                    return false;
+                }
+
+                var newUser = new Users
                 {
                     FullName = pendingUserData.FullName,
                     UserName = pendingUserData.UserName,
@@ -411,9 +425,9 @@ namespace FlowerSellingWebsite.Services.Implementations
                     PasswordHash = passwordHash,
                     Phone = pendingUserData.PhoneNumber,
                     Address = pendingUserData.Address,
-                    RoleId = 4, // Customer role ID
-                    IsCustomer = true,
-                    IsSupplier = false
+                    RoleId = customerRole.Id,
+                    //IsCustomer = true,
+                    //IsSupplier = false
                 };
 
                 // Save user to database
@@ -478,19 +492,6 @@ namespace FlowerSellingWebsite.Services.Implementations
                 _logger.LogError(ex, "Error resending verification email for: {Email}", email);
                 return false;
             }
-        }
-
-        private static int GetRoleIdByName(string roleName)
-        {
-            return roleName.ToLower() switch
-            {
-                "admin" => 1,
-                "manager" => 2,
-                "staff" => 3,
-                "customer" => 4,
-                "supplier" => 5,
-                _ => 4 // Default to Customer
-            };
         }
     }
 }

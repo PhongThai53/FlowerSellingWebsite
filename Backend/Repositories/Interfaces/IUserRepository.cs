@@ -27,9 +27,9 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<bool> UpdatePasswordAsync(Users user, string newPasswordHash);
 
         // Role management
-        Task<Role?> GetRoleByNameAsync(string roleName);
+        Task<Roles?> GetRoleByNameAsync(string roleName);
 
         // Email verification (using existing fields creatively)
-        Task<User?> GetUserByEmailForVerificationAsync(string email);
+        Task<Users?> GetUserByEmailForVerificationAsync(string email);
     }
 }

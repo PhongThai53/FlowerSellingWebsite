@@ -4,7 +4,7 @@ using ProjectGreenLens.Services.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Interfaces
 {
-    public interface ICategoryService : IBaseService<FlowerCategory>
+    public interface ICategoryService : IBaseService<FlowerCategories>
     {
         Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
         Task<CategoryDTO> GetCategoryByIdAsync(int id);

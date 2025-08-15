@@ -172,7 +172,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         }
 
         // Email verification (using existing fields creatively)
-        public async Task<User?> GetUserByEmailForVerificationAsync(string email)
+        public async Task<Users?> GetUserByEmailForVerificationAsync(string email)
         {
             return await _context.Users
                 .Include(u => u.Role)

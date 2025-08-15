@@ -6,7 +6,7 @@ using ProjectGreenLens.Services.Implementations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class CategoryService : BaseService<FlowerCategory>, ICategoryService
+    public class CategoryService : BaseService<FlowerCategories>, ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
 
@@ -41,12 +41,12 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<CategoryDTO> CreateCategoryAsync(CreateCategoryDTO categoryDTO)
         {
-            var category = new FlowerCategory
+            var category = new FlowerCategories
             {
                 CategoryName = categoryDTO.CategoryName,
                 Description = categoryDTO.Description,
-                Color = categoryDTO.Color,
-                IsActive = categoryDTO.IsActive
+                //Color = categoryDTO.Color,
+                //IsActive = categoryDTO.IsActive
             };
 
             var createdCategory = await _categoryRepository.createAsync(category);
@@ -61,8 +61,8 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             existingCategory.CategoryName = categoryDTO.CategoryName;
             existingCategory.Description = categoryDTO.Description;
-            existingCategory.Color = categoryDTO.Color;
-            existingCategory.IsActive = categoryDTO.IsActive;
+            //existingCategory.Color = categoryDTO.Color;
+            //existingCategory.IsActive = categoryDTO.IsActive;
 
             await _categoryRepository.updateAsync(existingCategory);
             var productCount = await _categoryRepository.GetProductCountByCategoryIdAsync(id);
@@ -99,20 +99,20 @@ namespace FlowerSellingWebsite.Services.Implementations
             if (category == null)
                 throw new KeyNotFoundException($"Category with Id={id} was not found.");
 
-            category.IsActive = isActive;
+            //category.IsActive = isActive;
             await _categoryRepository.updateAsync(category);
             return true;
         }
 
-        private CategoryDTO MapToDTO(FlowerCategory category, int productCount)
+        private CategoryDTO MapToDTO(FlowerCategories category, int productCount)
         {
             return new CategoryDTO
             {
                 Id = category.Id,
                 CategoryName = category.CategoryName,
                 Description = category.Description,
-                Color = category.Color,
-                IsActive = category.IsActive,
+                //Color = category.Color,
+                //IsActive = category.IsActive,
                 ProductCount = productCount,
                 CreatedAt = category.CreatedAt,
                 UpdatedAt = category.UpdatedAt
