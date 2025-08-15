@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Email Verification Success - Floda Flower Shop"
+    />
+    <title>Email Verified Successfully - Floda</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- Icon Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="/css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="/css/style.css" rel="stylesheet" />
+    <!-- Custom Auth CSS -->
+    <link href="/css/auth.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  </head>
+
+  <body>
+    <!-- Load Header Component -->
+    <div
+      hx-get="/html/components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></div>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>Email Verification</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="/html/common/homepage.html">Home</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Email Verified
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- verification success area start -->
+      <div class="login-register-wrapper section-space pb-0">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+              <div class="login-reg-form-wrap text-center">
+                <div class="verification-success-icon mb-4">
+                  <i
+                    class="fas fa-check-circle"
+                    style="font-size: 72px; color: #28a745"
+                  ></i>
+                </div>
+
+                <h2 class="mb-3">Email Verified Successfully!</h2>
+
+                <div class="alert alert-success mb-4">
+                  <p class="mb-2">
+                    <strong>Congratulations!</strong> Your email address has
+                    been verified successfully.
+                  </p>
+                  <p class="mb-0">
+                    Your account is now active and you can start using all our
+                    services.
+                  </p>
+                </div>
+
+                <div class="verification-actions">
+                  <a
+                    href="/html/auth/login-register.html"
+                    class="btn btn__bg me-3"
+                  >
+                    <i class="fas fa-sign-in-alt"></i> Login Now
+                  </a>
+                  <a
+                    href="/html/common/homepage.html"
+                    class="btn btn-outline-primary"
+                  >
+                    <i class="fas fa-home"></i> Go to Homepage
+                  </a>
+                </div>
+
+                <div class="welcome-message mt-4">
+                  <h4>Welcome to Floda Flower Shop!</h4>
+                  <p>You can now:</p>
+                  <ul class="list-unstyled">
+                    <li>
+                      <i class="fas fa-check text-success"></i> Browse our
+                      beautiful flower collections
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Place orders and
+                      track deliveries
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Manage your
+                      account preferences
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Receive
+                      exclusive offers and updates
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- verification success area end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <div
+      hx-get="/html/components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></div>
+
+    <!-- Scroll to top start -->
+    <div class="scroll-top not-visible">
+      <i class="fa fa-angle-up"></i>
+    </div>
+    <!-- Scroll to Top End -->
+
+    <!-- All vendor & plugins & active js include here -->
+    <script src="/js/vendor.js"></script>
+    <script src="/js/active.js"></script>
+    <script src="/js/auth.js"></script>
+  </body>
+</html>

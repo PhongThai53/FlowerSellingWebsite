@@ -1,0 +1,61 @@
+# ========================================
+# Visual Studio
+# ========================================
+.vs/
+*.user
+*.suo
+*.vsidx
+
+# ========================================
+# Build output
+# ========================================
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# ========================================
+# ASP.NET & EF Core generated files
+# ========================================
+*.dbmdl
+*.dbproj.schemaview
+*.pdb
+*.cache
+*.log
+*.tlog
+*.tmp
+*.tmp_proj
+*.svclog
+
+# ========================================
+# Node.js / Frontend
+# ========================================
+node_modules/
+dist/
+.cache/
+
+# ========================================
+# IDE / Editor files
+# ========================================
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# ========================================
+# Secret or config files
+# ========================================
+secretsettings.json
+Backend/secretsettings.json
+
+# ========================================
+# OS-specific files
+# ========================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
