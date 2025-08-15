@@ -1,5 +1,7 @@
 using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
+using FlowerSellingWebsite.Infrastructure.Swagger;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Repositories.Implementations;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Implementations;
@@ -35,16 +37,23 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 // Repository Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
+builder.Services.AddSingleton<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSingleton<IPendingUserService, PendingUserService>();
 
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
+builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
+
+// AutoMapper configuration
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 // HTTP Context Accessor for current user access
 builder.Services.AddHttpContextAccessor();
@@ -114,6 +123,37 @@ builder.Services.AddSwaggerGen(options =>
     {
         options.IncludeXmlComments(xmlPath);
     }
+    
+    // Add JWT Authentication support for Swagger
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+
+    // Add operation filter to apply security requirements only to endpoints with [Authorize] attribute
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
 var app = builder.Build();

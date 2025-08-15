@@ -1,0 +1,24 @@
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: flowerselling-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=123abc@123
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - flowerselling-network
+
+networks:
+  flowerselling-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+    driver: local

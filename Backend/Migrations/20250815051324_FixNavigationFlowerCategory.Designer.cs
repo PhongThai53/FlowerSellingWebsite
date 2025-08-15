@@ -4,6 +4,7 @@ using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    partial class FlowerSellingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250815051324_FixNavigationFlowerCategory")]
+    partial class FixNavigationFlowerCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1129,44 +1132,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
-                            Description = "System Admin",
-                            IsDeleted = false,
-                            PublicId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
-                            Description = "System Users",
-                            IsDeleted = false,
-                            PublicId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            RoleName = "Users"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
-                            Description = "System Staff",
-                            IsDeleted = false,
-                            PublicId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            RoleName = "Staff"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
-                            Description = "System Supplier",
-                            IsDeleted = false,
-                            PublicId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            RoleName = "Supplier"
-                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListingPhotos", b =>

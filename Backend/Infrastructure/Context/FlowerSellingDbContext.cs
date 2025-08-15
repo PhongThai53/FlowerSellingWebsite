@@ -38,6 +38,8 @@ namespace FlowerSelling.Data
             public DbSet<PaymentMethods> PaymentMethods { get; set; }
             public DbSet<Payments> Payments { get; set; }
             public DbSet<Deliveries> Deliveries { get; set; }
+            public DbSet<Blog> Blogs { get; set; }
+            public DbSet<Comment> Comments { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
@@ -70,6 +72,8 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<PaymentMethods>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Payments>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Deliveries>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Comment>().HasQueryFilter(e => !e.IsDeleted);
 
                 // BaseEntity configurations - không config cho abstract class
                 // Các config này sẽ được inherit bởi các entity con
@@ -117,7 +121,44 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<Roles>()
                     .Property(e => e.Description)
                     .HasColumnType("nvarchar(200)");
-
+                modelBuilder.Entity<Roles>().HasData(
+    new Roles
+    {
+        Id = 1,
+        RoleName = "Admin",
+        Description = "System Admin",
+        PublicId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 2,
+        RoleName = "Users",
+        Description = "System Users",
+        PublicId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 3,
+        RoleName = "Staff",
+        Description = "System Staff",
+        PublicId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 4,
+        RoleName = "Supplier",
+        Description = "System Supplier",
+        PublicId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    }
+);
                 // Permissions
                 modelBuilder.Entity<Permissions>()
                     .Property(e => e.PermissionName)
@@ -688,6 +729,29 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<Deliveries>()
                     .Property(e => e.ShipperName)
                     .HasColumnType("nvarchar(200)");
+
+                // Relationships configuration
+                modelBuilder.Entity<Blog>()
+                    .HasOne(b => b.Category)
+                    .WithMany(c => c.Blogs)
+                    .HasForeignKey(b => b.CategoryId)
+                    .OnDelete(DeleteBehavior.NoAction); // Thay đổi từ NoAction thành Restrict để tránh lỗi
+
+                modelBuilder.Entity<Blog>()
+                    .HasOne(b => b.User)
+                    .WithMany()
+                    .HasForeignKey(b => b.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Parent)
+                    .WithMany(c => c.Children)
+                    .HasForeignKey(c => c.ParentId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Blog)
+                    .WithMany(b => b.Comments)
+                    .HasForeignKey(c => c.BlogId)
+                    .OnDelete(DeleteBehavior.NoAction);
             }
 
             public override int SaveChanges()
