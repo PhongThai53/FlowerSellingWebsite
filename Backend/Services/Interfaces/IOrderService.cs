@@ -3,7 +3,7 @@ using ProjectGreenLens.Services.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Interfaces
 {
-    public interface IOrderService : IBaseService<Models.Entities.Order>
+    public interface IOrderService : IBaseService<Models.Entities.Orders>
     {
         Task<PagedOrdersResultDTO> GetOrdersWithFiltersAsync(OrderFilterDTO filters);
         Task<OrderDTO> GetOrderByIdAsync(int id);

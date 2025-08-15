@@ -4,19 +4,19 @@ using ProjectGreenLens.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Interfaces
 {
-    public interface IOrderRepository : IBaseRepository<Order>
+    public interface IOrderRepository : IBaseRepository<Orders>
     {
-        Task<(IEnumerable<Order> orders, int totalCount)> GetOrdersWithFiltersAsync(OrderFilterDTO filters);
-        Task<Order?> GetOrderWithDetailsAsync(int id);
-        Task<Order?> GetOrderWithDetailsByPublicIdAsync(Guid publicId);
-        Task<OrderDetail?> GetOrderDetailAsync(int id);
-        Task<OrderDetail?> GetOrderDetailByPublicIdAsync(Guid publicId);
-        Task<IEnumerable<Order>> GetOrdersByCustomerIdAsync(int customerId);
-        Task<IEnumerable<Order>> GetOrdersBySupplierIdAsync(int supplierId);
-        Task<IEnumerable<Order>> GetOrdersByStatusAsync(string status);
+        Task<(IEnumerable<Orders> orders, int totalCount)> GetOrdersWithFiltersAsync(OrderFilterDTO filters);
+        Task<Orders?> GetOrderWithDetailsAsync(int id);
+        Task<Orders?> GetOrderWithDetailsByPublicIdAsync(Guid publicId);
+        Task<OrderDetails?> GetOrderDetailAsync(int id);
+        Task<OrderDetails?> GetOrderDetailByPublicIdAsync(Guid publicId);
+        Task<IEnumerable<Orders>> GetOrdersByCustomerIdAsync(int customerId);
+        Task<IEnumerable<Orders>> GetOrdersBySupplierIdAsync(int supplierId);
+        Task<IEnumerable<Orders>> GetOrdersByStatusAsync(string status);
         Task<bool> UpdateOrderStatusAsync(int id, string status);
-        Task<bool> AddOrderDetailAsync(OrderDetail orderDetail);
-        Task<bool> UpdateOrderDetailAsync(OrderDetail orderDetail);
+        Task<bool> AddOrderDetailAsync(OrderDetails orderDetail);
+        Task<bool> UpdateOrderDetailAsync(OrderDetails orderDetail);
         Task<bool> RemoveOrderDetailAsync(int orderDetailId);
     }
 }
