@@ -1,4 +1,4 @@
-﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
+using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
 
 namespace FlowerSellingWebsite.Infrastructure.DbContext

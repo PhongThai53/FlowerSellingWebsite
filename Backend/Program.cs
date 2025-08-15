@@ -3,8 +3,8 @@ using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Repositories.Implementations;
-using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Implementations;
+
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +37,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 // Repository Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -50,7 +50,7 @@ builder.Services.AddSingleton<IPendingUserService, PendingUserService>();
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
 builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // AutoMapper configuration
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -176,6 +176,8 @@ app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+
 
 // Make Swagger available in all environments
 app.UseSwagger();
