@@ -4,6 +4,7 @@ using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    partial class FlowerSellingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250815102445_UpdateBlogWithStatusAndCommentUpdates")]
+    partial class UpdateBlogWithStatusAndCommentUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -626,9 +629,6 @@ namespace FlowerSellingWebsite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ApprovedQuantity")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -638,26 +638,11 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<decimal?>("FinalAmount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal?>("FinalUnitPrice")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int?>("FlowerBatchId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ItemName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("LineTotal")
                         .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -671,24 +656,17 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierListingId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FlowerBatchId");
-
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("SupplierListingId");
 
                     b.ToTable("OrderDetails");
                 });
@@ -704,8 +682,8 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -713,23 +691,11 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("EstimatedTotalAmount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal?>("FinalTotalAmount")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSaleOrder")
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
@@ -738,35 +704,22 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("RequiredDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SupplierNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
-
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("SupplierId");
 
                     b.ToTable("Orders");
                 });
@@ -1572,10 +1525,6 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.OrderDetails", b =>
                 {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerBatches", "FlowerBatch")
-                        .WithMany()
-                        .HasForeignKey("FlowerBatchId");
-
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Orders", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
@@ -1588,42 +1537,20 @@ namespace FlowerSellingWebsite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.SupplierListings", "SupplierListing")
-                        .WithMany()
-                        .HasForeignKey("SupplierListingId");
-
-                    b.Navigation("FlowerBatch");
-
                     b.Navigation("Order");
 
                     b.Navigation("Product");
-
-                    b.Navigation("SupplierListing");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Orders", b =>
                 {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId");
-
-                    b.Navigation("CreatedByUser");
-
                     b.Navigation("Customer");
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Payments", b =>

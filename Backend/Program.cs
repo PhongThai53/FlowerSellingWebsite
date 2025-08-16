@@ -37,6 +37,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 // Repository Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // Application Services
@@ -45,12 +47,15 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddSingleton<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSingleton<IPendingUserService, PendingUserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
 builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
 
 // AutoMapper configuration
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
