@@ -38,7 +38,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Order
         public int? SupplierListingId { get; set; }
         public string? SupplierListingName { get; set; }
         public string ItemName { get; set; } = string.Empty;
-        public int RequestedQuantity { get; set; }
+        public int Quantity { get; set; }
         public int? ApprovedQuantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal? FinalUnitPrice { get; set; }
@@ -85,7 +85,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Order
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "RequestedQuantity must be positive")]
-        public int RequestedQuantity { get; set; }
+        public int Quantity { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "UnitPrice must be positive")]
@@ -114,7 +114,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Order
     public class UpdateOrderDetailDTO
     {
         [Range(1, int.MaxValue, ErrorMessage = "RequestedQuantity must be positive")]
-        public int? RequestedQuantity { get; set; }
+        public int? Quantity { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "ApprovedQuantity must be non-negative")]
         public int? ApprovedQuantity { get; set; }
