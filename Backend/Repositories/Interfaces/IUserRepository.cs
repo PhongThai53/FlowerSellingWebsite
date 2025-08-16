@@ -1,4 +1,5 @@
-﻿using FlowerSellingWebsite.Models.Entities;
+﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.Entities;
 
 namespace FlowerSellingWebsite.Repositories.Interfaces
 {
@@ -17,6 +18,7 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<bool> UsernameExistsAsync(string username);
 
         // Users management
+        Task<PagedResult<Users>> GetUsersAsync(UrlQueryParams urlQueryParams);
         Task<Users> CreateUserAsync(Users user);
         Task AddAsync(Users user);
         Task UpdateAsync(Users user);
