@@ -1,4 +1,5 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.Entities;
 
 namespace FlowerSellingWebsite.Services.Interfaces
 {
@@ -19,5 +20,7 @@ namespace FlowerSellingWebsite.Services.Interfaces
         // Email verification methods
         Task<bool> VerifyEmailAsync(string token);
         Task<bool> ResendVerificationEmailAsync(string email);
+        Task SendPasswordResetLinkAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

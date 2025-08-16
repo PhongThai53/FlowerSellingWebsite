@@ -14,6 +14,7 @@ class AuthManager {
       this.updateUserInterface();
       this.setupFormHandlers();
       this.setupPasswordValidation();
+      this.setupForgotPasswordFormToggle();
     };
 
     // Run on initial page load
@@ -46,7 +47,9 @@ class AuthManager {
       // Only handle responses from the login or register forms
       if (
         event.target.id === "login-form" ||
-        event.target.id === "register-form"
+        event.target.id === "register-form" ||
+        event.target.id === "forgot-password-form" ||
+        event.target.id === "reset-password-form"
       ) {
         this.hideLoadingState(event.target);
         this.handleAuthResponse(event);
@@ -56,68 +59,73 @@ class AuthManager {
 
   handleAuthResponse(event) {
     try {
-      const response = JSON.parse(event.detail.xhr.responseText);
-      const formType = event.target.id === "login-form" ? "login" : "register";
-      const responseContainer =
-        formType === "login" ? "#login-response" : "#register-response";
+      const contentType = event.detail.xhr.getResponseHeader("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        const response = JSON.parse(event.detail.xhr.responseText);
+        const formType =
+          event.target.id === "login-form" ? "login" : "register";
+        const responseContainer =
+          formType === "login" ? "#login-response" : "#register-response";
 
-      if (event.detail.failed) {
-        // This handles server-side validation errors (e.g., 400 Bad Request)
-        let errorMessage = "An error occurred. Please check your input.";
-        if (response && response.errors) {
-          errorMessage = "<ul>";
-          // response.errors is an object like {"Email": ["error1"], "Password": ["error2"]}
-          for (const key in response.errors) {
-            if (response.errors.hasOwnProperty(key)) {
-              response.errors[key].forEach((error) => {
-                errorMessage += `<li>${error}</li>`;
-              });
+        if (event.detail.failed) {
+          // This handles server-side validation errors (e.g., 400 Bad Request)
+          let errorMessage = "An error occurred. Please check your input.";
+          if (response && response.errors) {
+            errorMessage = "<ul>";
+            // response.errors is an object like {"Email": ["error1"], "Password": ["error2"]}
+            for (const key in response.errors) {
+              if (response.errors.hasOwnProperty(key)) {
+                response.errors[key].forEach((error) => {
+                  errorMessage += `<li>${error}</li>`;
+                });
+              }
             }
+            errorMessage += "</ul>";
+          } else if (response && response.message) {
+            errorMessage = response.message;
           }
-          errorMessage += "</ul>";
-        } else if (response && response.message) {
-          errorMessage = response.message;
-        }
-        this.showErrorMessage(responseContainer, errorMessage);
-      } else if (response.succeeded && response.data) {
-        // This handles successful responses
-        if (formType === "login") {
-          this.setAuthData(response.data.token, response.data.user);
-        }
+          this.showErrorMessage(responseContainer, errorMessage);
+        } else if (response.succeeded && response.data) {
+          // This handles successful responses
+          if (formType === "login") {
+            this.setAuthData(response.data.token, response.data.user);
+          }
 
-        this.showSuccessMessage(responseContainer, response.message);
+          this.showSuccessMessage(responseContainer, response.message);
 
-        if (formType === "login") {
-          setTimeout(() => {
-            window.location.href = "/html/common/homepage.html";
-          }, 1500);
+          if (formType === "login") {
+            setTimeout(() => {
+              window.location.href = "/html/common/homepage.html";
+            }, 1500);
+          } else {
+            // Registration successful - show email verification message
+            const verificationMessage = `
+              <div class="alert alert-info">
+                <h5><i class="fas fa-envelope"></i> Registration Successful!</h5>
+                <p><strong>Please check your email inbox to verify your account.</strong></p>
+                <p>We've sent a verification link to your email address. Click the link to activate your account and complete the registration process.</p>
+                <p class="mb-0"><small>Didn't receive the email? Check your spam folder or <a href="/html/auth/verification-failed.html">request a new verification email</a>.</small></p>
+              </div>
+            `;
+            this.showSuccessMessage(responseContainer, verificationMessage);
+
+            // Clear the form fields on successful registration
+            event.target.reset();
+          }
         } else {
-          // Registration successful - show email verification message
-          const verificationMessage = `
-            <div class="alert alert-info">
-              <h5><i class="fas fa-envelope"></i> Registration Successful!</h5>
-              <p><strong>Please check your email inbox to verify your account.</strong></p>
-              <p>We've sent a verification link to your email address. Click the link to activate your account and complete the registration process.</p>
-              <p class="mb-0"><small>Didn't receive the email? Check your spam folder or <a href="/html/auth/verification-failed.html">request a new verification email</a>.</small></p>
-            </div>
-          `;
-          this.showSuccessMessage(responseContainer, verificationMessage);
-
-          // Clear the form fields on successful registration
-          event.target.reset();
+          // This handles cases where Succeeded is false but not a 4xx/5xx error
+          let errorMessage = response.message || "Authentication failed.";
+          if (response.errors && response.errors.length > 0) {
+            errorMessage += "<ul>";
+            response.errors.forEach((error) => {
+              errorMessage += `<li>${error}</li>`;
+            });
+            errorMessage += "</ul>";
+          }
+          this.showErrorMessage(responseContainer, errorMessage);
         }
-      } else {
-        // This handles cases where Succeeded is false but not a 4xx/5xx error
-        let errorMessage = response.message || "Authentication failed.";
-        if (response.errors && response.errors.length > 0) {
-          errorMessage += "<ul>";
-          response.errors.forEach((error) => {
-            errorMessage += `<li>${error}</li>`;
-          });
-          errorMessage += "</ul>";
-        }
-        this.showErrorMessage(responseContainer, errorMessage);
       }
+      // If the response is HTML, do nothing and let HTMX handle the swap.
     } catch (error) {
       console.error("Error parsing auth response:", error);
       this.showErrorMessage(
@@ -129,15 +137,39 @@ class AuthManager {
     }
   }
 
+  setupForgotPasswordFormToggle() {
+    const forgotPasswordLink = document.getElementById("forgot-password-link");
+    const backToLoginLink = document.getElementById("back-to-login-link");
+    const loginFormContainer = document.getElementById("login-form-container");
+    const forgotPasswordContainer = document.getElementById(
+      "forgot-password-container"
+    );
+
+    if (
+      forgotPasswordLink &&
+      backToLoginLink &&
+      loginFormContainer &&
+      forgotPasswordContainer
+    ) {
+      forgotPasswordLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginFormContainer.style.display = "none";
+        forgotPasswordContainer.style.display = "block";
+      });
+
+      backToLoginLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginFormContainer.style.display = "block";
+        forgotPasswordContainer.style.display = "none";
+      });
+    }
+  }
+
   // Show loading state on form submission
   showLoadingState(form) {
     const submitBtn = form.querySelector('button[type="submit"]');
-    const textSpan = submitBtn.querySelector(
-      ".login-btn-text, .register-btn-text"
-    );
-    const loadingSpan = submitBtn.querySelector(
-      ".login-btn-loading, .register-btn-loading"
-    );
+    const textSpan = submitBtn.querySelector(".btn-text");
+    const loadingSpan = submitBtn.querySelector(".btn-loading");
 
     if (textSpan && loadingSpan) {
       textSpan.style.display = "none";
@@ -151,7 +183,12 @@ class AuthManager {
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) {
       submitButton.disabled = false;
-      submitButton.innerHTML = form.id === "login-form" ? "Login" : "Register";
+      const textSpan = submitButton.querySelector(".btn-text");
+      const loadingSpan = submitButton.querySelector(".btn-loading");
+      if (textSpan && loadingSpan) {
+        textSpan.style.display = "inline";
+        loadingSpan.style.display = "none";
+      }
     }
   }
 
@@ -273,46 +310,65 @@ class AuthManager {
 
   validateForm(form) {
     let isValid = true;
-    const responseContainer =
-      form.id === "login-form" ? "#login-response" : "#register-response";
-    this.hideFieldError(responseContainer); // Clear previous errors
+    const responseContainerId = `#${form.id.replace("form", "response")}`;
+    const responseContainer = form.querySelector(responseContainerId);
 
-    const inputs = form.querySelectorAll("input[required]");
-    let errorMessages = [];
+    // Clear previous errors
+    if (responseContainer) {
+      responseContainer.style.display = "none";
+      responseContainer.innerHTML = "";
+    }
 
-    inputs.forEach((input) => {
-      const value = input.value.trim();
-      if (!value) {
-        isValid = false;
-        errorMessages.push(`${input.placeholder} is required.`);
-      }
-
-      // Specific validations
-      if (input.name === "email" && value) {
-        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-        if (!emailRegex.test(value)) {
-          isValid = false;
-          errorMessages.push("Please enter a valid email address.");
-        }
-      }
-
-      if (input.name === "password" && value) {
-        if (value.length < 6) {
-          isValid = false;
-          errorMessages.push("Password must be at least 6 characters long.");
-        }
-      }
-    });
-
-    // Password confirmation check for register form
-    if (form.id === "register-form") {
-      const password = form.querySelector('input[name="password"]').value;
+    if (form.id === "reset-password-form") {
+      const newPassword = form.querySelector('input[name="NewPassword"]').value;
       const confirmPassword = form.querySelector(
-        'input[name="confirmPassword"]'
+        'input[name="ConfirmPassword"]'
       ).value;
-      if (password !== confirmPassword) {
+
+      if (newPassword.length < 6) {
+        isValid = false;
+        errorMessages.push("Password must be at least 6 characters long.");
+      }
+      if (newPassword !== confirmPassword) {
         isValid = false;
         errorMessages.push("Passwords do not match.");
+      }
+    } else {
+      const inputs = form.querySelectorAll("input[required]");
+      inputs.forEach((input) => {
+        const value = input.value.trim();
+        if (!value) {
+          isValid = false;
+          errorMessages.push(`${input.placeholder} is required.`);
+        }
+
+        // Specific validations for login/register
+        if (input.name === "email" && value) {
+          const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+          if (!emailRegex.test(value)) {
+            isValid = false;
+            errorMessages.push("Please enter a valid email address.");
+          }
+        }
+
+        if (input.name === "password" && value) {
+          if (value.length < 6) {
+            isValid = false;
+            errorMessages.push("Password must be at least 6 characters long.");
+          }
+        }
+      });
+
+      // Password confirmation check for register form
+      if (form.id === "register-form") {
+        const password = form.querySelector('input[name="password"]').value;
+        const confirmPassword = form.querySelector(
+          'input[name="confirmPassword"]'
+        ).value;
+        if (password !== confirmPassword) {
+          isValid = false;
+          errorMessages.push("Passwords do not match.");
+        }
       }
     }
 
@@ -322,7 +378,7 @@ class AuthManager {
         errorMessage += `<li>${error}</li>`;
       });
       errorMessage += "</ul>";
-      this.showErrorMessage(responseContainer, errorMessage);
+      this.showErrorMessage(responseContainerId, errorMessage);
     }
 
     return isValid;

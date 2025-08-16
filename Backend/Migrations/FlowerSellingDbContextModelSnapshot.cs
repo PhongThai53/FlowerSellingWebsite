@@ -22,6 +22,117 @@ namespace FlowerSellingWebsite.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.PrimitiveCollection<string>("Images")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHide")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Deliveries", b =>
                 {
                     b.Property<int>("Id")
@@ -381,6 +492,9 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("FlowerCategoriesId")
+                        .HasColumnType("int");
+
                     b.Property<int>("FlowerId")
                         .HasColumnType("int");
 
@@ -405,6 +519,8 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FlowerCategoriesId");
 
                     b.HasIndex("FlowerId");
 
@@ -510,6 +626,9 @@ namespace FlowerSellingWebsite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ApprovedQuantity")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -519,11 +638,26 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<decimal?>("FinalAmount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal?>("FinalUnitPrice")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int?>("FlowerBatchId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ItemName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("LineTotal")
                         .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -537,17 +671,24 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SupplierListingId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FlowerBatchId");
+
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("SupplierListingId");
 
                     b.ToTable("OrderDetails");
                 });
@@ -563,8 +704,8 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -572,11 +713,23 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("EstimatedTotalAmount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal?>("FinalTotalAmount")
+                        .HasColumnType("decimal(18, 2)");
+
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSaleOrder")
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
@@ -585,22 +738,35 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("RequiredDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SupplierNotes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("SupplierId");
 
                     b.ToTable("Orders");
                 });
@@ -1017,6 +1183,44 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
+                            Description = "System Admin",
+                            IsDeleted = false,
+                            PublicId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
+                            Description = "System Users",
+                            IsDeleted = false,
+                            PublicId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            RoleName = "Users"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
+                            Description = "System Staff",
+                            IsDeleted = false,
+                            PublicId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            RoleName = "Staff"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2025, 8, 15, 14, 22, 51, 987, DateTimeKind.Unspecified).AddTicks(6543),
+                            Description = "System Supplier",
+                            IsDeleted = false,
+                            PublicId = new Guid("44444444-4444-4444-4444-444444444444"),
+                            RoleName = "Supplier"
+                        });
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListingPhotos", b =>
@@ -1210,6 +1414,51 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
+                {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", "Category")
+                        .WithMany("Blogs")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Comment", b =>
+                {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Blog", "Blog")
+                        .WithMany("Comments")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Comment", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Blog");
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Deliveries", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Orders", "Order")
@@ -1283,6 +1532,10 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
                 {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", null)
+                        .WithMany("FlowerPricings")
+                        .HasForeignKey("FlowerCategoriesId");
+
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
                         .WithMany("FlowerPricings")
                         .HasForeignKey("FlowerId")
@@ -1319,6 +1572,10 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.OrderDetails", b =>
                 {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerBatches", "FlowerBatch")
+                        .WithMany()
+                        .HasForeignKey("FlowerBatchId");
+
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Orders", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
@@ -1331,20 +1588,42 @@ namespace FlowerSellingWebsite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.SupplierListings", "SupplierListing")
+                        .WithMany()
+                        .HasForeignKey("SupplierListingId");
+
+                    b.Navigation("FlowerBatch");
+
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+
+                    b.Navigation("SupplierListing");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Orders", b =>
                 {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId");
+
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Payments", b =>
@@ -1478,6 +1757,16 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Comment", b =>
+                {
+                    b.Navigation("Children");
+                });
+
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerBatches", b =>
                 {
                     b.Navigation("FlowerDamageLogs");
@@ -1485,6 +1774,10 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerCategories", b =>
                 {
+                    b.Navigation("Blogs");
+
+                    b.Navigation("FlowerPricings");
+
                     b.Navigation("Flowers");
                 });
 

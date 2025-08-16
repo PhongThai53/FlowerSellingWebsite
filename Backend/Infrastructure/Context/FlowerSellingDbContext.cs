@@ -2,10 +2,10 @@
 
 namespace FlowerSelling.Data
 {
-    using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
     namespace FlowerSellingWebsite.Data
-    {
+{
         public class FlowerSellingDbContext : DbContext
         {
             public FlowerSellingDbContext(DbContextOptions<FlowerSellingDbContext> options) : base(options)
@@ -38,6 +38,8 @@ namespace FlowerSelling.Data
             public DbSet<PaymentMethods> PaymentMethods { get; set; }
             public DbSet<Payments> Payments { get; set; }
             public DbSet<Deliveries> Deliveries { get; set; }
+            public DbSet<Blog> Blogs { get; set; }
+            public DbSet<Comment> Comments { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
@@ -70,6 +72,8 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<PaymentMethods>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Payments>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Deliveries>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Comment>().HasQueryFilter(e => !e.IsDeleted);
 
                 // BaseEntity configurations - không config cho abstract class
                 // Các config này sẽ được inherit bởi các entity con
@@ -117,7 +121,44 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<Roles>()
                     .Property(e => e.Description)
                     .HasColumnType("nvarchar(200)");
-
+                modelBuilder.Entity<Roles>().HasData(
+    new Roles
+    {
+        Id = 1,
+        RoleName = "Admin",
+        Description = "System Admin",
+        PublicId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 2,
+        RoleName = "Users",
+        Description = "System Users",
+        PublicId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 3,
+        RoleName = "Staff",
+        Description = "System Staff",
+        PublicId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    },
+    new Roles
+    {
+        Id = 4,
+        RoleName = "Supplier",
+        Description = "System Supplier",
+        PublicId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
+        IsDeleted = false
+    }
+);
                 // Permissions
                 modelBuilder.Entity<Permissions>()
                     .Property(e => e.PermissionName)
@@ -570,7 +611,7 @@ namespace FlowerSelling.Data
                     .IsRequired();
 
                 modelBuilder.Entity<Orders>()
-                    .Property(e => e.CreatedDate)
+                    .Property(e => e.OrderDate)
                     .HasColumnType("datetime2")
                     .IsRequired();
 
@@ -688,6 +729,106 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<Deliveries>()
                     .Property(e => e.ShipperName)
                     .HasColumnType("nvarchar(200)");
+
+                // Relationships configuration
+                // Blog configurations
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Title)
+                    .HasColumnType("nvarchar(250)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Content)
+                    .HasColumnType("nvarchar(max)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Tags)
+                    .HasColumnType("nvarchar(1000)");
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.Status)
+                    .HasColumnType("int")
+                    .IsRequired();
+
+                modelBuilder.Entity<Blog>()
+                    .Property(b => b.RejectionReason)
+                    .HasColumnType("nvarchar(500)");
+
+                modelBuilder.Entity<Blog>()
+                    .HasOne(b => b.Category)
+                    .WithMany(c => c.Blogs)
+                    .HasForeignKey(b => b.CategoryId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                modelBuilder.Entity<Blog>()
+                    .HasOne(b => b.User)
+                    .WithMany()
+                    .HasForeignKey(b => b.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // Comment configurations
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.Content)
+                    .HasColumnType("nvarchar(max)")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.IsHide)
+                    .HasColumnType("bit")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .Property(c => c.UserId)
+                    .HasColumnType("int")
+                    .IsRequired();
+
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Parent)
+                    .WithMany(c => c.Children)
+                    .HasForeignKey(c => c.ParentId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Blog)
+                    .WithMany(b => b.Comments)
+                    .HasForeignKey(c => c.BlogId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // A user can be a customer for many orders.
+                modelBuilder.Entity<Orders>()
+                    .HasOne(o => o.Customer)
+                    .WithMany(u => u.Orders) // The collection in the Users entity.
+                    .HasForeignKey(o => o.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // A user can create many orders.
+                // This relationship does not have a corresponding collection in the Users entity.
+                modelBuilder.Entity<Orders>()
+                    .HasOne(o => o.CreatedByUser)
+                    .WithMany() // No corresponding collection navigation property.
+                    .HasForeignKey(o => o.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Configure decimal precision
+                modelBuilder.Entity<Orders>(entity =>
+                {
+                    entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.EstimatedTotalAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalTotalAmount).HasColumnType("decimal(18, 2)");
+                });
+
+                modelBuilder.Entity<OrderDetails>(entity =>
+                {
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalUnitPrice).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalAmount).HasColumnType("decimal(18, 2)");
+                });
             }
 
             public override int SaveChanges()
@@ -704,30 +845,32 @@ namespace FlowerSelling.Data
 
             private void UpdateTimestamps()
             {
-                var entries = ChangeTracker.Entries<BaseEntity>();
+                var entries = ChangeTracker.Entries().Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
 
                 foreach (var entry in entries)
                 {
+                    var baseEntity = (BaseEntity)entry.Entity;
+
                     switch (entry.State)
                     {
                         case EntityState.Added:
-                            entry.Entity.CreatedAt = DateTime.UtcNow;
-                            entry.Entity.PublicId = Guid.NewGuid();
+                            baseEntity.CreatedAt = DateTime.UtcNow;
+                            baseEntity.PublicId = Guid.NewGuid();
                             break;
 
                         case EntityState.Modified:
-                            entry.Entity.UpdatedAt = DateTime.UtcNow;
+                            baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
 
                         case EntityState.Deleted:
                             entry.State = EntityState.Modified;
-                            entry.Entity.IsDeleted = true;
-                            entry.Entity.DeletedAt = DateTime.UtcNow;
-                            entry.Entity.UpdatedAt = DateTime.UtcNow;
+                            baseEntity.IsDeleted = true;
+                            baseEntity.DeletedAt = DateTime.UtcNow;
+                            baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
+                    }
                     }
                 }
             }
         }
     }
-}
