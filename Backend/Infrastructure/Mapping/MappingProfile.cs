@@ -1,4 +1,5 @@
 using AutoMapper;
+using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.Entities;
 
@@ -35,6 +36,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<CreateOrderDetailDTO, OrderDetails>();
             CreateMap<UpdateOrderDetailDTO, OrderDetails>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Users, UserDTO>().ReverseMap();
         }
     }
 }

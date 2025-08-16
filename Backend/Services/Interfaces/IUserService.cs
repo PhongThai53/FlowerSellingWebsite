@@ -13,6 +13,8 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<UserDTO> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO request);
         Task<bool> DeleteUserAsync(Guid publicId);
         Task<bool> ChangePasswordAsync(Guid publicId, ChangePasswordRequestDTO request);
+
+        Task<PagedResult<UserDTO>> GetUsersAsync(UrlQueryParams urlQueryParams);
         Task<IEnumerable<UserDTO>> GetUsersAsync(int page = 1, int pageSize = 10, string? search = null, string? role = null);
         Task<bool> ActivateUserAsync(Guid publicId);
         Task<bool> DeactivateUserAsync(Guid publicId);
