@@ -1,10 +1,9 @@
 using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
-using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Repositories.Implementations;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Implementations;
-
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +39,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -52,6 +52,7 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
@@ -120,7 +121,7 @@ builder.Services.AddSwaggerGen(options =>
             Email = "admin@flowershop.com"
         }
     });
-    
+
     // Enable XML comments
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -128,7 +129,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         options.IncludeXmlComments(xmlPath);
     }
-    
+
     // Add JWT Authentication support for Swagger
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
@@ -165,14 +166,14 @@ var app = builder.Build();
 
 
 // Seed Data
-/*
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
-    await db.Database.MigrateAsync();
-    SeedData.Initialize(db);
-}
-*/
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+//    await db.Database.MigrateAsync();
+//    SeedData.Initialize(db);
+//}
+
 
 
 // Middleware

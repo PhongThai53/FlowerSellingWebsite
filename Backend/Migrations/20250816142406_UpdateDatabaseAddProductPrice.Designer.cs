@@ -4,6 +4,7 @@ using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    partial class FlowerSellingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250816142406_UpdateDatabaseAddProductPrice")]
+    partial class UpdateDatabaseAddProductPrice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -894,42 +897,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductCategories", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProductCategories");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductFlowers", b =>
                 {
                     b.Property<int>("Id")
@@ -1055,8 +1022,8 @@ namespace FlowerSellingWebsite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1084,8 +1051,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
@@ -1725,17 +1690,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Products", b =>
-                {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.ProductCategories", "ProductCategories")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductCategories");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.PurchaseOrderDetails", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
@@ -1887,11 +1841,6 @@ namespace FlowerSellingWebsite.Migrations
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Permissions", b =>
                 {
                     b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductCategories", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Products", b =>

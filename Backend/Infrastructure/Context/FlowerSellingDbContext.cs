@@ -2,10 +2,10 @@
 
 namespace FlowerSelling.Data
 {
-using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
 
     namespace FlowerSellingWebsite.Data
-{
+    {
         public class FlowerSellingDbContext : DbContext
         {
             public FlowerSellingDbContext(DbContextOptions<FlowerSellingDbContext> options) : base(options)
@@ -40,6 +40,8 @@ using Microsoft.EntityFrameworkCore;
             public DbSet<Deliveries> Deliveries { get; set; }
             public DbSet<Blog> Blogs { get; set; }
             public DbSet<Comment> Comments { get; set; }
+            public DbSet<ProductPriceHistories> ProductPriceHistories { get; set; }
+            public DbSet<ProductCategories> ProductCategories { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
@@ -74,6 +76,8 @@ using Microsoft.EntityFrameworkCore;
                 modelBuilder.Entity<Deliveries>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Comment>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<ProductPriceHistories>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<ProductCategories>().HasQueryFilter(e => !e.IsDeleted);
 
                 // BaseEntity configurations - không config cho abstract class
                 // Các config này sẽ được inherit bởi các entity con
@@ -121,44 +125,6 @@ using Microsoft.EntityFrameworkCore;
                 modelBuilder.Entity<Roles>()
                     .Property(e => e.Description)
                     .HasColumnType("nvarchar(200)");
-                modelBuilder.Entity<Roles>().HasData(
-    new Roles
-    {
-        Id = 1,
-        RoleName = "Admin",
-        Description = "System Admin",
-        PublicId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
-        IsDeleted = false
-    },
-    new Roles
-    {
-        Id = 2,
-        RoleName = "Users",
-        Description = "System Users",
-        PublicId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
-        IsDeleted = false
-    },
-    new Roles
-    {
-        Id = 3,
-        RoleName = "Staff",
-        Description = "System Staff",
-        PublicId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
-        IsDeleted = false
-    },
-    new Roles
-    {
-        Id = 4,
-        RoleName = "Supplier",
-        Description = "System Supplier",
-        PublicId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-        CreatedAt = DateTime.Parse("2025-08-15 14:22:51.9876543"),
-        IsDeleted = false
-    }
-);
                 // Permissions
                 modelBuilder.Entity<Permissions>()
                     .Property(e => e.PermissionName)
@@ -433,9 +399,25 @@ using Microsoft.EntityFrameworkCore;
                     .Property(e => e.Description)
                     .HasColumnType("nvarchar(1000)");
 
+
                 modelBuilder.Entity<Products>()
-                    .Property(e => e.Category)
-                    .HasColumnType("nvarchar(100)");
+                    .HasMany(p => p.PriceHistories)
+                    .WithOne(ph => ph.Products)
+                    .HasForeignKey(ph => ph.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // ProductCategories
+                // Category - Product (1-n)
+                modelBuilder.Entity<ProductCategories>()
+                    .HasMany(c => c.Products)
+                    .WithOne(p => p.ProductCategories)
+                    .HasForeignKey(p => p.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Product History
+                modelBuilder.Entity<ProductPriceHistories>()
+                    .Property(ph => ph.Price)
+                    .HasColumnType("decimal(18,2)");
 
                 // ProductPhotos
                 modelBuilder.Entity<ProductPhotos>()
@@ -869,8 +851,8 @@ using Microsoft.EntityFrameworkCore;
                             baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
                     }
-                    }
                 }
             }
         }
     }
+}

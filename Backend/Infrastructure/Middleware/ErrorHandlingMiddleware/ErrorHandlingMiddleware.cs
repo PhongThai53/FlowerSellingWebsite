@@ -50,6 +50,20 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
 
                 await WriteJsonResponse(context, response);
             }
+            catch (KeyNotFoundException nfex)
+            {
+                _logger.LogWarning(nfex, "Resource not found");
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+
+                var response = ApiResponse<object>.Fail(
+                    "Resource not found",
+                    new List<string> { nfex.Message }
+                );
+
+                await WriteJsonResponse(context, response);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception");

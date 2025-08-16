@@ -6,6 +6,7 @@
         public const string User = "Users";
         public const string Staff = "Staff";
         public const string Supplier = "Supplier";
+        public const string Guest = "Guest";
     }
     public static class Permissions
     {
@@ -14,7 +15,6 @@
         public const string CreateUsers = "users.create";
         public const string UpdateUsers = "users.update";
         public const string DeleteUsers = "users.delete";
-
         // Order Management
         public const string ViewAllOrders = "orders.view.all";
         public const string ViewOwnOrders = "orders.view.own";
@@ -23,25 +23,21 @@
         public const string UpdateOrders = "orders.update";
         public const string DeleteOrders = "orders.delete";
         public const string AssignOrders = "orders.assign";
-
         // Product Management
         public const string ViewProducts = "products.view";
         public const string CreateProducts = "products.create";
         public const string UpdateProducts = "products.update";
         public const string DeleteProducts = "products.delete";
         public const string ManageStock = "products.stock.manage";
-
         // Supplier Management
         public const string ViewSuppliers = "suppliers.view";
         public const string CreateSuppliers = "suppliers.create";
         public const string UpdateSuppliers = "suppliers.update";
         public const string DeleteSuppliers = "suppliers.delete";
-
         // Report
         public const string ViewReports = "reports.view";
         public const string ExportReports = "reports.export";
     }
-
     public static class RolePermissions
     {
         public static IReadOnlyDictionary<string, IReadOnlyList<string>> DefaultRolePermissions { get; } = new Dictionary<string, IReadOnlyList<string>>
@@ -89,6 +85,10 @@
                     Permissions.UpdateProducts,
                     Permissions.ManageStock,
                     Permissions.ViewReports
+                },
+            [Roles.Guest] = new List<string>
+                {
+                    Permissions.ViewProducts
                 }
         };
     }
