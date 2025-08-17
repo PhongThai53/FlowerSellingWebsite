@@ -1,14 +1,16 @@
-using FlowerSelling.Data.FlowerSellingWebsite.Data;
+﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
-using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Repositories.Implementations;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Implementations;
-
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using ProjectGreenLens.Repositories.Implementations;
+using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
@@ -35,6 +37,7 @@ builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Repository Services
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
@@ -42,8 +45,10 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 //builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 // Application Services
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
@@ -54,15 +59,17 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+// Application Services
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
 builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
 
-// AutoMapper configuration
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-// HTTP Context Accessor for current user access
+// HTTP Context Accessor
 builder.Services.AddHttpContextAccessor();
 
 // Authentication
@@ -89,26 +96,30 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-
-
-// CORS Configuration
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:5062", "http://127.0.0.1:5062", "http://localhost:5081", "http://127.0.0.1:5081")
+        builder.WithOrigins(
+            "http://localhost:3000",
+            "http://127.0.0.1:5500",
+            "http://localhost:5500",
+            "http://localhost:5062",
+            "http://127.0.0.1:5062",
+            "http://localhost:5081",
+            "http://127.0.0.1:5081")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials()
-               .SetIsOriginAllowed(origin => true); // Allow any origin for development
+               .SetIsOriginAllowed(origin => true); // development
     });
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Enhanced Swagger configuration
+// Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -122,16 +133,16 @@ builder.Services.AddSwaggerGen(options =>
             Email = "admin@flowershop.com"
         }
     });
-    
-    // Enable XML comments
+
+    // XML comments
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath);
     }
-    
-    // Add JWT Authentication support for Swagger
+
+    // JWT support
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -159,44 +170,49 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Add operation filter to apply security requirements only to endpoints with [Authorize] attribute
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
 var app = builder.Build();
 
-
-// Seed Data
-/*
-using (var scope = app.Services.CreateScope())
+// Serve Static file
+app.UseStaticFiles(new StaticFileOptions
 {
-    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
-    await db.Database.MigrateAsync();
-    SeedData.Initialize(db);
-}
-*/
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Image")), // Đường dẫn đến folder Image
+    RequestPath = "/Image" // URL path để access files
+});
+// Middleware order
 
-
-// Middleware
-app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseCors("AllowFrontend");
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-
-
-
-// Make Swagger available in all environments
+// Swagger first (not wrapped)
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Flower Selling Website API v1");
     options.RoutePrefix = "swagger";
     options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-    options.DefaultModelsExpandDepth(0); // Hide schemas section by default
+    options.DefaultModelsExpandDepth(0);
+});
+
+app.UseCors("AllowFrontend");
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Error handling for API only
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"), appBuilder =>
+{
+    appBuilder.UseMiddleware<ErrorHandlingMiddleware>();
 });
 
 app.MapControllers();
 
+// Optional: Seed Data
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+//    await db.Database.MigrateAsync();
+//    SeedData.Initialize(db);
+//}
 
 app.Run();
