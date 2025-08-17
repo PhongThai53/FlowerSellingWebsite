@@ -9,14 +9,14 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<(IEnumerable<Orders> orders, int totalCount)> GetOrdersWithFiltersAsync(OrderFilterDTO filters);
         Task<Orders?> GetOrderWithDetailsAsync(int id);
         Task<Orders?> GetOrderWithDetailsByPublicIdAsync(Guid publicId);
-        Task<OrderDetails?> GetOrderDetailAsync(int id);
-        Task<OrderDetails?> GetOrderDetailByPublicIdAsync(Guid publicId);
+        Task<OrderDetails?> GetOrderDetailsAsync(int id);
+        Task<OrderDetails?> GetOrderDetailsByPublicIdAsync(Guid publicId);
         Task<IEnumerable<Orders>> GetOrdersByCustomerIdAsync(int customerId);
         Task<IEnumerable<Orders>> GetOrdersBySupplierIdAsync(int supplierId);
         Task<IEnumerable<Orders>> GetOrdersByStatusAsync(string status);
         Task<bool> UpdateOrderStatusAsync(int id, string status);
-        Task<bool> AddOrderDetailAsync(OrderDetails orderDetail);
-        Task<bool> UpdateOrderDetailAsync(OrderDetails orderDetail);
-        Task<bool> RemoveOrderDetailAsync(int orderDetailId);
+        Task<bool> AddOrderDetailsAsync(OrderDetails orderDetail);
+        Task<bool> UpdateOrderDetailsAsync(OrderDetails orderDetail);
+        Task<bool> RemoveOrderDetailsAsync(int orderDetailId);
     }
 }

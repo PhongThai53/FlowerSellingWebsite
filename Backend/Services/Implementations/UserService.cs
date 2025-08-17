@@ -1,3 +1,4 @@
+using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
@@ -18,6 +19,8 @@ namespace FlowerSellingWebsite.Services.Implementations
         private readonly IPendingUserService _pendingUserService;
         private readonly IPasswordResetService _passwordResetService;
 
+        private readonly IMapper _mapper;
+
         public UserService(
             IUserRepository userRepository,
             IJwtService jwtService,
@@ -26,7 +29,8 @@ namespace FlowerSellingWebsite.Services.Implementations
             IEmailService emailService,
             IEmailVerificationService verificationService,
             IPendingUserService pendingUserService,
-            IPasswordResetService passwordResetService)
+            IPasswordResetService passwordResetService,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -36,6 +40,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             _verificationService = verificationService;
             _pendingUserService = pendingUserService;
             _passwordResetService = passwordResetService;
+            _mapper = mapper;
         }
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -302,6 +307,29 @@ namespace FlowerSellingWebsite.Services.Implementations
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing password for user: {PublicId}", publicId);
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<UserDTO>> GetUsersAsync(UrlQueryParams urlQueryParams)
+        {
+            try
+            {
+                var users = await _userRepository.GetUsersAsync(urlQueryParams);
+
+                return new PagedResult<UserDTO>
+                {
+                    Page = users.Page,
+                    PageSize = users.PageSize,
+                    TotalItems = users.TotalItems,
+                    TotalPages = users.TotalPages,
+                    Items = _mapper.Map<List<UserDTO>>(users.Items)
+                };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users list");
                 throw;
             }
         }

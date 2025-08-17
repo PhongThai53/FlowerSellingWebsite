@@ -1,6 +1,8 @@
 ﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
+using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
@@ -60,6 +62,73 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .ThenInclude(r => r.RolePermissions)
                 .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(u => u.PublicId == publicId && !u.IsDeleted);
+        }
+
+
+        // Admin
+        public async Task<PagedResult<Users>> GetUsersAsync(UrlQueryParams urlQueryParams)
+        {
+            var query = _context.Users.Include(u => u.Role).AsQueryable();
+
+            //Search value
+            if (!string.IsNullOrWhiteSpace(urlQueryParams.SearchBy))
+            {
+                //Allow for search by fullname || username || email
+                if (!string.IsNullOrEmpty(urlQueryParams.SearchValue)){
+                    query = urlQueryParams.SearchBy switch
+                    {
+                        "fullname" => query.Where(x => x.FullName == urlQueryParams.SearchValue),
+                        "username" => query.Where(x => x.UserName == urlQueryParams.SearchValue),
+                        "email" => query.Where(x => x.Email == urlQueryParams.SearchValue),
+                        //Add more search field
+                        _ => query
+                    };
+                }
+            }
+
+            //Filter properties
+            //Allow to filter by role
+            if(urlQueryParams.FilterParams != null && urlQueryParams.FilterParams.Count > 0)
+            {
+                foreach(var item in urlQueryParams.FilterParams)
+                {
+                    query = item.Key switch
+                    {
+                        "role" => query.Where(x => x.Role.RoleName == item.Value),
+                        //Add more properties for filter
+                        _ => query
+                    };
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(urlQueryParams.SortBy))
+            {
+                query = urlQueryParams.SortBy switch
+                {
+                    "username" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.UserName) : query.OrderByDescending(x => x.UserName),
+                    "email" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email),
+                    "fullname" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName),
+                    "phone" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Phone) : query.OrderByDescending(x => x.Phone),
+                    "address" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address),
+                    _ => query
+                };
+            }
+
+            var totalItems = await query.CountAsync();
+
+            var users = await query.OrderBy(u => u.CreatedAt)
+                .Skip((urlQueryParams.Page - 1) * urlQueryParams.PageSize)
+                .Take(urlQueryParams.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<Users>
+            {
+                Page = urlQueryParams.Page,
+                PageSize = urlQueryParams.PageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)urlQueryParams.PageSize),
+                Items = users
+            };
         }
 
         public async Task<IEnumerable<Users>> GetUsersAsync(int page, int pageSize, string? search, string? role)

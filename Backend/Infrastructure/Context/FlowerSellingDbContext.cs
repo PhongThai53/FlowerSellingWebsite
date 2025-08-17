@@ -2,10 +2,10 @@
 
 namespace FlowerSelling.Data
 {
-    using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
     namespace FlowerSellingWebsite.Data
-    {
+{
         public class FlowerSellingDbContext : DbContext
         {
             public FlowerSellingDbContext(DbContextOptions<FlowerSellingDbContext> options) : base(options)
@@ -611,7 +611,7 @@ namespace FlowerSelling.Data
                     .IsRequired();
 
                 modelBuilder.Entity<Orders>()
-                    .Property(e => e.CreatedDate)
+                    .Property(e => e.OrderDate)
                     .HasColumnType("datetime2")
                     .IsRequired();
 
@@ -798,6 +798,37 @@ namespace FlowerSelling.Data
                     .WithMany(b => b.Comments)
                     .HasForeignKey(c => c.BlogId)
                     .OnDelete(DeleteBehavior.NoAction);
+
+                // A user can be a customer for many orders.
+                modelBuilder.Entity<Orders>()
+                    .HasOne(o => o.Customer)
+                    .WithMany(u => u.Orders) // The collection in the Users entity.
+                    .HasForeignKey(o => o.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // A user can create many orders.
+                // This relationship does not have a corresponding collection in the Users entity.
+                modelBuilder.Entity<Orders>()
+                    .HasOne(o => o.CreatedByUser)
+                    .WithMany() // No corresponding collection navigation property.
+                    .HasForeignKey(o => o.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Configure decimal precision
+                modelBuilder.Entity<Orders>(entity =>
+                {
+                    entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.EstimatedTotalAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalTotalAmount).HasColumnType("decimal(18, 2)");
+                });
+
+                modelBuilder.Entity<OrderDetails>(entity =>
+                {
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalUnitPrice).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.FinalAmount).HasColumnType("decimal(18, 2)");
+                });
             }
 
             public override int SaveChanges()
@@ -814,30 +845,32 @@ namespace FlowerSelling.Data
 
             private void UpdateTimestamps()
             {
-                var entries = ChangeTracker.Entries<BaseEntity>();
+                var entries = ChangeTracker.Entries().Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
 
                 foreach (var entry in entries)
                 {
+                    var baseEntity = (BaseEntity)entry.Entity;
+
                     switch (entry.State)
                     {
                         case EntityState.Added:
-                            entry.Entity.CreatedAt = DateTime.UtcNow;
-                            entry.Entity.PublicId = Guid.NewGuid();
+                            baseEntity.CreatedAt = DateTime.UtcNow;
+                            baseEntity.PublicId = Guid.NewGuid();
                             break;
 
                         case EntityState.Modified:
-                            entry.Entity.UpdatedAt = DateTime.UtcNow;
+                            baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
 
                         case EntityState.Deleted:
                             entry.State = EntityState.Modified;
-                            entry.Entity.IsDeleted = true;
-                            entry.Entity.DeletedAt = DateTime.UtcNow;
-                            entry.Entity.UpdatedAt = DateTime.UtcNow;
+                            baseEntity.IsDeleted = true;
+                            baseEntity.DeletedAt = DateTime.UtcNow;
+                            baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
+                    }
                     }
                 }
             }
         }
     }
-}
