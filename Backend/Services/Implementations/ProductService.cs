@@ -20,6 +20,7 @@ namespace FlowerSellingWebsite.Services.Implementations
         public async Task<(IEnumerable<ProductDTO> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
             int pageNumber,
             int pageSize,
+            int categoryId,
             string? search,
             string? sortBy,
             bool asc = true,
@@ -33,6 +34,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var (items, totalPages, totalCount) = await _productRepository.GetPagedProductsAsync(
             pageNumber,
             pageSize,
+            categoryId,
             search,
             sortBy,
             asc,

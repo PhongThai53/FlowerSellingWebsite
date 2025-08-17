@@ -24,7 +24,7 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
             }
             catch (NotFoundException notFoundException)
             {
-                _logger.LogWarning("Not found exception: {Message}", notFoundException.Message);
+                _logger.LogWarning(notFoundException, "Not found exception: {Message}", notFoundException.Message);
 
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
                 context.Response.ContentType = "application/json";
@@ -34,7 +34,7 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
             }
             catch (ValidationException validationException)
             {
-                _logger.LogWarning("Validation exception: {Message}", validationException.Message);
+                _logger.LogWarning(validationException, "Validation exception: {Message}", validationException.Message);
 
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 context.Response.ContentType = "application/json";

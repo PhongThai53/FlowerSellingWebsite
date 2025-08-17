@@ -41,8 +41,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
-                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.ProductPhotos));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));
 
             CreateMap<Products, ProductListDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));

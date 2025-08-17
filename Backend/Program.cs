@@ -1,4 +1,4 @@
-using FlowerSelling.Data.FlowerSellingWebsite.Data;
+﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
 using FlowerSellingWebsite.Repositories.Implementations;
@@ -7,7 +7,10 @@ using FlowerSellingWebsite.Services.Implementations;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using ProjectGreenLens.Repositories.Implementations;
+using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
@@ -34,14 +37,16 @@ builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Repository Services
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
+builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 // Application Services
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
@@ -53,7 +58,8 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+// Application Services
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
 builder.Services.AddHostedService<PasswordResetTokenCleanupService>();
@@ -167,6 +173,13 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Serve Static file
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Image")), // Đường dẫn đến folder Image
+    RequestPath = "/Image" // URL path để access files
+});
 // Middleware order
 
 // Swagger first (not wrapped)

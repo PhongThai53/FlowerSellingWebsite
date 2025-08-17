@@ -20,6 +20,7 @@ namespace FlowerSellingWebsite.Controllers
         public async Task<IActionResult> GetPagedProducts(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
+            [FromQuery] int categoryId = 0,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool asc = true,
@@ -27,7 +28,7 @@ namespace FlowerSellingWebsite.Controllers
         {
 
             var result = await _productService.GetPagedProductsAsync(
-                pageNumber, pageSize, search, sortBy, asc, cancellationToken);
+                pageNumber, pageSize, categoryId, search, sortBy, asc, cancellationToken);
 
             var data = new
             {

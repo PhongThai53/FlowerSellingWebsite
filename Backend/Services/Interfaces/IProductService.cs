@@ -7,6 +7,7 @@ namespace FlowerSellingWebsite.Services.Interfaces
         public Task<(IEnumerable<ProductDTO> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
            int pageNumber,
            int pageSize,
+           int categoryId,
            string? search,
            string? sortBy,
            bool asc = true,

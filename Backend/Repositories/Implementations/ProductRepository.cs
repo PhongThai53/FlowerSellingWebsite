@@ -35,6 +35,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task<(IEnumerable<Products> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
            int pageNumber,
            int pageSize,
+           int categoryId,
            string? search,
            string? sortBy,
            bool asc = true,
@@ -56,6 +57,12 @@ namespace FlowerSellingWebsite.Repositories.Implementations
 
             // Count
             var totalCount = await query.CountAsync();
+
+            // Category
+            if (categoryId > 0)
+            {
+                query = query.Where(p => p.CategoryId == categoryId);
+            }
 
             // Sort
             if (!string.IsNullOrEmpty(sortBy))
