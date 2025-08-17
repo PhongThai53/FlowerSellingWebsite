@@ -12,6 +12,26 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             _context = context;
         }
+
+        public async Task<Products> CreateProductAsync(Products product, CancellationToken cancellationToken = default)
+        {
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync(cancellationToken);
+            return product;
+        }
+
+        public async Task<bool> DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var existing = await GetProductByIdAsync(id);
+            if (existing == null)
+            {
+                return false;
+            }
+            _context.Products.Remove(existing);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         public async Task<(IEnumerable<Products> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
            int pageNumber,
            int pageSize,
@@ -66,6 +86,16 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .Include(p => p.ProductPhotos)
                 .Include(p => p.ProductCategories)
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Products?> UpdateProductAsync(Products product, CancellationToken cancellationToken = default)
+        {
+            var existing = await GetProductByIdAsync(product.Id);
+            if (existing == null) return null;
+
+            _context.Entry(existing).CurrentValues.SetValues(product);
+            await _context.SaveChangesAsync(cancellationToken);
+            return existing;
         }
     }
 }

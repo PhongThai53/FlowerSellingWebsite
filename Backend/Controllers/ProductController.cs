@@ -1,4 +1,5 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,15 +10,12 @@ namespace FlowerSellingWebsite.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        public ProductController(IProductService productService)
         {
             _productService = productService;
-            _logger = logger;
         }
 
-        /// Get paged products with search and sorting
         [HttpGet]
         public async Task<IActionResult> GetPagedProducts(
             [FromQuery] int pageNumber = 1,
@@ -27,44 +25,49 @@ namespace FlowerSellingWebsite.Controllers
             [FromQuery] bool asc = true,
             CancellationToken cancellationToken = default)
         {
-            try
-            {
-                var result = await _productService.GetPagedProductsAsync(
-                    pageNumber, pageSize, search, sortBy, asc, cancellationToken);
 
-                var data = new
-                {
-                    items = result.Items,
-                    totalPages = result.TotalPages,
-                    totalCount = result.TotalCount
-                };
+            var result = await _productService.GetPagedProductsAsync(
+                pageNumber, pageSize, search, sortBy, asc, cancellationToken);
 
-                return Ok(ApiResponse<object>.Ok(data, "Products retrieved successfully"));
-            }
-            catch (Exception ex)
+            var data = new
             {
-                _logger.LogError(ex, "An error occurred while retrieving paged products.");
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while processing your request."));
-            }
+                items = result.Items,
+                totalPages = result.TotalPages,
+                totalCount = result.TotalCount
+            };
+
+            return Ok(ApiResponse<object>.Ok(data, "Products retrieved successfully"));
         }
+
+
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            try
-            {
-                var product = await _productService.GetProductByIdAsync(id);
-                if (product == null)
-                {
-                    return NotFound(ApiResponse<object>.Fail("Product is not found."));
-                }
-                return Ok(ApiResponse<object>.Ok(product, "Product retrieved successfully"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while retrieving the product.");
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while processing your request."));
-            }
+            var product = await _productService.GetProductByIdAsync(id);
+            return Ok(ApiResponse<object>.Ok(product!, "Product retrieved successfully"));
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateProductDTO dto)
+        {
+            var created = await _productService.CreateProductAsync(dto);
+            return Ok(ApiResponse<CreateProductDTO>.Ok(created!));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, UpdateProductDTO dto, CancellationToken cancellationToken = default)
+        {
+            var updated = await _productService.UpdateProductAsync(id, dto, cancellationToken);
+            return Ok(ApiResponse<UpdateProductDTO>.Ok(updated!));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+        {
+            var deleted = await _productService.DeleteProductAsync(id, cancellationToken);
+            return Ok(ApiResponse<bool>.Ok(deleted));
         }
     }
 }

@@ -51,8 +51,6 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<UpdateProductDTO, Products>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); // only map when null
 
-            CreateMap<DeleteProductDTO, Products>();
-
             // ------------------ ProductPhotos ------------------
             CreateMap<ProductPhotos, ProductPhotoDTO>();
             CreateMap<CreateProductPhotoDTO, ProductPhotos>();

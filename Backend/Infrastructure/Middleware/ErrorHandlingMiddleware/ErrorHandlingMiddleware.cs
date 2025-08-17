@@ -1,6 +1,5 @@
-﻿using FlowerSellingWebsite.Models.DTOs;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
+﻿using FlowerSellingWebsite.Exceptions;
+using FlowerSellingWebsite.Models.DTOs;
 using System.Text.Json;
 
 namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
@@ -20,63 +19,38 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
         {
             try
             {
+                // Chỉ call next - không xử lý success response
                 await _next(context);
             }
-            catch (ValidationException vex)
+            catch (NotFoundException notFoundException)
             {
-                _logger.LogWarning(vex, "Validation failed");
+                _logger.LogWarning("Not found exception: {Message}", notFoundException.Message);
 
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-                var response = ApiResponse<object>.Fail(
-                    "Validation failed",
-                    new List<string> { vex.Message }
-                );
-
-                await WriteJsonResponse(context, response);
+                var errorResponse = ApiResponse<object>.Fail(notFoundException.Message);
+                await WriteJsonResponse(context, errorResponse);
             }
-            catch (UnauthorizedAccessException uex)
+            catch (ValidationException validationException)
             {
-                _logger.LogWarning(uex, "Unauthorized request");
+                _logger.LogWarning("Validation exception: {Message}", validationException.Message);
 
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
-                var response = ApiResponse<object>.Fail(
-                    "Unauthorized",
-                    new List<string> { uex.Message }
-                );
-
-                await WriteJsonResponse(context, response);
-            }
-            catch (KeyNotFoundException nfex)
-            {
-                _logger.LogWarning(nfex, "Resource not found");
-
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-                var response = ApiResponse<object>.Fail(
-                    "Resource not found",
-                    new List<string> { nfex.Message }
-                );
-
-                await WriteJsonResponse(context, response);
+                var errorResponse = ApiResponse<object>.Fail(validationException.Message);
+                await WriteJsonResponse(context, errorResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception");
+                _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
 
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var response = ApiResponse<object>.Fail(
-                    "An unexpected error occurred",
-                    new List<string> { ex.Message }
-                );
-
-                await WriteJsonResponse(context, response);
+                var errorResponse = ApiResponse<object>.Fail("Internal server error");
+                await WriteJsonResponse(context, errorResponse);
             }
         }
 
@@ -86,6 +60,7 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
+
             await context.Response.WriteAsync(json);
         }
     }
