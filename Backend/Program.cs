@@ -40,6 +40,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 //builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IContactService, ContactService>();
 
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
