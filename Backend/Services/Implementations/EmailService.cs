@@ -87,7 +87,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             await SendEmailAsync(email, subject, body);
         }
 
-        private async Task SendEmailAsync(string toEmail, string subject, string body)
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
             try
             {

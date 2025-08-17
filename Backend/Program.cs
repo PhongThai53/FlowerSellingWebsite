@@ -39,6 +39,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // Application Services
