@@ -5,5 +5,6 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task SendEmailVerificationAsync(string email, string fullName, string verificationToken);
         Task SendPasswordResetAsync(string email, string fullName, string resetToken);
         Task SendWelcomeEmailAsync(string email, string fullName);
+        Task SendEmailAsync(string toEmail, string subject, string body);
     }
 }

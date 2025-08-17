@@ -1,4 +1,5 @@
 using AutoMapper;
+using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Models.DTOs.ProductCategoryDTO;
@@ -11,7 +12,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
     {
         public MappingProfile()
         {
-            // Order mappings
+            // ------------------ Orders ------------------
             CreateMap<Orders, OrderDTO>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
                     src.Customer != null ? src.Customer.FullName : null))
@@ -26,7 +27,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<UpdateOrderDTO, Orders>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Order detail mappings
+            // ------------------ OrderDetails ------------------
             CreateMap<OrderDetails, OrderDetailDTO>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src =>
                     src.Product != null ? src.Product.Name : null))
@@ -48,7 +49,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             CreateMap<CreateProductDTO, Products>();
             CreateMap<UpdateProductDTO, Products>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); // only map when null
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); 
 
             // ------------------ ProductPhotos ------------------
             CreateMap<ProductPhotos, ProductPhotoDTO>();
@@ -63,6 +64,9 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<UpdateProductCategoryDTO, ProductCategories>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<DeleteProductCategoryDTO, ProductCategories>();
+
+            // ------------------ Users ------------------
+            CreateMap<Users, UserDTO>().ReverseMap();
         }
     }
 }
