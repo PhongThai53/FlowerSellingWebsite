@@ -16,5 +16,8 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<int> GetBlogCountByUserAsync(int userId);
         Task<int> GetBlogCountByCategoryAsync(int categoryId);
         Task<int> GetBlogCountByStatusAsync(BlogStatus status);
+        
+        // Get blogs with user permission (published + own blogs)
+        Task<(List<Blog> blogs, int totalCount)> GetBlogsForUserWithPermissionAsync(BlogFilterDTO filters, int currentUserId);
     }
 }

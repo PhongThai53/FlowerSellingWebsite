@@ -33,6 +33,17 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .OrderBy(c => c.CreatedAt)
                 .ToListAsync();
         }
+        
+        public async Task<List<Comment>> GetAllCommentsByBlogIdAsync(int blogId)
+        {
+            return await _context.Comments
+                .Include(c => c.User)
+                .Include(c => c.Children.Where(ch => !ch.IsDeleted)) // Include all non-deleted children
+                    .ThenInclude(ch => ch.User)
+                .Where(c => c.BlogId == blogId && !c.IsDeleted && c.ParentId == null) // Don't filter by IsHide
+                .OrderBy(c => c.CreatedAt)
+                .ToListAsync();
+        }
 
         public async Task<List<Comment>> GetCommentsByParentIdAsync(int parentId)
         {
