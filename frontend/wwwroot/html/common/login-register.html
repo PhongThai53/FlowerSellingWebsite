@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description"
+          content="Floda - Flower eCommerce Login & Registration" />
+    <title>Floda - Login & Register</title>
+
+    <!--=== Favicon ===-->
+    <link rel="shortcut icon"
+          href="../../images/favicon.ico"
+          type="image/x-icon" />
+
+    <!-- Google fonts include -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+          rel="stylesheet" />
+
+    <!-- Icon Fonts -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet"
+          href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css" />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Custom Auth CSS -->
+    <link href="../../css/auth.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- HTMX JSON Extension for json-enc -->
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
+</head>
+
+<body>
+    <!-- Load Header Component -->
+    <div hx-get="../components/header.html"
+         hx-trigger="load"
+         hx-swap="outerHTML"></div>
+
+    <!-- off-canvas menu start -->
+    <aside class="off-canvas-wrapper">
+        <div class="off-canvas-overlay"></div>
+        <div class="off-canvas-inner-content">
+            <div class="btn-close-off-canvas">
+                <i class="lnr lnr-cross"></i>
+            </div>
+
+            <div class="off-canvas-inner">
+                <!-- search box start -->
+                <div class="search-box-offcanvas">
+                    <form>
+                        <input type="text" placeholder="Search Here..." />
+                        <button class="search-btn">
+                            <i class="lnr lnr-magnifier"></i>
+                        </button>
+                    </form>
+                </div>
+                <!-- search box end -->
+                <!-- mobile menu start -->
+                <div class="mobile-navigation">
+                    <!-- mobile menu navigation start -->
+                    <nav>
+                        <ul class="mobile-menu">
+                            <li class="menu-item-has-children">
+                                <a href="../index.html">Home</a>
+                            </li>
+                            <li class="menu-item-has-children"><a href="#">Shop</a></li>
+                            <li class="menu-item-has-children"><a href="#">Blog</a></li>
+                            <li><a href="../contact-us.html">Contact us</a></li>
+                        </ul>
+                    </nav>
+                    <!-- mobile menu navigation end -->
+                </div>
+                <!-- mobile menu end -->
+
+                <div class="mobile-settings">
+                    <ul class="nav">
+                        <li>
+                            <div class="dropdown mobile-top-dropdown">
+                                <a href="#"
+                                   class="dropdown-toggle"
+                                   id="myaccount"
+                                   data-bs-toggle="dropdown"
+                                   aria-haspopup="true"
+                                   aria-expanded="false">
+                                    My Account
+                                    <i class="fa fa-angle-down"></i>
+                                </a>
+                                <div class="dropdown-menu"
+                                     aria-labelledby="myaccount"
+                                     id="mobile-user-menu">
+                                    <!-- This will be populated by JavaScript based on auth state -->
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- off-canvas menu end -->
+    <!-- main wrapper start -->
+    <main>
+        <!-- breadcrumb area start -->
+        <div class="breadcrumb-area common-bg">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="breadcrumb-wrap">
+                            <nav aria-label="breadcrumb">
+                                <h1>Login/Register</h1>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="../index.html"></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Login/Register
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- breadcrumb area end -->
+        <!-- login register wrapper start -->
+        <div class="login-register-wrapper section-space pb-0">
+            <div class="container">
+                <div class="member-area-from-wrap">
+                    <div class="row">
+                        <!-- Login Content Start -->
+                        <div class="col-lg-6">
+                            <div class="login-reg-form-wrap">
+                                <h2>Sign In</h2>
+
+                                <!-- Login Form -->
+                                <div id="login-form-container">
+                                    <form id="login-form"
+                                          hx-post="http://localhost:5062/api/auth/login"
+                                          hx-target="#login-response"
+                                          hx-swap="innerHTML"
+                                          hx-trigger="submit"
+                                          hx-headers='{"Content-Type": "application/json"}'
+                                          hx-ext="json-enc">
+                                        <!-- Response Area -->
+                                        <div id="login-response"
+                                             class="auth-response mb-3"
+                                             style="display: none"></div>
+
+                                        <div class="single-input-item">
+                                            <input type="email"
+                                                   name="email"
+                                                   placeholder="Email"
+                                                   required
+                                                   maxlength="100" />
+                                        </div>
+
+                                        <div class="single-input-item">
+                                            <input type="password"
+                                                   name="password"
+                                                   placeholder="Enter your Password"
+                                                   required
+                                                   minlength="6"
+                                                   maxlength="100" />
+                                        </div>
+
+                                        <div class="single-input-item">
+                                            <div class="login-reg-form-meta d-flex align-items-center justify-content-between">
+                                                <div class="remember-meta">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox"
+                                                               class="custom-control-input"
+                                                               id="rememberMe"
+                                                               name="rememberMe" />
+                                                        <label class="custom-control-label"
+                                                               for="rememberMe">Remember Me</label>
+                                                    </div>
+                                                </div>
+                                                <a href="javascript:void(0)"
+                                                   id="forgot-password-link"
+                                                   class="forget-pwd">Forget Password?</a>
+                                            </div>
+                                        </div>
+
+                                        <div class="single-input-item">
+                                            <button type="submit" class="btn btn__bg">
+                                                <span class="btn-text">Login</span>
+                                                <span class="btn-loading" style="display: none">
+                                                    <i class="fa fa-spinner fa-spin"></i> Logging in...
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Forgot Password Form (hidden by default) -->
+                                <div id="forgot-password-container" style="display: none">
+                                    <h4>Forgot Password</h4>
+                                    <form id="forgot-password-form"
+                                          hx-post="http://localhost:5062/api/auth/forgot-password"
+                                          hx-target="#forgot-password-container"
+                                          hx-swap="outerHTML"
+                                          hx-ext="json-enc">
+                                        <div id="forgot-password-response"
+                                             class="auth-response mb-3"></div>
+
+                                        <div class="single-input-item">
+                                            <input type="email"
+                                                   name="email"
+                                                   placeholder="Enter your email"
+                                                   required />
+                                        </div>
+                                        <div class="single-input-item">
+                                            <button type="submit" class="btn btn__bg">
+                                                Send Reset Link
+                                            </button>
+                                        </div>
+                                        <div class="single-input-item">
+                                            <a href="javascript:void(0)" id="back-to-login-link">Back to Login</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Login Content End -->
+                        <!-- Register Content Start -->
+                        <div class="col-lg-6">
+                            <div class="login-reg-form-wrap sign-up-form">
+                                <h2>Sign Up</h2>
+
+                                <!-- Registration Form -->
+                                <form id="register-form"
+                                      hx-post="http://localhost:5062/api/auth/register"
+                                      hx-target="#register-response"
+                                      hx-swap="innerHTML"
+                                      hx-trigger="submit"
+                                      hx-headers='{"Content-Type": "application/json"}'
+                                      hx-ext="json-enc">
+                                    <!-- Response Area -->
+                                    <div id="register-response"
+                                         class="auth-response mb-3"
+                                         style="display: none"></div>
+
+                                    <div class="single-input-item">
+                                        <input type="text"
+                                               name="fullName"
+                                               placeholder="Full Name *"
+                                               required
+                                               maxlength="100" />
+                                    </div>
+
+                                    <div class="single-input-item">
+                                        <input type="text"
+                                               name="userName"
+                                               placeholder="Username *"
+                                               required
+                                               minlength="3"
+                                               maxlength="50"
+                                               pattern="[a-zA-Z0-9_]+"
+                                               title="Username can only contain letters, numbers, and underscores" />
+                                    </div>
+
+                                    <div class="single-input-item">
+                                        <input type="email"
+                                               name="email"
+                                               placeholder="Enter your Email *"
+                                               required
+                                               maxlength="100" />
+                                    </div>
+
+                                    <div class="single-input-item">
+                                        <input type="tel"
+                                               name="phoneNumber"
+                                               placeholder="Phone Number (Optional)"
+                                               maxlength="20" />
+                                    </div>
+
+                                    <div class="single-input-item">
+                                        <textarea name="address"
+                                                  placeholder="Address (Optional)"
+                                                  maxlength="300"
+                                                  rows="2"></textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="single-input-item">
+                                                <input type="password"
+                                                       name="password"
+                                                       id="register-password"
+                                                       placeholder="Enter your Password *"
+                                                       required
+                                                       minlength="6"
+                                                       maxlength="100"
+                                                       pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,}$"
+                                                       title="Password must contain at least one uppercase letter, one lowercase letter, and one number" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="single-input-item">
+                                                <input type="password"
+                                                       name="confirmPassword"
+                                                       id="confirm-password"
+                                                       placeholder="Repeat your Password *"
+                                                       required
+                                                       minlength="6"
+                                                       maxlength="100" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="single-input-item">
+                                        <button type="submit" class="btn btn__bg">
+                                            <span class="btn-text">Register</span>
+                                            <span class="btn-loading" style="display: none">
+                                                <i class="fa fa-spinner fa-spin"></i> Registering...
+                                            </span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Register Content End -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- login register wrapper end -->
+    </main>
+    <!-- main wrapper end -->
+    <!-- Load Footer Component -->
+    <div hx-get="../components/footer.html"
+         hx-trigger="load"
+         hx-swap="outerHTML"></div>
+
+    <!-- Scroll to top start -->
+    <div class="scroll-top not-visible">
+        <i class="fa fa-angle-up"></i>
+    </div>
+    <!-- Scroll to Top End -->
+    <!-- All vendor & plugins & active js include here -->
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+    <script src="../../js/auth.js"></script>
+</body>
+</html>
