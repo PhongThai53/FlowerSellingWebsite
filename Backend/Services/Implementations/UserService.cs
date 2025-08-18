@@ -141,7 +141,6 @@ namespace FlowerSellingWebsite.Services.Implementations
                     Address = request.Address,
                     PublicId = Guid.NewGuid(),
                     RoleId = 2,
-                    
                 };
 
                 var createdUser = await _userRepository.CreateUserAsync(usr);
@@ -405,6 +404,25 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
+        public async Task<IEnumerable<RoleDTO>> GetRolesAsync()
+        {
+            try
+            {
+                var roles = await _userRepository.GetAllRolesAsync();
+                return roles.Select(role => new RoleDTO
+                {
+                    Id = role.Id,
+                    RoleName = role.RoleName,
+                    Description = role.Description
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting roles");
+                throw;
+            }
+        }
+
         private static UserDTO MapToUserDTO(Users user)
         {
             return new UserDTO
@@ -416,7 +434,6 @@ namespace FlowerSellingWebsite.Services.Implementations
                 Email = user.Email ?? string.Empty,
                 PhoneNumber = user.Phone,
                 Address = user.Address,
-                IsActive = !user.IsDeleted,
                 RoleName = user.Role?.RoleName ?? string.Empty,
                 CreatedAt = user.CreatedAt
             };

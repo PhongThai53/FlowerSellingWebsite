@@ -77,9 +77,10 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 if (!string.IsNullOrEmpty(urlQueryParams.SearchValue)){
                     query = urlQueryParams.SearchBy switch
                     {
-                        "fullname" => query.Where(x => x.FullName == urlQueryParams.SearchValue),
-                        "username" => query.Where(x => x.UserName == urlQueryParams.SearchValue),
-                        "email" => query.Where(x => x.Email == urlQueryParams.SearchValue),
+                        "fullname" => query.Where(x => x.FullName.Contains(urlQueryParams.SearchValue)),
+                        "username" => query.Where(x => x.UserName.Contains(urlQueryParams.SearchValue)),
+                        "email" => query.Where(x => x.Email.Contains(urlQueryParams.SearchValue)),
+                        "phone" => query.Where(x => x.Phone != null && x.Phone.Contains(urlQueryParams.SearchValue)),
                         //Add more search field
                         _ => query
                     };
@@ -101,22 +102,29 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 }
             }
 
+            // Apply sorting
             if (!string.IsNullOrWhiteSpace(urlQueryParams.SortBy))
             {
-                query = urlQueryParams.SortBy switch
+                query = urlQueryParams.SortBy.ToLower() switch
                 {
                     "username" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.UserName) : query.OrderByDescending(x => x.UserName),
                     "email" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email),
                     "fullname" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName),
                     "phone" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Phone) : query.OrderByDescending(x => x.Phone),
                     "address" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address),
-                    _ => query
+                    "createdat" => urlQueryParams.SortDirection == SortDirection.Asc ? query.OrderBy(x => x.CreatedAt) : query.OrderByDescending(x => x.CreatedAt),
+                    _ => query.OrderBy(x => x.CreatedAt) // Default sort
                 };
+            }
+            else
+            {
+                // Default sort by CreatedAt descending (newest first)
+                query = query.OrderByDescending(x => x.CreatedAt);
             }
 
             var totalItems = await query.CountAsync();
 
-            var users = await query.OrderBy(u => u.CreatedAt)
+            var users = await query
                 .Skip((urlQueryParams.Page - 1) * urlQueryParams.PageSize)
                 .Take(urlQueryParams.PageSize)
                 .ToListAsync();
@@ -238,6 +246,14 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task<Roles?> GetRoleByNameAsync(string roleName)
         {
             return await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
+        }
+
+        public async Task<IEnumerable<Roles>> GetAllRolesAsync()
+        {
+            return await _context.Roles
+                .Where(r => !r.IsDeleted)
+                .OrderBy(r => r.RoleName)
+                .ToListAsync();
         }
 
         // Email verification (using existing fields creatively)
