@@ -57,12 +57,12 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new UnauthorizedAccessException("Invalid email or password");
                 }
 
-                // Check if user has pending email verification
-                if (_verificationService.IsEmailPendingVerification(request.Email))
-                {
-                    _logger.LogWarning("Login failed: Email verification pending for {Email}", request.Email);
-                    throw new UnauthorizedAccessException("Please verify your email address before logging in. Check your inbox for the verification link.");
-                }
+                //// Check if user has pending email verification
+                //if (_verificationService.IsEmailPendingVerification(request.Email))
+                //{
+                //    _logger.LogWarning("Login failed: Email verification pending for {Email}", request.Email);
+                //    throw new UnauthorizedAccessException("Please verify your email address before logging in. Check your inbox for the verification link.");
+                //}
 
                 // Verify password
                 if (string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -126,10 +126,25 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var verificationToken = _verificationService.GenerateVerificationToken(request.Email);
 
                 // Send verification email
-                await _emailService.SendEmailVerificationAsync(request.Email, request.FullName, verificationToken);
+                //await _emailService.SendEmailVerificationAsync(request.Email, request.FullName, verificationToken);
 
                 _logger.LogInformation("Registration initiated for user {UserName} ({Email}). Verification email sent.", 
                     request.UserName, request.Email);
+
+                var usr = new Users
+                {
+                    UserName = request.UserName,
+                    FullName = request.FullName,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                    Email = request.Email,
+                    Phone = request.PhoneNumber,
+                    Address = request.Address,
+                    PublicId = Guid.NewGuid(),
+                    RoleId = 2,
+                    
+                };
+
+                var createdUser = await _userRepository.CreateUserAsync(usr);
 
                 // Return a temporary user DTO indicating verification is required
                 return new UserDTO
@@ -394,6 +409,7 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             return new UserDTO
             {
+                Id = user.Id,
                 PublicId = user.PublicId,
                 FullName = user.FullName ?? string.Empty,
                 UserName = user.UserName ?? string.Empty,

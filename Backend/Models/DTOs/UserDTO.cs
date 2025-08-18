@@ -2,6 +2,7 @@ namespace FlowerSellingWebsite.Models.DTOs
 {
     public class UserDTO
     {
+        public int Id { get; set; }
         public Guid PublicId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;

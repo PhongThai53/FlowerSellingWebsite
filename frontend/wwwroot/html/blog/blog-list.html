@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Blog Management - View All Blogs" />
+    <title>Blog Management - Floda</title>
+
+    <!--=== Favicon ===-->
+    <link rel="shortcut icon" href="../../images/favicon.ico" type="image/x-icon" />
+
+    <!-- Google fonts include -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear" rel="stylesheet" />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Custom CSS for auth pages -->
+    <link href="../../css/auth.css" rel="stylesheet" />
+    <!-- Custom CSS for blog pages -->
+    <link href="../../css/blog.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Linearicons -->
+    <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css" />
+
+    <!-- Custom Blog CSS -->
+    <style>
+        .blog-list-container {
+            min-height: 70vh;
+        }
+        .blog-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+        }
+        .blog-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .blog-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .blog-content {
+            padding: 20px;
+        }
+        .blog-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .status-draft { background: #f8f9fa; color: #6c757d; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-published { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .blog-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .blog-tags {
+            margin-top: 10px;
+        }
+        .blog-tag {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .filters-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .action-buttons {
+            margin-top: 10px;
+        }
+        .btn-sm {
+            font-size: 12px;
+            padding: 4px 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Load Header Component -->
+    <header id="header-placeholder" hx-get="../components/header.html" hx-trigger="load" hx-swap="outerHTML"></header>
+
+    <!-- main wrapper start -->
+    <main>
+        <!-- breadcrumb area start -->
+        <div class="breadcrumb-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="breadcrumb-wrap">
+                            <nav aria-label="breadcrumb">
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/html/common/homepage.html"><i class="fa fa-home"></i> Home</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Blog Management</li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- breadcrumb area end -->
+
+        <!-- Blog List Area Start -->
+        <div class="blog-list-container section-space">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-title text-center">
+                            <h2>Blog Management</h2>
+                            <p>Manage your blog posts with advanced filtering and search capabilities</p>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4>All Blogs</h4>
+                            <div>
+                                <a href="/html/blog/blog-detail.html" class="btn btn-primary">
+                                    <i class="fa fa-plus"></i> Create New Blog
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Filters Section -->
+                        <div class="filters-section">
+                            <div class="row" id="blog-filters">
+                                <div class="col-md-3">
+                                    <label>Search</label>
+                                    <input type="text" id="search-input" class="form-control" placeholder="Search title, content, tags...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Status</label>
+                                    <select id="status-filter" class="form-control">
+                                        <option value="">All Status</option>
+                                        <option value="0">Draft</option>
+                                        <option value="1">Pending</option>
+                                        <option value="2">Published</option>
+                                        <option value="3">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Category</label>
+                                    <select id="category-filter" class="form-control">
+                                        <option value="">All Categories</option>
+                                        <!-- Categories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Sort By</label>
+                                    <select id="sort-by" class="form-control">
+                                        <option value="CreatedAt">Created Date</option>
+                                        <option value="UpdatedAt">Updated Date</option>
+                                        <option value="Title">Title</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Order</label>
+                                    <select id="sort-order" class="form-control">
+                                        <option value="desc">Descending</option>
+                                        <option value="asc">Ascending</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <label>&nbsp;</label>
+                                    <button type="button" id="clear-filters" class="btn btn-secondary btn-block">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Info -->
+                        <div id="view-info-container">
+                            <!-- Dynamic view info -->
+                        </div>
+
+                        <!-- Results Summary -->
+                        <div id="results-summary" class="mb-3">
+                            <!-- Dynamic content -->
+                        </div>
+
+                        <!-- Blog List Container -->
+                        <div id="blog-list-container">
+                            <div class="loading-spinner">
+                                <i class="fa fa-spinner fa-spin fa-2x"></i>
+                                <p>Loading blogs...</p>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div id="pagination-container" class="pagination-wrapper">
+                            <!-- Dynamic pagination -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Blog List Area End -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <footer hx-get="../components/footer.html" hx-trigger="load" hx-swap="outerHTML"></footer>
+
+    <!-- All JS is here -->
+    <script src="../../js/vendor/modernizr-3.6.0.min.js"></script>
+    <script src="../../js/vendor/jquery-3.6.0.min.js"></script>
+    <script src="../../js/vendor/bootstrap.bundle.min.js"></script>
+    <script src="../../js/plugins/slick.min.js"></script>
+    <script src="../../js/plugins/countdown.min.js"></script>
+    <script src="../../js/plugins/nice-select.min.js"></script>
+    <script src="../../js/plugins/jqueryui.min.js"></script>
+    <script src="../../js/plugins/image-zoom.min.js"></script>
+    <script src="../../js/plugins/imagesloaded.pkgd.min.js"></script>
+    <script src="../../js/plugins/ajaxchimp.js"></script>
+    <script src="../../js/plugins/ajax-mail.js"></script>
+    <script src="../../js/main.js"></script>
+
+    <!-- Auth Manager -->
+    <script src="../../js/auth.js"></script>
+    
+    <!-- Blog Manager -->
+    <script src="../../js/blog-manager.js"></script>
+
+    <script>
+        // Initialize blog list page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.blogManager) {
+                window.blogManager.initializeBlogList();
+            }
+        });
+    </script>
+</body>
+</html>

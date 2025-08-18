@@ -231,10 +231,28 @@ namespace FlowerSellingWebsite.Services.Implementations
             if (blog.UserId != currentUserId && !await IsAdminUser(currentUserId))
                 throw new UnauthorizedAccessException("You don't have permission to modify this blog.");
 
-            blog.Images.Remove(imageUrl);
-            await _blogRepository.updateAsync(blog);
+            // Convert full URL to relative path if needed
+            string relativePath = imageUrl;
+            if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            {
+                var uri = new Uri(imageUrl);
+                relativePath = uri.LocalPath; // This will extract /uploads/blog-images/xxx.png from full URL
+            }
+
+            // Remove the image path from blog images
+            var removed = blog.Images.Remove(relativePath);
+            if (!removed)
+            {
+                // Try removing the original imageUrl if relative path didn't work
+                removed = blog.Images.Remove(imageUrl);
+            }
+
+            if (removed)
+            {
+                await _blogRepository.updateAsync(blog);
+            }
             
-            return true;
+            return removed;
         }
 
         public async Task<PagedBlogResultDTO> GetBlogsByStatusAsync(BlogStatus status, int page = 1, int pageSize = 6)
@@ -291,6 +309,25 @@ namespace FlowerSellingWebsite.Services.Implementations
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
                 HasPreviousPage = page > 1,
                 HasNextPage = page < (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+
+        public async Task<PagedBlogResultDTO> GetBlogsForCurrentUserAsync(BlogFilterDTO filters, int currentUserId)
+        {
+            // For regular users: get published blogs + their own blogs (any status)
+            var (blogs, totalCount) = await _blogRepository.GetBlogsForUserWithPermissionAsync(filters, currentUserId);
+            
+            var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
+            
+            return new PagedBlogResultDTO
+            {
+                Blogs = blogListDTOs,
+                TotalCount = totalCount,
+                Page = filters.Page,
+                PageSize = filters.PageSize,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize),
+                HasPreviousPage = filters.Page > 1,
+                HasNextPage = filters.Page < (int)Math.Ceiling(totalCount / (double)filters.PageSize)
             };
         }
 

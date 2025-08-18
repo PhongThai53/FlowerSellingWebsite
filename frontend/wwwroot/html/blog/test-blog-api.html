@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Blog API</title>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/blog-manager.js"></script>
+</head>
+<body>
+    <h1>Test Blog API</h1>
+    
+    <div>
+        <h3>Test Create Blog</h3>
+        <button onclick="testCreateBlog()">Test Create Blog</button>
+        <div id="test-result"></div>
+    </div>
+    
+    <div>
+        <h3>Test Image Upload</h3>
+        <input type="file" id="test-file" accept="image/*">
+        <button onclick="testImageUpload()">Test Upload Image</button>
+        <div id="upload-result"></div>
+    </div>
+
+    <script>
+        async function testCreateBlog() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Get auth token first
+                const token = window.authManager?.getAuthToken();
+                console.log('Auth token:', token ? 'Present' : 'Missing');
+                
+                if (!token) {
+                    resultDiv.innerHTML = '<div style="color: red;">Error: No auth token. Please login first.</div>';
+                    return;
+                }
+                
+                // Test data - ensure CategoryId exists
+                const blogData = {
+                    title: 'Test Blog ' + Date.now(),
+                    content: '<p>This is a test blog content</p>',
+                    tags: 'test, demo',
+                    categoryId: 1
+                };
+                
+                // First, let's check if category exists
+                console.log('Testing category API first...');
+                const categoryResponse = await fetch('http://localhost:5062/api/category', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (categoryResponse.ok) {
+                    const categories = await categoryResponse.json();
+                    console.log('Available categories:', categories);
+                    if (categories.length > 0) {
+                        blogData.categoryId = categories[0].id;
+                        console.log('Using category ID:', blogData.categoryId);
+                    }
+                } else {
+                    console.warn('Could not fetch categories');
+                }
+                
+                console.log('Testing blog creation with data:', blogData);
+                
+                // Test API call
+                const response = await fetch('http://localhost:5062/api/blog', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(blogData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const responseText = await response.text();
+                console.log('Response body:', responseText);
+                
+                if (response.ok) {
+                    const result = JSON.parse(responseText);
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            <h4>Success!</h4>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color: red;">
+                            <h4>Error ${response.status}: ${response.statusText}</h4>
+                            <pre>${responseText}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        <h4>Exception:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testImageUpload() {
+            const resultDiv = document.getElementById('upload-result');
+            const fileInput = document.getElementById('test-file');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                resultDiv.innerHTML = '<div style="color: red;">Please select a file first</div>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            resultDiv.innerHTML = 'Testing upload...';
+            
+            try {
+                const token = window.authManager?.getAuthToken();
+                if (!token) {
+                    resultDiv.innerHTML = '<div style="color: red;">Please login first</div>';
+                    return;
+                }
+                
+                // First, create a test blog to get a real blog ID
+                const testBlogData = {
+                    title: 'Test Blog for Upload ' + Date.now(),
+                    content: '<p>Test content for image upload</p>',
+                    tags: 'test',
+                    categoryId: 1
+                };
+                
+                console.log('Creating test blog first...');
+                const blogResponse = await fetch('http://localhost:5062/api/blog', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(testBlogData)
+                });
+                
+                if (!blogResponse.ok) {
+                    resultDiv.innerHTML = '<div style="color: red;">Failed to create test blog first</div>';
+                    return;
+                }
+                
+                const blogResult = await blogResponse.json();
+                const blogId = blogResult.data.id;
+                console.log('Created test blog with ID:', blogId);
+                
+                // Now test upload to real blog ID
+                const formData = new FormData();
+                formData.append('files', file);
+                
+                console.log('Testing upload with file:', file.name, file.size, file.type);
+                
+                const response = await fetch(`http://localhost:5062/api/blog/${blogId}/upload-images`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                console.log('Upload response status:', response.status);
+                
+                const responseText = await response.text();
+                console.log('Upload response:', responseText);
+                
+                if (response.ok) {
+                    const result = JSON.parse(responseText);
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            <h4>Upload Success!</h4>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color: red;">
+                            <h4>Upload Failed ${response.status}: ${response.statusText}</h4>
+                            <pre>${responseText}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Upload test error:', error);
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        <h4>Exception:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
