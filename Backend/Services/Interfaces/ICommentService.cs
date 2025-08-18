@@ -18,6 +18,7 @@ namespace FlowerSellingWebsite.Services.Interfaces
         
         // Get comments by blog
         Task<List<CommentDTO>> GetCommentsByBlogIdAsync(int blogId);
+        Task<List<CommentDTO>> GetAllCommentsByBlogIdAsync(int blogId, int currentUserId);
         Task<List<CommentDTO>> GetCommentsByParentIdAsync(int parentId);
         
         // Get comments by user

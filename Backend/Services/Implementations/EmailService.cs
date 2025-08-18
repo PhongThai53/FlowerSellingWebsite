@@ -91,12 +91,12 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             try
             {
-                var smtpHost = _configuration["EmailSettings:SmtpHost"];
-                var smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
-                var smtpUser = _configuration["EmailSettings:SmtpUser"];
-                var smtpPass = _configuration["EmailSettings:SmtpPassword"];
-                var fromEmail = _configuration["EmailSettings:FromEmail"];
-                var fromName = _configuration["EmailSettings:FromName"];
+                var smtpHost = _configuration["EmailSettings:SmtpServer"];
+                var smtpPort = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
+                var smtpUser = _configuration["EmailSettings:Username"];
+                var smtpPass = _configuration["EmailSettings:Password"];
+                var fromEmail = _configuration["EmailSettings:SenderEmail"];
+                var fromName = _configuration["EmailSettings:SenderName"];
 
                 using var client = new SmtpClient(smtpHost, smtpPort)
                 {

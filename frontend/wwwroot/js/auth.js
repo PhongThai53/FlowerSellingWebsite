@@ -446,6 +446,7 @@ class AuthManager {
   updateUserInterface() {
     const userDropdown = document.getElementById("user-dropdown");
     const mobileUserMenu = document.getElementById("mobile-user-menu");
+    const adminUserManagement = document.getElementById("admin-user-management");
 
     // Safety check to ensure the elements exist
     if (!userDropdown && !mobileUserMenu) {
@@ -457,22 +458,57 @@ class AuthManager {
         this.user.fullName || this.user.userName
       }`;
 
+      // Check if user is Admin to show User Management menu
+      const isAdmin = this.user && this.user.roleName === 'Admin';
+      if (adminUserManagement) {
+        adminUserManagement.style.display = isAdmin ? 'block' : 'none';
+      }
+
       // Update desktop user menu for authenticated users
       if (userDropdown) {
-        userDropdown.innerHTML = `
-          <li><a href="/html/common/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
+        let userMenuItems = `
+          <li><a href="/html/auth/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
+        `;
+        
+        // Add User Management link for Admin users
+        if (isAdmin) {
+          userMenuItems += `
+            <li><a href="/html/user/user-list.html"><i class="fa fa-users"></i> Quản lý người dùng</a></li>
+          `;
+        }
+        
+        userMenuItems += `
           <li><a href="#" onclick="authManager.logout()"><i class="lnr lnr-exit"></i> Logout</a></li>
         `;
+        
+        userDropdown.innerHTML = userMenuItems;
       }
 
       // Update mobile user menu for authenticated users
       if (mobileUserMenu) {
-        mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="/html/common/my-account.html">My Account</a>
+        let mobileMenuItems = `
+          <a class="dropdown-item" href="/html/auth/my-account.html">My Account</a>
+        `;
+        
+        // Add User Management link for Admin users in mobile menu
+        if (isAdmin) {
+          mobileMenuItems += `
+            <a class="dropdown-item" href="/html/user/user-list.html"><i class="fa fa-users"></i> Quản lý người dùng</a>
+          `;
+        }
+        
+        mobileMenuItems += `
           <a class="dropdown-item" href="#" onclick="authManager.logout()">Logout</a>
         `;
+        
+        mobileUserMenu.innerHTML = mobileMenuItems;
       }
     } else {
+      // Hide User Management menu for non-authenticated users
+      if (adminUserManagement) {
+        adminUserManagement.style.display = 'none';
+      }
+
       // Update desktop user menu for non-authenticated users
       if (userDropdown) {
         userDropdown.innerHTML = `

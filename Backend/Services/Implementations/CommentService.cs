@@ -10,11 +10,16 @@ namespace FlowerSellingWebsite.Services.Implementations
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IBlogRepository _blogRepository;
+        private readonly IUserRepository _userRepository;
 
-        public CommentService(ICommentRepository commentRepository, IBlogRepository blogRepository) : base(commentRepository)
+        public CommentService(
+            ICommentRepository commentRepository, 
+            IBlogRepository blogRepository,
+            IUserRepository userRepository) : base(commentRepository)
         {
             _commentRepository = commentRepository;
             _blogRepository = blogRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<CommentDTO> GetCommentByIdAsync(int id)
@@ -126,6 +131,29 @@ namespace FlowerSellingWebsite.Services.Implementations
             var comments = await _commentRepository.GetCommentsByBlogIdAsync(blogId);
             return comments.Select(MapToCommentDTO).ToList();
         }
+        
+        public async Task<List<CommentDTO>> GetAllCommentsByBlogIdAsync(int blogId, int currentUserId)
+        {
+            // Check if user is admin or blog owner
+            var blog = await _blogRepository.getByIdAsync(blogId);
+            if (blog == null)
+                throw new KeyNotFoundException($"Blog with ID {blogId} not found.");
+                
+            bool isAdminOrOwner = blog.UserId == currentUserId || await IsAdminUser(currentUserId);
+            
+            // If user is admin or blog owner, get all comments including hidden ones
+            if (isAdminOrOwner)
+            {
+                var allComments = await _commentRepository.GetAllCommentsByBlogIdAsync(blogId);
+                return allComments.Select(MapToCommentDTO).ToList();
+            }
+            else
+            {
+                // Otherwise, get only visible comments
+                var visibleComments = await _commentRepository.GetCommentsByBlogIdAsync(blogId);
+                return visibleComments.Select(MapToCommentDTO).ToList();
+            }
+        }
 
         public async Task<List<CommentDTO>> GetCommentsByParentIdAsync(int parentId)
         {
@@ -160,10 +188,13 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         private async Task<bool> IsAdminUser(int userId)
         {
-            // This should be implemented based on your user role system
-            // For now, assuming you have a way to check if user is admin
-            // You might need to inject IUserService or check role directly
-            return false; // TODO: Implement admin check
+            // Get user's role from the database
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+                
+            // Check if user has Admin role
+            return user.Role?.RoleName == "Admin";
         }
     }
 }
