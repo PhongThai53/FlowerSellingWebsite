@@ -66,7 +66,10 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<DeleteProductCategoryDTO, ProductCategories>();
 
             // ------------------ Users ------------------
-            CreateMap<Users, UserDTO>().ReverseMap();
+            CreateMap<Users, UserDTO>()
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone))
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : string.Empty))
+                .ReverseMap();
         }
     }
 }
