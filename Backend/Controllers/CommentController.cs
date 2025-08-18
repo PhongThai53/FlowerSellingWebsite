@@ -62,8 +62,19 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
-                var comments = await _commentService.GetCommentsByBlogIdAsync(blogId);
-                return Ok(ApiResponse<List<CommentDTO>>.Ok(comments, "Comments retrieved successfully"));
+                // If user is authenticated, use the method that considers permissions
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = await GetCurrentUserId();
+                    var comments = await _commentService.GetAllCommentsByBlogIdAsync(blogId, userId);
+                    return Ok(ApiResponse<List<CommentDTO>>.Ok(comments, "Comments retrieved successfully"));
+                }
+                else
+                {
+                    // For unauthenticated users, only show visible comments
+                    var comments = await _commentService.GetCommentsByBlogIdAsync(blogId);
+                    return Ok(ApiResponse<List<CommentDTO>>.Ok(comments, "Comments retrieved successfully"));
+                }
             }
             catch (Exception ex)
             {
@@ -168,7 +179,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -197,7 +208,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -226,7 +237,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -255,7 +266,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {

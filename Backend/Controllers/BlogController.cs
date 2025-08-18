@@ -216,7 +216,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -245,7 +245,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -274,7 +274,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (InvalidOperationException ex)
             {
@@ -307,7 +307,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (InvalidOperationException ex)
             {
@@ -345,7 +345,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (InvalidOperationException ex)
             {
@@ -378,7 +378,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (InvalidOperationException ex)
             {
@@ -411,7 +411,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -461,7 +461,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -498,7 +498,7 @@ namespace FlowerSellingWebsite.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, ApiResponse<bool>.Fail(ex.Message));
             }
             catch (Exception ex)
             {

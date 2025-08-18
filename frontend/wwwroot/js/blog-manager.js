@@ -6,10 +6,12 @@ class BlogManager {
         this.pageSize = 6;
         this.totalPages = 0;
         this.currentBlogId = null;
+        this.blogOwnerId = null;
         this.uploadedImages = [];
         this.pendingFiles = [];
         this.quillEditor = null;
         this.loadingTimeout = null;
+        this.replyingToCommentId = null;
         
         // Blog status enum
         this.BlogStatus = {
@@ -32,6 +34,17 @@ class BlogManager {
 
     // Initialize Blog List Page
     initializeBlogList() {
+        // Debug authentication state
+        console.log('BlogList initialization debug:', {
+            authManager: window.authManager,
+            isAuthenticated: window.authManager?.isAuthenticated(),
+            currentUser: window.authManager?.getCurrentUser(),
+            token: window.authManager?.getAuthToken() ? 'Present' : 'Missing'
+        });
+        
+        // Debug backend user info
+        this.debugBackendUser();
+        
         this.loadCategories();
         this.setupFilterEventListeners();
         this.showUserViewInfo();
@@ -44,20 +57,45 @@ class BlogManager {
         const isAdmin = currentUser?.roleName === 'Admin';
         const infoContainer = document.getElementById('view-info-container');
         
+        // Debug logging for role detection
+        console.log('showUserViewInfo Debug:', {
+            currentUser: currentUser,
+            roleName: currentUser?.roleName,
+            isAdmin: isAdmin,
+            availableRoles: ['Admin', 'User', 'Moderator'] // Example roles for comparison
+        });
+        
         if (infoContainer) {
             if (isAdmin) {
                 infoContainer.innerHTML = `
                     <div class="alert alert-info mb-3">
                         <i class="fa fa-shield-alt"></i> <strong>Admin View:</strong> You can see all blogs and manage them.
+                        <br><small>Role: ${currentUser?.roleName}</small>
                     </div>
                 `;
             } else {
                 infoContainer.innerHTML = `
                     <div class="alert alert-success mb-3">
                         <i class="fa fa-user"></i> <strong>User View:</strong> You can see published blogs and your own blogs (all statuses). You can only edit your own blogs.
+                        <br><small>Role: ${currentUser?.roleName || 'Not detected'}</small>
                     </div>
                 `;
             }
+        }
+    }
+
+    // Debug backend user information
+    async debugBackendUser() {
+        try {
+            const response = await this.makeAuthenticatedRequest(`${this.apiBaseUrl}/blog/debug/user`);
+            if (response && response.ok) {
+                const result = await response.json();
+                console.log('Backend User Debug:', result);
+            } else {
+                console.error('Debug endpoint failed:', response?.status, response?.statusText);
+            }
+        } catch (error) {
+            console.error('Debug request error:', error);
         }
     }
 
@@ -295,13 +333,26 @@ class BlogManager {
             // Determine which endpoint to use based on user role
             const currentUser = window.authManager?.getCurrentUser();
             const isAdmin = currentUser?.roleName === 'Admin';
+            
+            // Debug logging
+            console.log('loadBlogs Debug:', {
+                currentUser: currentUser,
+                roleName: currentUser?.roleName,
+                isAdmin: isAdmin,
+                filters: filters
+            });
+            
             const endpoint = isAdmin ? 
                 `${this.apiBaseUrl}/blog?${queryParams.toString()}` : 
                 `${this.apiBaseUrl}/blog/user-view?${queryParams.toString()}`;
             
+            console.log('Using endpoint:', endpoint);
+            
             const response = await this.makeAuthenticatedRequest(endpoint, {
                 method: 'GET'
             });
+            
+            console.log('API Response status:', response?.status, response?.statusText);
 
             // Clear loading timeout since we got a response
             if (this.loadingTimeout) {
@@ -311,16 +362,49 @@ class BlogManager {
 
             if (response && response.ok) {
                 const result = await response.json();
+                console.log('API Result:', result);
                 
+                console.log('Result structure:', {
+                    succeeded: result.succeeded,
+                    hasData: !!result.data,
+                    dataType: typeof result.data,
+                    hasBlogs: result.data && Array.isArray(result.data.blogs),
+                    blogCount: result.data?.blogs?.length,
+                    totalCount: result.data?.totalCount,
+                    pageCount: result.data?.pageCount,
+                    fullData: result.data
+                });
+                
+                // Check if we have valid data structure
                 if (result.succeeded && result.data) {
+                    // Ensure data.blogs is an array
+                    if (!Array.isArray(result.data.blogs)) {
+                        console.error('Invalid data structure: blogs is not an array', result.data);
+                        if (typeof result.data.blogs === 'object' && result.data.blogs !== null) {
+                            console.log('Converting blogs object to array');
+                            result.data.blogs = Object.values(result.data.blogs);
+                        } else {
+                            console.error('Cannot render blogs - invalid data structure');
+                            this.showError(container, 'Invalid data structure: blogs is not an array');
+                            return;
+                        }
+                    }
+                    
                     this.renderBlogList(result.data);
                     this.renderPagination(result.data);
                     this.updateResultsSummary(result.data);
                 } else {
+                    console.error('API Result failed:', result);
                     this.showError(container, result.message || 'Failed to load blogs');
                 }
             } else {
-                this.showError(container, 'Failed to load blogs');
+                const errorText = response ? await response.text() : 'No response';
+                console.error('API Error Response:', {
+                    status: response?.status,
+                    statusText: response?.statusText,
+                    errorText: errorText
+                });
+                this.showError(container, `Failed to load blogs: ${response?.status || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error loading blogs:', error);
@@ -347,9 +431,11 @@ class BlogManager {
     }
 
     renderBlogList(data) {
+        console.log('renderBlogList called with data:', data);
         const container = document.getElementById('blog-list-container');
         
-        if (!data.blogs || data.blogs.length === 0) {
+        if (!data || !data.blogs || data.blogs.length === 0) {
+            console.log('No blogs to render - showing empty state');
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fa fa-newspaper fa-3x text-muted"></i>
@@ -361,20 +447,41 @@ class BlogManager {
             return;
         }
 
-        // Use DocumentFragment for better performance
-        const fragment = document.createDocumentFragment();
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'row';
+        console.log(`Rendering ${data.blogs.length} blogs`);
         
-        data.blogs.forEach(blog => {
-            const cardElement = document.createElement('div');
-            cardElement.innerHTML = this.createBlogCard(blog);
-            rowDiv.appendChild(cardElement.firstElementChild);
-        });
-        
-        fragment.appendChild(rowDiv);
-        container.innerHTML = '';
-        container.appendChild(fragment);
+        try {
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row';
+            
+            data.blogs.forEach((blog, index) => {
+                console.log(`Rendering blog ${index + 1}/${data.blogs.length}:`, blog.id, blog.title);
+                try {
+                    const cardElement = document.createElement('div');
+                    cardElement.innerHTML = this.createBlogCard(blog);
+                    if (cardElement.firstElementChild) {
+                        rowDiv.appendChild(cardElement.firstElementChild);
+                    } else {
+                        console.error('Blog card has no firstElementChild', blog.id, blog.title);
+                    }
+                } catch (err) {
+                    console.error(`Error creating card for blog ${blog.id}:`, err);
+                }
+            });
+            
+            fragment.appendChild(rowDiv);
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            console.log('Blog list rendered successfully');
+        } catch (error) {
+            console.error('Error rendering blog list:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle"></i> Error rendering blogs: ${error.message}
+                </div>
+            `;
+        }
     }
 
     createBlogCard(blog) {
@@ -389,17 +496,16 @@ class BlogManager {
         const isCurrentUser = currentUser?.id === blog.userId;
         const isAdmin = currentUser?.roleName === 'Admin';
         
-        // Debug logging for first blog item
-        if (blog.id === data.blogs[0]?.id) {
-            console.log('Blog list permission check:', {
-                currentUserId: currentUser?.id,
-                currentUserRole: currentUser?.roleName,
-                blogUserId: blog.userId,
-                blogTitle: blog.title,
-                isCurrentUser: isCurrentUser,
-                isAdmin: isAdmin
-            });
-        }
+        // Debug logging
+        console.log('Blog card permission check:', {
+            blogId: blog.id,
+            currentUserId: currentUser?.id,
+            currentUserRole: currentUser?.roleName,
+            blogUserId: blog.userId,
+            blogTitle: blog.title,
+            isCurrentUser: isCurrentUser,
+            isAdmin: isAdmin
+        });
 
         // Create image element with better error handling
         const imageElement = hasImage 
@@ -1013,6 +1119,9 @@ class BlogManager {
     }
 
     populateBlogDetail(blog) {
+        // Store blog owner ID for permission checks
+        this.blogOwnerId = blog.userId;
+        
         // Populate detail view elements
         document.getElementById('detail-title').textContent = blog.title;
         document.getElementById('detail-category').textContent = blog.categoryName;
@@ -1088,16 +1197,15 @@ class BlogManager {
                 </a>
             `;
         } else {
-            editButtonContainer.innerHTML = `
-                <div class="alert alert-warning mt-2">
-                    <i class="fa fa-lock"></i> You don't have permission to edit this blog.
-                    <br><small>Current User ID: ${currentUser?.id}, Blog User ID: ${blog.userId}</small>
-                </div>
-            `;
+            // Không hiển thị gì cả khi không có quyền edit
+            editButtonContainer.innerHTML = '';
         }
     }
 
     populateBlogForm(blog) {
+        // Store blog owner ID for permission checks
+        this.blogOwnerId = blog.userId;
+        
         // Update page title and breadcrumb
         document.getElementById('page-title').textContent = 'Edit Blog';
         document.getElementById('breadcrumb-current').textContent = 'Edit Blog';
@@ -1269,14 +1377,10 @@ class BlogManager {
                     break;
             }
         } else {
-            // User without permission - hide edit buttons but may show view-only message
+            // User without permission - hide edit buttons completely
             const viewOnlyMessage = document.getElementById('blog-actions');
             if (viewOnlyMessage) {
-                viewOnlyMessage.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="fa fa-lock"></i> You don't have permission to edit this blog.
-                    </div>
-                `;
+                viewOnlyMessage.innerHTML = ''; // Không hiển thị gì cả
             }
         }
     }
@@ -1704,9 +1808,16 @@ class BlogManager {
 
     createCommentHtml(comment) {
         const createdDate = new Date(comment.createdAt).toLocaleDateString();
-        const isCurrentUser = window.authManager?.getCurrentUser()?.id === comment.userId;
-        const isAdmin = window.authManager?.getCurrentUser()?.roleName === 'Admin';
-        const isBlogOwner = window.authManager?.getCurrentUser()?.id === this.currentBlogId; // Assuming we have blog owner info
+        const currentUser = window.authManager?.getCurrentUser();
+        const isCurrentUser = currentUser?.id === comment.userId;
+        const isAdmin = currentUser?.roleName === 'Admin';
+        const isBlogOwner = currentUser?.id === this.blogOwnerId; // Blog owner ID
+        const canSeeHidden = isAdmin || isBlogOwner;
+        
+        // Skip hidden comments for regular users
+        if (comment.isHide && !canSeeHidden) {
+            return '';
+        }
 
         return `
             <div class="comment-item ${comment.isHide ? 'opacity-50' : ''}">
@@ -1729,12 +1840,12 @@ class BlogManager {
                             <i class="fa fa-trash"></i> Delete
                         </button>
                     ` : ''}
-                    ${(isAdmin || isBlogOwner) && !comment.isHide ? `
+                    ${canSeeHidden && !comment.isHide ? `
                         <button onclick="blogManager.hideComment(${comment.id})" class="btn btn-sm btn-warning">
                             <i class="fa fa-eye-slash"></i> Hide
                         </button>
                     ` : ''}
-                    ${(isAdmin || isBlogOwner) && comment.isHide ? `
+                    ${canSeeHidden && comment.isHide ? `
                         <button onclick="blogManager.showComment(${comment.id})" class="btn btn-sm btn-info">
                             <i class="fa fa-eye"></i> Show
                         </button>
@@ -1745,6 +1856,210 @@ class BlogManager {
                 </div>
             </div>
         `;
+    }
+
+    // Reply to a comment
+    replyToComment(commentId) {
+        // Store the comment ID we're replying to
+        this.replyingToCommentId = commentId;
+        
+        // Scroll to comment form
+        const commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            commentForm.scrollIntoView({ behavior: 'smooth' });
+            
+            // Focus on the comment textarea
+            const commentTextarea = document.getElementById('comment-content');
+            if (commentTextarea) {
+                commentTextarea.focus();
+                
+                // Show reply indicator
+                const replyIndicator = document.getElementById('reply-indicator') || this.createReplyIndicator();
+                if (replyIndicator) {
+                    // Find the comment we're replying to
+                    const allComments = document.querySelectorAll('.comment-item');
+                    let commentAuthor = 'this comment';
+                    
+                    allComments.forEach(item => {
+                        if (item.querySelector(`button[onclick*="replyToComment(${commentId})"]`)) {
+                            const authorElement = item.querySelector('.comment-meta strong');
+                            if (authorElement) {
+                                commentAuthor = authorElement.textContent;
+                            }
+                        }
+                    });
+                    
+                    replyIndicator.innerHTML = `
+                        <div class="alert alert-info">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Replying to ${commentAuthor}</span>
+                                <button type="button" class="btn btn-sm btn-light" onclick="blogManager.cancelReply()">
+                                    <i class="fa fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    replyIndicator.style.display = 'block';
+                }
+            }
+        }
+    }
+    
+    // Create reply indicator element if it doesn't exist
+    createReplyIndicator() {
+        const commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            const replyIndicator = document.createElement('div');
+            replyIndicator.id = 'reply-indicator';
+            replyIndicator.style.marginBottom = '15px';
+            
+            // Insert before the textarea or as the first child
+            const textarea = commentForm.querySelector('textarea');
+            if (textarea) {
+                textarea.parentNode.insertBefore(replyIndicator, textarea);
+            } else {
+                commentForm.insertBefore(replyIndicator, commentForm.firstChild);
+            }
+            
+            return replyIndicator;
+        }
+        return null;
+    }
+    
+    // Cancel reply
+    cancelReply() {
+        this.replyingToCommentId = null;
+        
+        // Hide reply indicator
+        const replyIndicator = document.getElementById('reply-indicator');
+        if (replyIndicator) {
+            replyIndicator.style.display = 'none';
+        }
+    }
+    
+    // Edit comment
+    async editComment(commentId) {
+        try {
+            // Get the comment from API
+            const response = await this.makeAuthenticatedRequest(`${this.apiBaseUrl}/comment/${commentId}`);
+            
+            if (response && response.ok) {
+                const result = await response.json();
+                
+                if (result.succeeded && result.data) {
+                    const comment = result.data;
+                    
+                    // Find the comment element
+                    const commentElement = document.querySelector(`.comment-item button[onclick*="editComment(${commentId})"]`)?.closest('.comment-item');
+                    if (!commentElement) {
+                        this.showMessage('error', 'Could not find comment element');
+                        return;
+                    }
+                    
+                    // Create edit form
+                    const contentElement = commentElement.querySelector('.comment-content');
+                    const originalContent = contentElement.innerHTML;
+                    
+                    // Replace content with edit form
+                    contentElement.innerHTML = `
+                        <div class="edit-comment-form">
+                            <textarea class="form-control" rows="3">${comment.content}</textarea>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-primary save-edit-btn">
+                                    <i class="fa fa-save"></i> Save
+                                </button>
+                                <button class="btn btn-sm btn-secondary cancel-edit-btn">
+                                    <i class="fa fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add event listeners
+                    const saveBtn = contentElement.querySelector('.save-edit-btn');
+                    const cancelBtn = contentElement.querySelector('.cancel-edit-btn');
+                    const textarea = contentElement.querySelector('textarea');
+                    
+                    // Focus on textarea
+                    textarea.focus();
+                    
+                    // Save button
+                    saveBtn.addEventListener('click', async () => {
+                        const newContent = textarea.value.trim();
+                        if (!newContent) {
+                            this.showMessage('error', 'Comment cannot be empty');
+                            return;
+                        }
+                        
+                        await this.saveCommentEdit(commentId, newContent, contentElement, originalContent);
+                    });
+                    
+                    // Cancel button
+                    cancelBtn.addEventListener('click', () => {
+                        contentElement.innerHTML = originalContent;
+                    });
+                    
+                    // Hide action buttons while editing
+                    const actionButtons = commentElement.querySelector('.comment-actions');
+                    if (actionButtons) {
+                        actionButtons.style.display = 'none';
+                    }
+                } else {
+                    this.showMessage('error', result.message || 'Failed to get comment');
+                }
+            } else {
+                this.showMessage('error', 'Failed to get comment');
+            }
+        } catch (error) {
+            console.error('Error editing comment:', error);
+            this.showMessage('error', 'An error occurred while editing comment');
+        }
+    }
+    
+    // Save comment edit
+    async saveCommentEdit(commentId, content, contentElement, originalContent) {
+        try {
+            const response = await this.makeAuthenticatedRequest(
+                `${this.apiBaseUrl}/comment/${commentId}`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        content: content
+                    })
+                }
+            );
+            
+            if (response && response.ok) {
+                const result = await response.json();
+                
+                if (result.succeeded) {
+                    // Update content
+                    contentElement.innerHTML = content;
+                    
+                    // Show action buttons again
+                    const commentElement = contentElement.closest('.comment-item');
+                    const actionButtons = commentElement.querySelector('.comment-actions');
+                    if (actionButtons) {
+                        actionButtons.style.display = '';
+                    }
+                    
+                    this.showMessage('success', 'Comment updated successfully');
+                } else {
+                    // Restore original content on error
+                    contentElement.innerHTML = originalContent;
+                    this.showMessage('error', result.message || 'Failed to update comment');
+                }
+            } else {
+                // Restore original content on error
+                contentElement.innerHTML = originalContent;
+                this.showMessage('error', 'Failed to update comment');
+            }
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            // Restore original content on error
+            contentElement.innerHTML = originalContent;
+            this.showMessage('error', 'An error occurred while updating comment');
+        }
     }
 
     // Add Comment
@@ -1769,7 +2084,7 @@ class BlogManager {
                     body: JSON.stringify({
                         content: content,
                         blogId: this.currentBlogId,
-                        parentId: null
+                        parentId: this.replyingToCommentId || null
                     })
                 }
             );
@@ -1780,6 +2095,10 @@ class BlogManager {
                 if (result.succeeded) {
                     this.showMessage('success', 'Comment added successfully');
                     document.getElementById('comment-content').value = '';
+                    
+                    // Reset reply state
+                    this.cancelReply();
+                    
                     this.loadComments(this.currentBlogId); // Reload comments
                 } else {
                     this.showMessage('error', result.message || 'Failed to add comment');
