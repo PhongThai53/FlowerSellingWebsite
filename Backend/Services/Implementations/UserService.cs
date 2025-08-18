@@ -537,21 +537,35 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<bool> ResetPasswordAsync(string token, string newPassword)
         {
+            _logger.LogInformation("Attempting to reset password with token: {Token}", token);
+            
             if (_passwordResetService.ValidatePasswordResetToken(token, out var email))
             {
+                _logger.LogInformation("Token validation successful for email: {Email}", email);
                 var user = await _userRepository.GetByEmailAsync(email);
                 if (user != null)
                 {
+                    _logger.LogInformation("User found for email: {Email}", email);
                     // Check if the new password is the same as the old one
                     if (BCrypt.Net.BCrypt.Verify(newPassword, user.PasswordHash))
                     {
+                        _logger.LogWarning("User attempted to reset password to the same password");
                         throw new InvalidOperationException("New password cannot be the same as the old password.");
                     }
                     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
                     await _userRepository.UpdateAsync(user);
                     _passwordResetService.RemovePasswordResetToken(token);
+                    _logger.LogInformation("Password reset completed successfully for user: {Email}", email);
                     return true;
                 }
+                else
+                {
+                    _logger.LogWarning("No user found for email: {Email}", email);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Token validation failed for token: {Token}", token);
             }
             return false;
         }

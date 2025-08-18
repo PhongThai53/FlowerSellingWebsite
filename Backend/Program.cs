@@ -1,4 +1,5 @@
 ﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
+using FlowerSellingWebsite.Infrastructure.DbContext;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
 using FlowerSellingWebsite.Repositories.Implementations;
@@ -207,12 +208,12 @@ app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"), appBuild
 
 app.MapControllers();
 
-// Optional: Seed Data
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
-//    await db.Database.MigrateAsync();
-//    SeedData.Initialize(db);
-//}
+//Optional: Seed Data
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+    await db.Database.MigrateAsync();
+    SeedData.Initialize(db);
+}
 
 app.Run();

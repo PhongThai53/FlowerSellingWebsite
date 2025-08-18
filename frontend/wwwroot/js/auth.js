@@ -460,7 +460,7 @@ class AuthManager {
       // Update desktop user menu for authenticated users
       if (userDropdown) {
         userDropdown.innerHTML = `
-          <li><a href="/html/auth/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
+          <li><a href="/html/common/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
           <li><a href="#" onclick="authManager.logout()"><i class="lnr lnr-exit"></i> Logout</a></li>
         `;
       }
@@ -468,7 +468,7 @@ class AuthManager {
       // Update mobile user menu for authenticated users
       if (mobileUserMenu) {
         mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="/html/auth/my-account.html">My Account</a>
+          <a class="dropdown-item" href="/html/common/my-account.html">My Account</a>
           <a class="dropdown-item" href="#" onclick="authManager.logout()">Logout</a>
         `;
       }

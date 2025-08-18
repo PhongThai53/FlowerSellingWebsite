@@ -246,12 +246,15 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
+                _logger.LogInformation("Reset password attempt with token: {Token}", resetPasswordDto.Token);
                 var success = await _userService.ResetPasswordAsync(resetPasswordDto.Token, resetPasswordDto.NewPassword);
                 if (success)
                 {
+                    _logger.LogInformation("Password reset successful for token: {Token}", resetPasswordDto.Token);
                     var message = "<div class='alert alert-success'>Password has been reset successfully. <a href='/html/auth/login-register.html'>Click here to login</a>.</div>";
                     return Content(message, "text/html");
                 }
+                _logger.LogWarning("Password reset failed - invalid or expired token: {Token}", resetPasswordDto.Token);
                 var errorMessage = "<div class='alert alert-danger'>Invalid or expired token. Please try resetting your password again.</div>";
                 return Content(errorMessage, "text/html");
             }
