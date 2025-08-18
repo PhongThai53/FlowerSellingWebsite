@@ -35,6 +35,52 @@ namespace FlowerSellingWebsite.Controllers
             return Ok("Blog Controller is working!");
         }
 
+        [HttpGet("debug/user")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<object>>> DebugUser()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
+                var allClaims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+                
+                Guid? userPublicId = null;
+                if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid parsed))
+                {
+                    userPublicId = parsed;
+                }
+                
+                Models.Entities.Users? user = null;
+                if (userPublicId.HasValue)
+                {
+                    user = await _userRepository.GetByPublicIdAsync(userPublicId.Value);
+                }
+                
+                var debugInfo = new
+                {
+                    JWT_Claims = allClaims,
+                    UserIdClaim = userIdClaim,
+                    RoleClaim = roleClaim,
+                    ParsedPublicId = userPublicId,
+                    DatabaseUser = user != null ? new
+                    {
+                        user.Id,
+                        user.PublicId,
+                        user.UserName,
+                        user.Email,
+                        RoleName = user.Role?.RoleName
+                    } : null
+                };
+                
+                return Ok(ApiResponse<object>.Ok(debugInfo, "Debug info retrieved"));
+            }
+            catch (Exception ex)
+            {
+                return Ok(ApiResponse<object>.Fail($"Debug error: {ex.Message}"));
+            }
+        }
+
         /// <summary>
         /// Get blogs with filtering, searching, sorting and pagination (Admin view - all blogs)
         /// </summary>

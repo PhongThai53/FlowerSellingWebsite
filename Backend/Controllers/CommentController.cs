@@ -1,5 +1,6 @@
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.DTOs.Comment;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,13 @@ namespace FlowerSellingWebsite.Controllers
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<CommentController> _logger;
 
-        public CommentController(ICommentService commentService, ILogger<CommentController> logger)
+        public CommentController(ICommentService commentService, IUserRepository userRepository, ILogger<CommentController> logger)
         {
             _commentService = commentService;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -119,7 +122,7 @@ namespace FlowerSellingWebsite.Controllers
                     return BadRequest(ApiResponse<CommentDTO>.Fail("Invalid input data"));
                 }
 
-                var userId = GetCurrentUserId();
+                var userId = await GetCurrentUserId();
                 var createdComment = await _commentService.CreateCommentAsync(createCommentDTO, userId);
                 
                 return CreatedAtAction(nameof(GetCommentById), new { id = createdComment.Id }, 
@@ -154,7 +157,7 @@ namespace FlowerSellingWebsite.Controllers
                     return BadRequest(ApiResponse<CommentDTO>.Fail("Invalid input data"));
                 }
 
-                var userId = GetCurrentUserId();
+                var userId = await GetCurrentUserId();
                 var updatedComment = await _commentService.UpdateCommentAsync(id, updateCommentDTO, userId);
                 
                 return Ok(ApiResponse<CommentDTO>.Ok(updatedComment, "Comment updated successfully"));
@@ -183,7 +186,7 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = await GetCurrentUserId();
                 var result = await _commentService.DeleteCommentAsync(id, userId);
                 
                 return Ok(ApiResponse<bool>.Ok(result, "Comment deleted successfully"));
@@ -212,7 +215,7 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = await GetCurrentUserId();
                 var result = await _commentService.HideCommentAsync(id, userId);
                 
                 return Ok(ApiResponse<bool>.Ok(result, "Comment hidden successfully"));
@@ -241,7 +244,7 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = await GetCurrentUserId();
                 var result = await _commentService.ShowCommentAsync(id, userId);
                 
                 return Ok(ApiResponse<bool>.Ok(result, "Comment shown successfully"));
@@ -261,14 +264,22 @@ namespace FlowerSellingWebsite.Controllers
             }
         }
 
-        private int GetCurrentUserId()
+        private async Task<int> GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userPublicId))
             {
                 throw new UnauthorizedAccessException("User ID not found in token");
             }
-            return userId;
+            
+            // Get user by PublicId to find database ID
+            var user = await _userRepository.GetByPublicIdAsync(userPublicId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User not found");
+            }
+            
+            return user.Id;
         }
     }
 }
