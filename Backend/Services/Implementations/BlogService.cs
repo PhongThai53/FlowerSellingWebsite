@@ -10,10 +10,12 @@ namespace FlowerSellingWebsite.Services.Implementations
     public class BlogService : BaseService<Blog>, IBlogService
     {
         private readonly IBlogRepository _blogRepository;
+        private readonly IUserRepository _userRepository;
 
-        public BlogService(IBlogRepository blogRepository) : base(blogRepository)
+        public BlogService(IBlogRepository blogRepository, IUserRepository userRepository) : base(blogRepository)
         {
             _blogRepository = blogRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<PagedBlogResultDTO> GetBlogsWithFiltersAsync(BlogFilterDTO filters)
@@ -377,10 +379,13 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         private async Task<bool> IsAdminUser(int userId)
         {
-            // This should be implemented based on your user role system
-            // For now, assuming you have a way to check if user is admin
-            // You might need to inject IUserService or check role directly
-            return false; // TODO: Implement admin check
+            // Get user's role from the database
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+                
+            // Check if user has Admin role
+            return user.Role?.RoleName == "Admin";
         }
     }
 }
