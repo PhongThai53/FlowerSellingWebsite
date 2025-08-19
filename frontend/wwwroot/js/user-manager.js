@@ -299,6 +299,7 @@ class UserManager {
             console.warn('No role-filter elements found');
         }
 
+        
         // Try to populate role select in detail form
         const roleSelect = document.getElementById('roleName');
         if (roleSelect) {
