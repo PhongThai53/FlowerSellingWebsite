@@ -20,7 +20,6 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             IQueryable<Orders> query = _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Supplier)
                 .Include(o => o.CreatedByUser)
                 .Include(o => o.OrderDetails)
                 .Where(o => !o.IsDeleted);
@@ -32,24 +31,13 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 query = query.Where(o =>
                     o.OrderNumber.ToLower().Contains(searchTerm) ||
                     (o.Customer != null && o.Customer.FullName != null && o.Customer.FullName.ToLower().Contains(searchTerm)) ||
-                    (o.Supplier != null && o.Supplier.SupplierName != null && o.Supplier.SupplierName.ToLower().Contains(searchTerm)) ||
                     (o.Notes != null && o.Notes.ToLower().Contains(searchTerm))
                 );
-            }
-
-            if (filters.IsSaleOrder.HasValue)
-            {
-                query = query.Where(o => o.IsSaleOrder == filters.IsSaleOrder.Value);
             }
 
             if (filters.CustomerId.HasValue)
             {
                 query = query.Where(o => o.CustomerId == filters.CustomerId.Value);
-            }
-
-            if (filters.SupplierId.HasValue)
-            {
-                query = query.Where(o => o.SupplierId == filters.SupplierId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(filters.Status))
@@ -126,10 +114,6 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                     return sortDescending 
                         ? query.OrderByDescending(o => o.Customer != null ? o.Customer.FullName : string.Empty)
                         : query.OrderBy(o => o.Customer != null ? o.Customer.FullName : string.Empty);
-                case "suppliername":
-                    return sortDescending 
-                        ? query.OrderByDescending(o => o.Supplier != null ? o.Supplier.SupplierName : string.Empty) 
-                        : query.OrderBy(o => o.Supplier != null ? o.Supplier.SupplierName : string.Empty);
                 default:
                     // Default sort by OrderDate descending
                     return query.OrderByDescending(o => o.OrderDate);
@@ -140,7 +124,6 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             return await _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Supplier)
                 .Include(o => o.CreatedByUser)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
@@ -155,7 +138,6 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             return await _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Supplier)
                 .Include(o => o.CreatedByUser)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
@@ -198,10 +180,8 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task<IEnumerable<Orders>> GetOrdersBySupplierIdAsync(int supplierId)
         {
             return await _context.Orders
-                .Include(o => o.Supplier)
                 .Include(o => o.CreatedByUser)
                 .Include(o => o.OrderDetails)
-                .Where(o => o.SupplierId == supplierId && !o.IsDeleted)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
@@ -210,7 +190,6 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             return await _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Supplier)
                 .Include(o => o.CreatedByUser)
                 .Include(o => o.OrderDetails)
                 .Where(o => o.Status.ToLower() == status.ToLower() && !o.IsDeleted)

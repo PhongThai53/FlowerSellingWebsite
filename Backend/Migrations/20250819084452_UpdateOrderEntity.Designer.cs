@@ -4,6 +4,7 @@ using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    partial class FlowerSellingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250819084452_UpdateOrderEntity")]
+    partial class UpdateOrderEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1435,9 +1438,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1448,10 +1448,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
-
-                    b.HasIndex("SupplierId")
-                        .IsUnique()
-                        .HasFilter("[SupplierId] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -1812,13 +1808,7 @@ namespace FlowerSellingWebsite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
-                        .WithOne("User")
-                        .HasForeignKey("FlowerSellingWebsite.Models.Entities.Users", "SupplierId");
-
                     b.Navigation("Role");
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
@@ -1932,8 +1922,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("PurchaseOrders");
 
                     b.Navigation("SupplierListings");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Users", b =>

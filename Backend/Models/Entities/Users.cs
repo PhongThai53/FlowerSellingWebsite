@@ -15,12 +15,14 @@ namespace FlowerSellingWebsite.Models.Entities
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        public int? SupplierId { get; set; }
 
         [Required]
         [ForeignKey("Roles")]
         public int RoleId { get; set; }
 
         // Navigation properties
+        public virtual Suppliers? Supplier { get; set; }
         public virtual Roles Role { get; set; } = null!;
         public virtual ICollection<Orders> Orders { get; set; } = new HashSet<Orders>();
         public virtual ICollection<FlowerPriceHistory> FlowerPriceHistories { get; set; } = new HashSet<FlowerPriceHistory>();
