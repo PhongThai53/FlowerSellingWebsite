@@ -9,6 +9,8 @@ namespace FlowerSellingWebsite.Models.DTOs
 
         [Required(ErrorMessage = "New password is required")]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.s*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$",
+            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")]
         public string NewPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Confirm password is required")]

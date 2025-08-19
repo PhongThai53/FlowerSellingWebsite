@@ -313,6 +313,12 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new UnauthorizedAccessException("Current password is incorrect");
                 }
 
+                // Check if new password is the same as current password
+                if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.PasswordHash))
+                {
+                    throw new InvalidOperationException("New password cannot be the same as the current password");
+                }
+
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
 
                 await _userRepository.UpdateAsync(user);
