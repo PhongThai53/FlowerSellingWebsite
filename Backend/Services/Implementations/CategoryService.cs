@@ -2,15 +2,14 @@ using FlowerSellingWebsite.Models.DTOs.Category;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
-using ProjectGreenLens.Services.Implementations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class CategoryService : BaseService<FlowerCategories>, ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository) : base(categoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }

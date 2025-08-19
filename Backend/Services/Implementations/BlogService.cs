@@ -3,15 +3,14 @@ using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Models.Enums;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
-using ProjectGreenLens.Services.Implementations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class BlogService : BaseService<Blog>, IBlogService
+    public class BlogService : IBlogService
     {
         private readonly IBlogRepository _blogRepository;
 
-        public BlogService(IBlogRepository blogRepository) : base(blogRepository)
+        public BlogService(IBlogRepository blogRepository)
         {
             _blogRepository = blogRepository;
         }
@@ -19,9 +18,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         public async Task<PagedBlogResultDTO> GetBlogsWithFiltersAsync(BlogFilterDTO filters)
         {
             var (blogs, totalCount) = await _blogRepository.GetBlogsWithFiltersAsync(filters);
-            
+
             var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
-            
+
             return new PagedBlogResultDTO
             {
                 Blogs = blogListDTOs,
@@ -39,7 +38,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var blog = await _blogRepository.GetBlogWithDetailsAsync(id);
             if (blog == null)
                 throw new KeyNotFoundException($"Blog with ID {id} not found.");
-                
+
             return MapToBlogDTO(blog);
         }
 
@@ -48,7 +47,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var blog = await _blogRepository.GetBlogByPublicIdAsync(publicId);
             if (blog == null)
                 throw new KeyNotFoundException($"Blog with PublicID {publicId} not found.");
-                
+
             return MapToBlogDTO(blog);
         }
 
@@ -66,7 +65,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             var createdBlog = await _blogRepository.createAsync(blog);
             var blogWithDetails = await _blogRepository.GetBlogWithDetailsAsync(createdBlog.Id);
-            
+
             return MapToBlogDTO(blogWithDetails!);
         }
 
@@ -84,7 +83,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             existingBlog.Content = updateBlogDTO.Content;
             existingBlog.Tags = updateBlogDTO.Tags;
             existingBlog.CategoryId = updateBlogDTO.CategoryId;
-            
+
             // Reset status to Draft if content changes
             if (existingBlog.Status == BlogStatus.Published || existingBlog.Status == BlogStatus.Rejected)
             {
@@ -94,7 +93,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             await _blogRepository.updateAsync(existingBlog);
             var updatedBlog = await _blogRepository.GetBlogWithDetailsAsync(id);
-            
+
             return MapToBlogDTO(updatedBlog!);
         }
 
@@ -127,7 +126,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             blog.Status = BlogStatus.Pending;
             blog.RejectionReason = null;
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -146,7 +145,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             blog.Status = BlogStatus.Published;
             blog.RejectionReason = null;
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -165,7 +164,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             blog.Status = BlogStatus.Rejected;
             blog.RejectionReason = rejectionReason;
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -185,7 +184,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             blog.Status = BlogStatus.Published;
             blog.RejectionReason = null;
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -201,7 +200,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             blog.Status = BlogStatus.Draft;
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -217,7 +216,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             blog.Images.AddRange(imageUrls);
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -233,7 +232,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             blog.Images.Remove(imageUrl);
             await _blogRepository.updateAsync(blog);
-            
+
             return true;
         }
 
@@ -241,9 +240,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             var blogs = await _blogRepository.GetBlogsByStatusAsync(status, page, pageSize);
             var totalCount = await _blogRepository.GetBlogCountByStatusAsync(status);
-            
+
             var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
-            
+
             return new PagedBlogResultDTO
             {
                 Blogs = blogListDTOs,
@@ -260,9 +259,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             var blogs = await _blogRepository.GetBlogsByUserAsync(userId, page, pageSize);
             var totalCount = await _blogRepository.GetBlogCountByUserAsync(userId);
-            
+
             var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
-            
+
             return new PagedBlogResultDTO
             {
                 Blogs = blogListDTOs,
@@ -279,9 +278,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             var blogs = await _blogRepository.GetBlogsByCategoryAsync(categoryId, page, pageSize);
             var totalCount = await _blogRepository.GetBlogCountByCategoryAsync(categoryId);
-            
+
             var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
-            
+
             return new PagedBlogResultDTO
             {
                 Blogs = blogListDTOs,

@@ -2,7 +2,7 @@ using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.DTOs.Product;
-using FlowerSellingWebsite.Models.DTOs.ProductCategoryDTO;
+using FlowerSellingWebsite.Models.DTOs.ProductCategory;
 using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using FlowerSellingWebsite.Models.Entities;
 
@@ -49,7 +49,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             CreateMap<CreateProductDTO, Products>();
             CreateMap<UpdateProductDTO, Products>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); 
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // ------------------ ProductPhotos ------------------
             CreateMap<ProductPhotos, ProductPhotoDTO>();
@@ -59,11 +59,11 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<DeleteProductPhotoDTO, ProductPhotos>();
 
             // ------------------ ProductCategories ------------------
-            CreateMap<ProductCategories, ProductCategoryDTO>();
-            CreateMap<CreateProductCategoryDTO, ProductCategories>();
-            CreateMap<UpdateProductCategoryDTO, ProductCategories>()
+            CreateMap<ProductCategories, ProductCategoryResponseDTO>()
+              .ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.Products.Count));
+            CreateMap<ProductCategoryCreateDTO, ProductCategories>();
+            CreateMap<ProductCategoryUpdateDTO, ProductCategories>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<DeleteProductCategoryDTO, ProductCategories>();
 
             // ------------------ Users ------------------
             CreateMap<Users, UserDTO>().ReverseMap();

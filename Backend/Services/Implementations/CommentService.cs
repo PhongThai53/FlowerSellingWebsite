@@ -2,16 +2,15 @@ using FlowerSellingWebsite.Models.DTOs.Comment;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
-using ProjectGreenLens.Services.Implementations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class CommentService : BaseService<Comment>, ICommentService
+    public class CommentService : ICommentService
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IBlogRepository _blogRepository;
 
-        public CommentService(ICommentRepository commentRepository, IBlogRepository blogRepository) : base(commentRepository)
+        public CommentService(ICommentRepository commentRepository, IBlogRepository blogRepository)
         {
             _commentRepository = commentRepository;
             _blogRepository = blogRepository;
@@ -22,7 +21,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var comment = await _commentRepository.GetCommentWithDetailsAsync(id);
             if (comment == null)
                 throw new KeyNotFoundException($"Comment with ID {id} not found.");
-                
+
             return MapToCommentDTO(comment);
         }
 
@@ -39,7 +38,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var parentComment = await _commentRepository.getByIdAsync(createCommentDTO.ParentId.Value);
                 if (parentComment == null)
                     throw new KeyNotFoundException($"Parent comment with ID {createCommentDTO.ParentId.Value} not found.");
-                
+
                 // Ensure parent comment belongs to the same blog
                 if (parentComment.BlogId != createCommentDTO.BlogId)
                     throw new InvalidOperationException("Parent comment must belong to the same blog.");
@@ -56,7 +55,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             var createdComment = await _commentRepository.createAsync(comment);
             var commentWithDetails = await _commentRepository.GetCommentWithDetailsAsync(createdComment.Id);
-            
+
             return MapToCommentDTO(commentWithDetails!);
         }
 
@@ -72,7 +71,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             existingComment.Content = updateCommentDTO.Content;
             await _commentRepository.updateAsync(existingComment);
-            
+
             var updatedComment = await _commentRepository.GetCommentWithDetailsAsync(id);
             return MapToCommentDTO(updatedComment!);
         }

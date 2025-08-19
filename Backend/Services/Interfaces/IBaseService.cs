@@ -1,11 +1,11 @@
 ﻿namespace ProjectGreenLens.Services.Interfaces
 {
-    public interface IBaseService<T>
+    public interface IBaseService<TCreateDTO, TUpdateDTO, TResponseDTO>
     {
-        Task<T> getByIdAsync(int id);
-        Task<IEnumerable<T>> getAllAsync();
-        Task<T> createAsync(T entity);
-        Task<T> updateAsync(T entity);
+        Task<IEnumerable<TResponseDTO>> getAllAsync();
+        Task<TResponseDTO> getByIdAsync(int id);
+        Task<TResponseDTO> createAsync(TCreateDTO createDto);
+        Task<TResponseDTO> updateAsync(int id, TUpdateDTO updateDto);
         Task<bool> deleteAsync(int id);
     }
 }

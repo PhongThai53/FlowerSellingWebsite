@@ -32,39 +32,42 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return true;
         }
 
-        public async Task<(IEnumerable<Products> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
-           int pageNumber,
-           int pageSize,
-           int categoryId,
-           string? search,
-           string? sortBy,
-           bool asc = true,
-           CancellationToken cancellationToken = default)
+        public async Task<(IEnumerable<Products> Items, int TotalPages, int TotalCount, int Min, int Max, int DbMax)> GetPagedProductsAsync(
+            int pageNumber,
+            int pageSize,
+            int categoryId,
+            int min,
+            int max,
+            string? search,
+            string? sortBy,
+            bool asc = true,
+            CancellationToken cancellationToken = default)
         {
-            // Query
             var query = _context.Products
                                 .Where(p => !p.IsDeleted)
                                 .Include(p => p.ProductCategories)
                                 .Include(p => p.ProductPhotos)
                                 .AsQueryable();
-            // Search
+
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(p =>
-                    (p.Name.Contains(search)) ||
+                    p.Name.Contains(search) ||
                     (p.Description != null && p.Description.Contains(search)));
             }
 
-            // Count
-            var totalCount = await query.CountAsync();
-
-            // Category
             if (categoryId > 0)
             {
                 query = query.Where(p => p.CategoryId == categoryId);
             }
 
-            // Sort
+            int DbMax = Convert.ToInt32(await query.AnyAsync(cancellationToken) ? await query.MaxAsync(p => p.Price, cancellationToken) ?? 0 : 0);
+
+            query = query.Where(p => p.Price >= min && p.Price <= max);
+
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
             if (!string.IsNullOrEmpty(sortBy))
             {
                 query = sortBy.ToLower() switch
@@ -80,11 +83,15 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 query = query.OrderBy(p => p.Id);
             }
 
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            var items = await query.Skip((pageNumber - 1) * pageSize)
+            // Paging
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
-            return (items, totalPages, totalCount);
+                .ToListAsync(cancellationToken);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return (items, totalPages, totalCount, min, max, DbMax);
         }
 
         public async Task<Products?> GetProductByIdAsync(int id)
