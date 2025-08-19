@@ -54,7 +54,7 @@ export class ProductPage {
         this.paginationContainer = document.querySelector(SELECTORS.PAGINATION_CONTAINER);
         this.productAmountElement = document.querySelector(SELECTORS.PRODUCT_AMOUNT);
         this.categoriesContainer = document.querySelector(SELECTORS.CATEGORIES_CONTAINER);
- 
+
 
         // Create pagination container if not exists
         if (!this.paginationContainer) {

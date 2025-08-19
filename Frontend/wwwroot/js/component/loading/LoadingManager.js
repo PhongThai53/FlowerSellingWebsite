@@ -1,4 +1,4 @@
-﻿import { MESSAGES} from '../../config/config.js';
+﻿import { MESSAGES } from '../../config/config.js';
 export class LoadingManager {
     constructor(container) {
         this.container = container;
