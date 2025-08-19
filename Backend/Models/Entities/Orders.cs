@@ -8,9 +8,6 @@ namespace FlowerSellingWebsite.Models.Entities
         [Required]
         public string OrderNumber { get; set; } = null!;
 
-        [ForeignKey("Supplier")]
-        public int? SupplierId { get; set; }
-
         [Required]
         [ForeignKey("Customer")]
         public int CustomerId { get; set; }
@@ -25,7 +22,6 @@ namespace FlowerSellingWebsite.Models.Entities
 
         [Required]
         public string Status { get; set; } = null!;
-        public bool IsSaleOrder { get; set; }
 
         [Required]
         public decimal Subtotal { get; set; }
@@ -40,7 +36,6 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation properties
         public virtual Users Customer { get; set; } = null!;
-        public virtual Suppliers? Supplier { get; set; }
         public virtual Users CreatedByUser { get; set; } = null!;
         public virtual ICollection<OrderDetails> OrderDetails { get; set; } = new HashSet<OrderDetails>();
         public virtual ICollection<Payments> Payments { get; set; } = new HashSet<Payments>();

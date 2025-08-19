@@ -16,8 +16,6 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<Orders, OrderDTO>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
                     src.Customer != null ? src.Customer.FullName : null))
-                .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src =>
-                    src.Supplier != null ? src.Supplier.SupplierName : null))
                 .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src =>
                     src.CreatedByUser != null ? src.CreatedByUser.FullName : null))
                 .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src =>
