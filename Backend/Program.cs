@@ -1,4 +1,5 @@
 ﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
+using FlowerSellingWebsite.Infrastructure.DbContext;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
 using FlowerSellingWebsite.Models.DTOs.ProductCategory;
@@ -16,6 +17,7 @@ using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
 using System.Text;
+using FlowerSellingWebsite.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -177,14 +179,32 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Serve Static file
+// Serve Static files
+// Default wwwroot folder
+app.UseStaticFiles();
+
+// Custom static files for Image folder
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "Image")), // Đường dẫn đến folder Image
     RequestPath = "/Image" // URL path để access files
 });
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+});
 // Middleware order
+
+// Migration and Seed Data
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+//    await db.Database.MigrateAsync();
+//    SeedData.Initialize(db);
+//}
 
 // Swagger first (not wrapped)
 app.UseSwagger();
@@ -209,12 +229,12 @@ app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"), appBuild
 
 app.MapControllers();
 
-// Optional: Seed Data
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
-//    await db.Database.MigrateAsync();
-//    SeedData.Initialize(db);
-//}
+//Optional: Seed Data
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FlowerSellingDbContext>();
+    await db.Database.MigrateAsync();
+    SeedData.Initialize(db);
+}
 
 app.Run();

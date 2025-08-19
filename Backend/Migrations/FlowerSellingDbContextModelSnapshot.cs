@@ -722,9 +722,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsSaleOrder")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(1000)");
 
@@ -748,9 +745,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SupplierNotes")
                         .HasColumnType("nvarchar(max)");
 
@@ -765,8 +759,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("SupplierId");
 
                     b.ToTable("Orders");
                 });
@@ -1443,6 +1435,9 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1453,6 +1448,10 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("SupplierId")
+                        .IsUnique()
+                        .HasFilter("[SupplierId] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -1658,15 +1657,9 @@ namespace FlowerSellingWebsite.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId");
-
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Payments", b =>
@@ -1819,7 +1812,13 @@ namespace FlowerSellingWebsite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
+                        .WithOne("User")
+                        .HasForeignKey("FlowerSellingWebsite.Models.Entities.Users", "SupplierId");
+
                     b.Navigation("Role");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
@@ -1933,6 +1932,8 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("PurchaseOrders");
 
                     b.Navigation("SupplierListings");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Users", b =>

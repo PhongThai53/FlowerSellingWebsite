@@ -1,7 +1,7 @@
 // Authentication JavaScript Module
 class AuthManager {
   constructor() {
-    this.apiBaseUrl = "http://localhost:5062/api";
+    this.apiBaseUrl = "https://localhost:7062/api";
     this.token = localStorage.getItem("auth_token");
     this.user = JSON.parse(localStorage.getItem("user_data") || "null");
 
@@ -11,7 +11,6 @@ class AuthManager {
   init() {
     // This function will be called both on initial load and after HTMX swaps.
     const setupUI = () => {
-      this.updateUserInterface();
       this.setupFormHandlers();
       this.setupPasswordValidation();
       this.setupForgotPasswordFormToggle();
@@ -427,8 +426,6 @@ class AuthManager {
 
     localStorage.setItem("auth_token", token);
     localStorage.setItem("user_data", JSON.stringify(user));
-
-    this.updateUserInterface();
   }
 
   // Clear authentication data
@@ -438,57 +435,6 @@ class AuthManager {
 
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user_data");
-
-    this.updateUserInterface();
-  }
-
-  // Update user interface based on authentication state
-  updateUserInterface() {
-    const userDropdown = document.getElementById("user-dropdown");
-    const mobileUserMenu = document.getElementById("mobile-user-menu");
-
-    // Safety check to ensure the elements exist
-    if (!userDropdown && !mobileUserMenu) {
-      return;
-    }
-
-    if (this.isAuthenticated()) {
-      const welcomeMessage = `Hello, ${
-        this.user.fullName || this.user.userName
-      }`;
-
-      // Update desktop user menu for authenticated users
-      if (userDropdown) {
-        userDropdown.innerHTML = `
-          <li><a href="/html/auth/my-account.html"><i class="lnr lnr-user"></i> My Account</a></li>
-          <li><a href="#" onclick="authManager.logout()"><i class="lnr lnr-exit"></i> Logout</a></li>
-        `;
-      }
-
-      // Update mobile user menu for authenticated users
-      if (mobileUserMenu) {
-        mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="/html/auth/my-account.html">My Account</a>
-          <a class="dropdown-item" href="#" onclick="authManager.logout()">Logout</a>
-        `;
-      }
-    } else {
-      // Update desktop user menu for non-authenticated users
-      if (userDropdown) {
-        userDropdown.innerHTML = `
-          <li><a href="/html/auth/login-register.html">Login</a></li>
-          <li><a href="/html/auth/login-register.html">Register</a></li>
-        `;
-      }
-
-      // Update mobile user menu for non-authenticated users
-      if (mobileUserMenu) {
-        mobileUserMenu.innerHTML = `
-          <a class="dropdown-item" href="/html/auth/login-register.html">Login</a>
-          <a class="dropdown-item" href="/html/auth/login-register.html">Register</a>
-        `;
-      }
-    }
   }
 
   // Check if user is authenticated
@@ -501,7 +447,7 @@ class AuthManager {
     try {
       // Call logout endpoint if available
       if (this.token) {
-        await fetch(`${this.apiBaseUrl}/auth/logout`, {
+        await fetch(`${this.apiBaseUrl}/Auth/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${this.token}`,

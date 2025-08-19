@@ -57,12 +57,12 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new UnauthorizedAccessException("Invalid email or password");
                 }
 
-                // Check if user has pending email verification
-                if (_verificationService.IsEmailPendingVerification(request.Email))
-                {
-                    _logger.LogWarning("Login failed: Email verification pending for {Email}", request.Email);
-                    throw new UnauthorizedAccessException("Please verify your email address before logging in. Check your inbox for the verification link.");
-                }
+                //// Check if user has pending email verification
+                //if (_verificationService.IsEmailPendingVerification(request.Email))
+                //{
+                //    _logger.LogWarning("Login failed: Email verification pending for {Email}", request.Email);
+                //    throw new UnauthorizedAccessException("Please verify your email address before logging in. Check your inbox for the verification link.");
+                //}
 
                 // Verify password
                 if (string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -130,6 +130,20 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                 _logger.LogInformation("Registration initiated for user {UserName} ({Email}). Verification email sent.", 
                     request.UserName, request.Email);
+
+                var usr = new Users
+                {
+                    UserName = request.UserName,
+                    FullName = request.FullName,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                    Email = request.Email,
+                    Phone = request.PhoneNumber,
+                    Address = request.Address,
+                    PublicId = Guid.NewGuid(),
+                    RoleId = 2,
+                };
+
+                //var createdUser = await _userRepository.CreateUserAsync(usr);
 
                 // Return a temporary user DTO indicating verification is required
                 return new UserDTO
@@ -299,6 +313,12 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new UnauthorizedAccessException("Current password is incorrect");
                 }
 
+                // Check if new password is the same as current password
+                if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.PasswordHash))
+                {
+                    throw new InvalidOperationException("New password cannot be the same as the current password");
+                }
+
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
 
                 await _userRepository.UpdateAsync(user);
@@ -390,17 +410,36 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
+        public async Task<IEnumerable<RoleDTO>> GetRolesAsync()
+        {
+            try
+            {
+                var roles = await _userRepository.GetAllRolesAsync();
+                return roles.Select(role => new RoleDTO
+                {
+                    Id = role.Id,
+                    RoleName = role.RoleName,
+                    Description = role.Description
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting roles");
+                throw;
+            }
+        }
+
         private static UserDTO MapToUserDTO(Users user)
         {
             return new UserDTO
             {
+                Id = user.Id,
                 PublicId = user.PublicId,
                 FullName = user.FullName ?? string.Empty,
                 UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 PhoneNumber = user.Phone,
                 Address = user.Address,
-                IsActive = !user.IsDeleted,
                 RoleName = user.Role?.RoleName ?? string.Empty,
                 CreatedAt = user.CreatedAt
             };
@@ -537,21 +576,35 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<bool> ResetPasswordAsync(string token, string newPassword)
         {
+            _logger.LogInformation("Attempting to reset password with token: {Token}", token);
+            
             if (_passwordResetService.ValidatePasswordResetToken(token, out var email))
             {
+                _logger.LogInformation("Token validation successful for email: {Email}", email);
                 var user = await _userRepository.GetByEmailAsync(email);
                 if (user != null)
                 {
+                    _logger.LogInformation("User found for email: {Email}", email);
                     // Check if the new password is the same as the old one
                     if (BCrypt.Net.BCrypt.Verify(newPassword, user.PasswordHash))
                     {
+                        _logger.LogWarning("User attempted to reset password to the same password");
                         throw new InvalidOperationException("New password cannot be the same as the old password.");
                     }
                     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
                     await _userRepository.UpdateAsync(user);
                     _passwordResetService.RemovePasswordResetToken(token);
+                    _logger.LogInformation("Password reset completed successfully for user: {Email}", email);
                     return true;
                 }
+                else
+                {
+                    _logger.LogWarning("No user found for email: {Email}", email);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Token validation failed for token: {Token}", token);
             }
             return false;
         }

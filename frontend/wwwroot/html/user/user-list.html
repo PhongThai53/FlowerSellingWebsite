@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="User Management - View All Users" />
+    <title>User Management - Floda</title>
+
+    <!--=== Favicon ===-->
+    <link rel="shortcut icon" href="../../images/favicon.ico" type="image/x-icon" />
+
+    <!-- Google fonts include -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear" rel="stylesheet" />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Custom CSS for auth pages -->
+    <link href="../../css/auth.css" rel="stylesheet" />
+    <!-- Custom CSS for user pages -->
+    <link href="../../css/user.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Linearicons -->
+    <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css" />
+
+    <!-- Custom User CSS -->
+    <style>
+        .user-list-container {
+            min-height: 70vh;
+        }
+        .user-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .user-content {
+            padding: 20px;
+        }
+        .user-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-right: 5px;
+        }
+        .role-admin {
+            background: #dc3545;
+            color: white;
+        }
+        .role-user {
+            background: #28a745;
+            color: white;
+        }
+        .role-moderator {
+            background: #ffc107;
+            color: #212529;
+        }
+        .filters-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .search-bar {
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+        }
+        .btn-action {
+            padding: 6px 12px;
+            margin-right: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .pagination-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-info {
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            width: 400px;
+            text-align: center;
+        }
+        .modal-buttons {
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Load Header Component -->
+    <div hx-get="../components/header.html" hx-trigger="load" hx-swap="outerHTML"></div>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-header text-center mb-4">
+                        <h1 class="page-title">Quản Lý Người Dùng</h1>
+                        <p class="page-subtitle">Xem và quản lý tất cả người dùng trong hệ thống</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Info Container -->
+            <div id="view-info-container"></div>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="row">
+                    <!-- Search Bar -->
+                    <div class="col-md-6 mb-3">
+                        <div class="input-group">
+                            <input type="text" id="search-input" class="form-control search-bar" 
+                                   placeholder="Tìm kiếm theo tên, email, phone..." />
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" onclick="userManager.searchUsers()">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create User Button -->
+                    <div class="col-md-6 mb-3 text-right">
+                        <button class="btn btn-success" onclick="userManager.openCreateUserModal()">
+                            <i class="fa fa-plus"></i> Thêm Người Dùng
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Role Filter -->
+                    <div class="col-md-4 mb-3">
+                        <label for="role-filter" class="form-label">Vai trò:</label>
+                        <select id="role-filter" class="form-control" onchange="userManager.applyFilters()">
+                        </select>
+                    </div>
+
+                    <!-- Sort By -->
+                    <div class="col-md-4 mb-3">
+                        <label for="sort-by" class="form-label">Sắp xếp theo:</label>
+                        <select id="sort-by" class="form-control" onchange="userManager.applyFilters()">
+                            <option value="fullname">Tên</option>
+                            <option value="email">Email</option>
+                            <option value="createdat" selected>Ngày tạo</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort Direction -->
+                    <div class="col-md-4 mb-3">
+                        <label for="sort-direction" class="form-label">Thứ tự:</label>
+                        <select id="sort-direction" class="form-control" onchange="userManager.applyFilters()">
+                            <option value="Asc">Tăng dần</option>
+                            <option value="Desc" selected>Giảm dần</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="row">
+                    <div class="col-12">
+                        <button class="btn btn-secondary btn-sm" onclick="userManager.clearFilters()">
+                            <i class="fa fa-times"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users List Container -->
+            <div id="users-container" class="user-list-container">
+                <!-- Users will be loaded here -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls">
+                <button id="prev-btn" class="pagination-btn" onclick="userManager.previousPage()">
+                    <i class="fa fa-chevron-left"></i> Trước
+                </button>
+                <span id="pagination-info" class="pagination-info">Trang 1 của 1</span>
+                <button id="next-btn" class="pagination-btn" onclick="userManager.nextPage()">
+                    Tiếp <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận xóa</h3>
+            <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="userManager.closeDeleteModal()">Hủy</button>
+                <button class="btn-confirm" onclick="userManager.confirmDelete()">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Footer Component -->
+    <div hx-get="../components/footer.html" hx-trigger="load" hx-swap="outerHTML"></div>
+
+    <!-- Scripts -->
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/user-manager.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.userManager) {
+                userManager.initializeUserList();
+                
+                // Additional fallback to ensure dropdowns are populated
+                setTimeout(() => {
+                    if (window.userManager && window.userManager.refreshRoleDropdowns) {
+                        console.log('Fallback: Refreshing role dropdowns...');
+                        window.userManager.refreshRoleDropdowns();
+                    }
+                }, 1000);
+            } else {
+                console.error('UserManager not found. Please ensure user-manager.js is loaded.');
+            }
+        });
+
+        // Handle search on Enter key
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                userManager.searchUsers();
+            }
+        });
+
+        // Debug functions for console
+        window.debugRoleDropdown = function() {
+            // Check for multiple elements with same ID
+            const allRoleFilters = document.querySelectorAll('#role-filter');
+            const allRoleFiltersByName = document.querySelectorAll('select[id*="role"]');
+            
+            console.log('=== ROLE DROPDOWN DEBUG ===');
+            console.log('Elements with ID role-filter:', allRoleFilters.length);
+            console.log('All role-related selects:', allRoleFiltersByName.length);
+            
+            // Debug each element
+            allRoleFilters.forEach((element, index) => {
+                console.log(`--- Element ${index + 1} ---`);
+                console.log('Element:', element);
+                console.log('Options count:', element.options.length);
+                console.log('innerHTML:', element.innerHTML);
+                console.log('Visible:', element.offsetParent !== null);
+                console.log('Style display:', element.style.display);
+                console.log('Computed display:', window.getComputedStyle(element).display);
+                console.log('Parent element:', element.parentElement);
+                console.log('Classes:', element.className);
+                
+                // Show all options
+                for (let i = 0; i < element.options.length; i++) {
+                    console.log(`  Option ${i}:`, element.options[i].value, '=', element.options[i].text);
+                }
+            });
+            
+            console.log('Available roles:', window.userManager?.availableRoles);
+            console.log('========================');
+        };
+
+        window.forcePopulateRoles = function() {
+            if (window.userManager) {
+                window.userManager.refreshRoleDropdowns();
+            }
+        };
+    </script>
+</body>
+</html>

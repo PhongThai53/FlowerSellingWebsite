@@ -16,8 +16,6 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<Orders, OrderDTO>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
                     src.Customer != null ? src.Customer.FullName : null))
-                .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src =>
-                    src.Supplier != null ? src.Supplier.SupplierName : null))
                 .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src =>
                     src.CreatedByUser != null ? src.CreatedByUser.FullName : null))
                 .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src =>
@@ -66,7 +64,10 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // ------------------ Users ------------------
-            CreateMap<Users, UserDTO>().ReverseMap();
+            CreateMap<Users, UserDTO>()
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone))
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : string.Empty))
+                .ReverseMap();
         }
     }
 }

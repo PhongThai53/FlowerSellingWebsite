@@ -57,5 +57,12 @@ namespace FlowerSellingWebsite.Controllers
 
             return delUser == true ? Ok(delUser) : NotFound();
         }
+
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = await _userService.GetRolesAsync();
+            return Ok(roles);
+        }
     }
 }

@@ -6,13 +6,15 @@ using FlowerSellingWebsite.Services.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class BlogService : IBlogService
+    public class BlogService : BaseService<Blog>, IBlogService
     {
         private readonly IBlogRepository _blogRepository;
+        private readonly IUserRepository _userRepository;
 
-        public BlogService(IBlogRepository blogRepository)
+        public BlogService(IBlogRepository blogRepository, IUserRepository userRepository) : base(blogRepository)
         {
             _blogRepository = blogRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<PagedBlogResultDTO> GetBlogsWithFiltersAsync(BlogFilterDTO filters)
@@ -230,10 +232,28 @@ namespace FlowerSellingWebsite.Services.Implementations
             if (blog.UserId != currentUserId && !await IsAdminUser(currentUserId))
                 throw new UnauthorizedAccessException("You don't have permission to modify this blog.");
 
-            blog.Images.Remove(imageUrl);
-            await _blogRepository.updateAsync(blog);
+            // Convert full URL to relative path if needed
+            string relativePath = imageUrl;
+            if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            {
+                var uri = new Uri(imageUrl);
+                relativePath = uri.LocalPath; // This will extract /uploads/blog-images/xxx.png from full URL
+            }
 
-            return true;
+            // Remove the image path from blog images
+            var removed = blog.Images.Remove(relativePath);
+            if (!removed)
+            {
+                // Try removing the original imageUrl if relative path didn't work
+                removed = blog.Images.Remove(imageUrl);
+            }
+
+            if (removed)
+            {
+                await _blogRepository.updateAsync(blog);
+            }
+            
+            return removed;
         }
 
         public async Task<PagedBlogResultDTO> GetBlogsByStatusAsync(BlogStatus status, int page = 1, int pageSize = 6)
@@ -293,6 +313,25 @@ namespace FlowerSellingWebsite.Services.Implementations
             };
         }
 
+        public async Task<PagedBlogResultDTO> GetBlogsForCurrentUserAsync(BlogFilterDTO filters, int currentUserId)
+        {
+            // For regular users: get published blogs + their own blogs (any status)
+            var (blogs, totalCount) = await _blogRepository.GetBlogsForUserWithPermissionAsync(filters, currentUserId);
+            
+            var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
+            
+            return new PagedBlogResultDTO
+            {
+                Blogs = blogListDTOs,
+                TotalCount = totalCount,
+                Page = filters.Page,
+                PageSize = filters.PageSize,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize),
+                HasPreviousPage = filters.Page > 1,
+                HasNextPage = filters.Page < (int)Math.Ceiling(totalCount / (double)filters.PageSize)
+            };
+        }
+
         private BlogDTO MapToBlogDTO(Blog blog)
         {
             return new BlogDTO
@@ -339,10 +378,13 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         private async Task<bool> IsAdminUser(int userId)
         {
-            // This should be implemented based on your user role system
-            // For now, assuming you have a way to check if user is admin
-            // You might need to inject IUserService or check role directly
-            return false; // TODO: Implement admin check
+            // Get user's role from the database
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+                
+            // Check if user has Admin role
+            return user.Role?.RoleName == "Admin";
         }
     }
 }

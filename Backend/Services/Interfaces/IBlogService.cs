@@ -30,5 +30,8 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<PagedBlogResultDTO> GetBlogsByStatusAsync(BlogStatus status, int page = 1, int pageSize = 6);
         Task<PagedBlogResultDTO> GetBlogsByUserAsync(int userId, int page = 1, int pageSize = 6);
         Task<PagedBlogResultDTO> GetBlogsByCategoryAsync(int categoryId, int page = 1, int pageSize = 6);
+        
+        // Get blogs for current user (published blogs + own blogs)
+        Task<PagedBlogResultDTO> GetBlogsForCurrentUserAsync(BlogFilterDTO filters, int currentUserId);
     }
 }

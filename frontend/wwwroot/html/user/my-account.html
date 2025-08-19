@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="My Account - Flower eCommerce" />
+    <title>My Account - Flower eCommerce</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- User CSS -->
+    <link href="../../css/user.css" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Linearicons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css"
+    />
+  </head>
+
+  <body>
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>my account</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="../common/homepage.html"
+                        ><i class="fa fa-home"></i
+                      ></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      my account
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- my account wrapper start -->
+      <div class="my-account-wrapper section-space pb-0">
+        <div class="container">
+          <div class="section-bg-color">
+            <div class="row">
+              <div class="col-lg-12">
+                <!-- My Account Page Start -->
+                <div class="myaccount-page-wrapper">
+                  <!-- My Account Tab Menu Start -->
+                  <div class="row">
+                    <div class="col-lg-3 col-md-4">
+                      <div class="myaccount-tab-menu nav" role="tablist">
+                        <a
+                          href="#dashboard"
+                          class="active"
+                          data-bs-toggle="tab"
+                        >
+                          <i class="fa fa-dashboard"></i> Dashboard
+                        </a>
+                        <a href="#address-edit" data-bs-toggle="tab">
+                          <i class="fa fa-map-marker"></i> Address
+                        </a>
+                        <a href="#account-info" data-bs-toggle="tab">
+                          <i class="fa fa-user"></i> Account Details
+                        </a>
+                        <a href="#change-password" data-bs-toggle="tab">
+                          <i class="fa fa-lock"></i> Change Password
+                        </a>
+                        <a href="#" id="logout-btn">
+                          <i class="fa fa-sign-out"></i> Logout
+                        </a>
+                      </div>
+                    </div>
+                    <!-- My Account Tab Menu End -->
+
+                    <!-- My Account Tab Content Start -->
+                    <div class="col-lg-9 col-md-8">
+                      <div class="tab-content" id="myaccountContent">
+                        <!-- Dashboard Tab Content Start -->
+                        <div
+                          class="tab-pane fade show active"
+                          id="dashboard"
+                          role="tabpanel"
+                        >
+                          <div class="myaccount-content">
+                            <h3>Dashboard</h3>
+                            <div class="welcome">
+                              <p>
+                                Hello,
+                                <strong id="dashboard-username"
+                                  >Loading...</strong
+                                >
+                              </p>
+                            </div>
+                            <p class="mb-0">
+                              From your account dashboard, you can easily check
+                              & view your recent orders, manage your shipping
+                              and billing addresses and edit your password and
+                              account details.
+                            </p>
+                          </div>
+                        </div>
+                        <!-- Dashboard Tab Content End -->
+
+                        <!-- Address Tab Content Start -->
+                        <div
+                          class="tab-pane fade"
+                          id="address-edit"
+                          role="tabpanel"
+                        >
+                          <div class="myaccount-content">
+                            <h3>Address</h3>
+                            <div id="address-content">
+                              <div class="address-loading">
+                                <i class="fa fa-spinner fa-spin"></i> Loading
+                                address...
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Address Tab Content End -->
+
+                        <!-- Account Details Tab Content Start -->
+                        <div
+                          class="tab-pane fade"
+                          id="account-info"
+                          role="tabpanel"
+                        >
+                          <div class="myaccount-content">
+                            <h3>Account Details</h3>
+                            <div class="account-details-form">
+                              <form id="account-form">
+                                <div class="row">
+                                  <div class="col-lg-6">
+                                    <div class="single-input-item">
+                                      <label for="fullname" class="required"
+                                        >Full Name</label
+                                      >
+                                      <input
+                                        type="text"
+                                        id="fullname"
+                                        name="fullname"
+                                        placeholder="Full Name"
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-6">
+                                    <div class="single-input-item">
+                                      <label for="username" class="required"
+                                        >Username</label
+                                      >
+                                      <input
+                                        type="text"
+                                        id="username"
+                                        name="username"
+                                        placeholder="Username"
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="single-input-item">
+                                  <label for="email" class="required"
+                                    >Email Address</label
+                                  >
+                                  <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email Address"
+                                    required
+                                  />
+                                </div>
+                                <div class="single-input-item">
+                                  <label for="phone">Phone Number</label>
+                                  <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="Phone Number"
+                                  />
+                                </div>
+                                <div class="single-input-item">
+                                  <label for="address">Address</label>
+                                  <textarea
+                                    id="address"
+                                    name="address"
+                                    placeholder="Address"
+                                    rows="3"
+                                  ></textarea>
+                                </div>
+                                <div class="single-input-item">
+                                  <button
+                                    type="submit"
+                                    class="btn btn__bg"
+                                    id="save-account-btn"
+                                  >
+                                    <i class="fa fa-save"></i> Save Changes
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Account Details Tab Content End -->
+
+                        <!-- Change Password Tab Content Start -->
+                        <div
+                          class="tab-pane fade"
+                          id="change-password"
+                          role="tabpanel"
+                        >
+                          <div class="myaccount-content">
+                            <h3>Change Password</h3>
+                            <div class="account-details-form">
+                              <form id="password-form">
+                                <div class="single-input-item">
+                                  <label for="current-password" class="required"
+                                    >Current Password</label
+                                  >
+                                  <input
+                                    type="password"
+                                    id="current-password"
+                                    name="currentPassword"
+                                    placeholder="Current Password"
+                                    required
+                                  />
+                                </div>
+                                <div class="row">
+                                  <div class="col-lg-6">
+                                    <div class="single-input-item">
+                                      <label for="new-password" class="required"
+                                        >New Password</label
+                                      >
+                                      <input
+                                        type="password"
+                                        id="new-password"
+                                        name="newPassword"
+                                        placeholder="New Password"
+                                        required
+                                      />
+                                      <small class="password-help">
+                                        Password must contain at least 8
+                                        characters, including 1 lowercase
+                                        letter, 1 uppercase letter, 1 number,
+                                        and 1 special character.
+                                      </small>
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-6">
+                                    <div class="single-input-item">
+                                      <label
+                                        for="confirm-password"
+                                        class="required"
+                                        >Confirm Password</label
+                                      >
+                                      <input
+                                        type="password"
+                                        id="confirm-password"
+                                        name="confirmPassword"
+                                        placeholder="Confirm Password"
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="single-input-item">
+                                  <button
+                                    type="submit"
+                                    class="btn btn__bg"
+                                    id="change-password-btn"
+                                  >
+                                    <i class="fa fa-lock"></i> Change Password
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Change Password Tab Content End -->
+                      </div>
+                    </div>
+                    <!-- My Account Tab Content End -->
+                  </div>
+                </div>
+                <!-- My Account Page End -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- my account wrapper end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+
+    <!-- Alert Modal -->
+    <div
+      class="modal fade"
+      id="alertModal"
+      tabindex="-1"
+      aria-labelledby="alertModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="alertModalLabel">Message</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="alertModalBody"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll to top start -->
+    <div class="scroll-top not-visible">
+      <i class="fa fa-angle-up"></i>
+    </div>
+    <!-- Scroll to Top End -->
+
+    <!-- All vendor & plugins & active js include here -->
+    <!--All Vendor Js -->
+    <script src="../../js/vendor.js"></script>
+    <!-- Active Js -->
+    <script src="../../js/active.js"></script>
+    <!-- Auth Js -->
+    <script src="../../js/auth.js"></script>
+    <!-- My Account Js -->
+    <script src="../../js/my-account.js"></script>
+  </body>
+</html>
