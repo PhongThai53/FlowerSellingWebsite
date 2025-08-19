@@ -126,7 +126,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var verificationToken = _verificationService.GenerateVerificationToken(request.Email);
 
                 // Send verification email
-                //await _emailService.SendEmailVerificationAsync(request.Email, request.FullName, verificationToken);
+                await _emailService.SendEmailVerificationAsync(request.Email, request.FullName, verificationToken);
 
                 _logger.LogInformation("Registration initiated for user {UserName} ({Email}). Verification email sent.", 
                     request.UserName, request.Email);
@@ -143,7 +143,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                     RoleId = 2,
                 };
 
-                var createdUser = await _userRepository.CreateUserAsync(usr);
+                //var createdUser = await _userRepository.CreateUserAsync(usr);
 
                 // Return a temporary user DTO indicating verification is required
                 return new UserDTO
