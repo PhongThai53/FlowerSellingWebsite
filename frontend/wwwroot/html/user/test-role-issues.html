@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Role Issues - User Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .result-box {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .warning { border-left: 4px solid #ffc107; }
+        .user-card-demo {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+        }
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .role-admin { background: #dc3545; color: white; }
+        .role-user { background: #28a745; color: white; }
+        .role-staff { background: #ffc107; color: #212529; }
+        .role-supplier { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">
+            <i class="fa fa-bug"></i> Debug Role Issues
+        </h1>
+
+        <!-- Issue 1: Role Dropdown -->
+        <div class="test-section">
+            <h3>Issue 1: Role Dropdown không hiện</h3>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Role Filter Dropdown:</label>
+                    <select id="role-filter" class="form-control">
+                        <option value="">Tất cả vai trò</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <button class="btn btn-primary" onclick="testRoleDropdown()">
+                        <i class="fa fa-test"></i> Test Role Dropdown
+                    </button>
+                    <button class="btn btn-success" onclick="manuallyPopulateDropdown()">
+                        <i class="fa fa-plus"></i> Manually Populate
+                    </button>
+                </div>
+            </div>
+            
+            <div id="dropdown-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <!-- Issue 2: User List Response -->
+        <div class="test-section">
+            <h3>Issue 2: User List Response không có roleName</h3>
+            
+            <button class="btn btn-info" onclick="testUserListResponse()">
+                <i class="fa fa-download"></i> Test User List API
+            </button>
+            <button class="btn btn-warning" onclick="testSingleUserResponse()">
+                <i class="fa fa-user"></i> Test Single User API
+            </button>
+            
+            <div id="userlist-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <!-- Issue 3: Role API -->
+        <div class="test-section">
+            <h3>Issue 3: Test Roles API</h3>
+            
+            <button class="btn btn-success" onclick="testRolesAPI()">
+                <i class="fa fa-users-cog"></i> Test Roles API
+            </button>
+            
+            <div id="roles-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <!-- User Cards Preview -->
+        <div class="test-section">
+            <h3>User Cards với Role Display</h3>
+            
+            <button class="btn btn-primary" onclick="generateUserCards()">
+                <i class="fa fa-users"></i> Generate Sample User Cards
+            </button>
+            
+            <div id="user-cards-container"></div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="test-section">
+            <h3>Authentication Setup</h3>
+            
+            <div id="auth-status" class="alert alert-info">Checking auth...</div>
+            
+            <button class="btn btn-secondary" onclick="setupAuth()">
+                <i class="fa fa-key"></i> Setup Auth
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../js/auth.js"></script>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:5062/api';
+
+        // Setup authentication
+        function setupAuth() {
+            const authStatus = document.getElementById('auth-status');
+            
+            // Simulate admin user
+            const adminUser = {
+                id: 1,
+                publicId: '12345678-1234-1234-1234-123456789012',
+                fullName: 'Test Admin',
+                email: 'admin@test.com',
+                roleName: 'Admin'
+            };
+            
+            // Store in auth manager if available
+            if (window.authManager) {
+                window.authManager.user = adminUser;
+                window.authManager.token = 'fake-admin-token';
+            }
+            
+            // Store in localStorage
+            localStorage.setItem('user_data', JSON.stringify(adminUser));
+            localStorage.setItem('auth_token', 'fake-admin-token');
+            
+            authStatus.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>Auth Setup Complete!</strong><br>
+                    User: ${adminUser.fullName} (${adminUser.roleName})<br>
+                    Token: fake-admin-token
+                </div>
+            `;
+            
+            console.log('Auth setup completed:', adminUser);
+        }
+
+        // Make authenticated request
+        async function makeAuthenticatedRequest(url, options = {}) {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                throw new Error('No authentication token available');
+            }
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            return fetch(url, {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers,
+                },
+            });
+        }
+
+        // Test role dropdown
+        async function testRoleDropdown() {
+            const resultDiv = document.getElementById('dropdown-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result-box';
+            
+            let log = 'Testing Role Dropdown...\n\n';
+            
+            // 1. Check if userManager is available
+            log += '1. Checking userManager availability:\n';
+            if (window.userManager) {
+                log += '✅ userManager is available\n';
+            } else {
+                log += '❌ userManager is NOT available\n';
+                log += 'Loading user-manager.js...\n';
+                
+                // Try to load user-manager.js
+                const script = document.createElement('script');
+                script.src = '../../js/user-manager.js';
+                document.head.appendChild(script);
+                
+                await new Promise(resolve => {
+                    script.onload = resolve;
+                    script.onerror = resolve;
+                });
+                
+                if (window.userManager) {
+                    log += '✅ userManager loaded successfully\n';
+                } else {
+                    log += '❌ Failed to load userManager\n';
+                }
+            }
+            
+            // 2. Check role-filter element
+            log += '\n2. Checking role-filter element:\n';
+            const roleFilter = document.getElementById('role-filter');
+            if (roleFilter) {
+                log += '✅ role-filter element found\n';
+                log += `Current options: ${roleFilter.options.length}\n`;
+                log += `Current HTML: ${roleFilter.innerHTML}\n`;
+            } else {
+                log += '❌ role-filter element NOT found\n';
+            }
+            
+            // 3. Test loadAvailableRoles
+            log += '\n3. Testing loadAvailableRoles:\n';
+            if (window.userManager) {
+                try {
+                    await window.userManager.loadAvailableRoles();
+                    log += '✅ loadAvailableRoles completed\n';
+                    log += `Available roles: ${JSON.stringify(window.userManager.availableRoles, null, 2)}\n`;
+                    
+                    // Check dropdown again
+                    if (roleFilter) {
+                        log += `Options after loading: ${roleFilter.options.length}\n`;
+                        log += `HTML after loading: ${roleFilter.innerHTML}\n`;
+                    }
+                } catch (error) {
+                    log += `❌ loadAvailableRoles failed: ${error.message}\n`;
+                    log += `Error stack: ${error.stack}\n`;
+                }
+            }
+            
+            resultDiv.textContent = log;
+            resultDiv.className = 'result-box ' + (log.includes('❌') ? 'error' : 'success');
+        }
+
+        // Manually populate dropdown
+        function manuallyPopulateDropdown() {
+            const roleFilter = document.getElementById('role-filter');
+            
+            const testRoles = [
+                { value: 'Admin', label: 'Quản trị viên' },
+                { value: 'User', label: 'Người dùng' },
+                { value: 'Staff', label: 'Nhân viên' },
+                { value: 'Supplier', label: 'Nhà cung cấp' }
+            ];
+            
+            roleFilter.innerHTML = '<option value="">Tất cả vai trò</option>';
+            testRoles.forEach(role => {
+                roleFilter.innerHTML += `<option value="${role.value}">${role.label}</option>`;
+            });
+            
+            console.log('Manually populated role dropdown');
+        }
+
+        // Test user list response
+        async function testUserListResponse() {
+            const resultDiv = document.getElementById('userlist-result');
+            resultDiv.style.display = 'block';
+            
+            let log = 'Testing User List API Response...\n\n';
+            
+            try {
+                const payload = {
+                    page_index: 1,
+                    page_size: 3,
+                    sort_by: 'fullname',
+                    sort_direction: 0
+                };
+                
+                log += `Request payload: ${JSON.stringify(payload, null, 2)}\n\n`;
+                
+                const response = await makeAuthenticatedRequest(`${API_BASE_URL}/user/list`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                log += `Response status: ${response.status} ${response.statusText}\n\n`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log += `Response data:\n${JSON.stringify(data, null, 2)}\n\n`;
+                    
+                    // Check for roleName in items
+                    if (data.items && data.items.length > 0) {
+                        log += 'Checking roleName in first user:\n';
+                        const firstUser = data.items[0];
+                        log += `First user: ${JSON.stringify(firstUser, null, 2)}\n`;
+                        
+                        if (firstUser.roleName) {
+                            log += `✅ roleName found: ${firstUser.roleName}\n`;
+                        } else {
+                            log += '❌ roleName NOT found in user object\n';
+                            log += `Available properties: ${Object.keys(firstUser).join(', ')}\n`;
+                        }
+                    } else {
+                        log += '⚠️ No users returned in response\n';
+                    }
+                    
+                    resultDiv.className = 'result-box success';
+                } else {
+                    const errorText = await response.text();
+                    log += `❌ API Error: ${errorText}\n`;
+                    resultDiv.className = 'result-box error';
+                }
+                
+            } catch (error) {
+                log += `❌ Request failed: ${error.message}\n`;
+                log += `Error stack: ${error.stack}\n`;
+                resultDiv.className = 'result-box error';
+            }
+            
+            resultDiv.textContent = log;
+        }
+
+        // Test single user response
+        async function testSingleUserResponse() {
+            const resultDiv = document.getElementById('userlist-result');
+            resultDiv.style.display = 'block';
+            
+            let log = 'Testing Single User API Response...\n\n';
+            
+            try {
+                // First get a user ID from the list
+                const listResponse = await makeAuthenticatedRequest(`${API_BASE_URL}/user/list`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        page_index: 1,
+                        page_size: 1,
+                        sort_by: 'fullname',
+                        sort_direction: 0
+                    })
+                });
+                
+                if (listResponse.ok) {
+                    const listData = await listResponse.json();
+                    if (listData.items && listData.items.length > 0) {
+                        const userId = listData.items[0].publicId;
+                        log += `Testing with user ID: ${userId}\n\n`;
+                        
+                        const userResponse = await makeAuthenticatedRequest(`${API_BASE_URL}/user/${userId}`);
+                        
+                        log += `Single user response status: ${userResponse.status} ${userResponse.statusText}\n\n`;
+                        
+                        if (userResponse.ok) {
+                            const userData = await userResponse.json();
+                            log += `Single user data:\n${JSON.stringify(userData, null, 2)}\n\n`;
+                            
+                            if (userData.roleName) {
+                                log += `✅ roleName found in single user: ${userData.roleName}\n`;
+                            } else {
+                                log += '❌ roleName NOT found in single user\n';
+                            }
+                            
+                            resultDiv.className = 'result-box success';
+                        } else {
+                            const errorText = await userResponse.text();
+                            log += `❌ Single user API Error: ${errorText}\n`;
+                            resultDiv.className = 'result-box error';
+                        }
+                    } else {
+                        log += '❌ No users found to test with\n';
+                        resultDiv.className = 'result-box warning';
+                    }
+                } else {
+                    log += '❌ Failed to get user list for testing\n';
+                    resultDiv.className = 'result-box error';
+                }
+                
+            } catch (error) {
+                log += `❌ Request failed: ${error.message}\n`;
+                resultDiv.className = 'result-box error';
+            }
+            
+            resultDiv.textContent = log;
+        }
+
+        // Test roles API
+        async function testRolesAPI() {
+            const resultDiv = document.getElementById('roles-result');
+            resultDiv.style.display = 'block';
+            
+            let log = 'Testing Roles API...\n\n';
+            
+            try {
+                const response = await makeAuthenticatedRequest(`${API_BASE_URL}/user/roles`);
+                
+                log += `Response status: ${response.status} ${response.statusText}\n\n`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log += `Roles data:\n${JSON.stringify(data, null, 2)}\n\n`;
+                    
+                    if (Array.isArray(data) && data.length > 0) {
+                        log += `✅ Roles API working - found ${data.length} roles\n`;
+                        data.forEach(role => {
+                            log += `  - ${role.roleName} (ID: ${role.id})\n`;
+                        });
+                    } else {
+                        log += '⚠️ Roles API returned empty or invalid data\n';
+                    }
+                    
+                    resultDiv.className = 'result-box success';
+                } else {
+                    const errorText = await response.text();
+                    log += `❌ Roles API Error: ${errorText}\n`;
+                    resultDiv.className = 'result-box error';
+                }
+                
+            } catch (error) {
+                log += `❌ Roles API Request failed: ${error.message}\n`;
+                resultDiv.className = 'result-box error';
+            }
+            
+            resultDiv.textContent = log;
+        }
+
+        // Generate user cards
+        function generateUserCards() {
+            const container = document.getElementById('user-cards-container');
+            
+            const sampleUsers = [
+                { fullName: 'Nguyễn Văn A', email: 'admin@test.com', roleName: 'Admin', createdAt: '2024-01-15T10:30:00Z' },
+                { fullName: 'Trần Thị B', email: 'user@test.com', roleName: 'User', createdAt: '2024-01-16T14:20:00Z' },
+                { fullName: 'Lê Văn C', email: 'staff@test.com', roleName: 'Staff', createdAt: '2024-01-17T09:15:00Z' },
+                { fullName: 'Phạm Thị D', email: 'supplier@test.com', roleName: 'Supplier', createdAt: '2024-01-18T16:45:00Z' }
+            ];
+            
+            function getRoleClass(roleName) {
+                switch (roleName?.toLowerCase()) {
+                    case 'admin': return 'role-admin';
+                    case 'user': return 'role-user';
+                    case 'staff': return 'role-staff';
+                    case 'supplier': return 'role-supplier';
+                    default: return 'role-user';
+                }
+            }
+            
+            function getInitials(fullName) {
+                const names = fullName.trim().split(' ');
+                return names.length === 1 ? names[0][0] : (names[0][0] + names[names.length - 1][0]);
+            }
+            
+            const cardsHTML = sampleUsers.map(user => `
+                <div class="user-card-demo">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                ${getInitials(user.fullName)}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${user.fullName}</h6>
+                            <span class="role-badge ${getRoleClass(user.roleName)}">${user.roleName}</span>
+                            <div class="text-muted small">${user.email}</div>
+                            <div class="text-muted small">Tạo: ${new Date(user.createdAt).toLocaleDateString('vi-VN')}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = `
+                <h6>Sample User Cards:</h6>
+                ${cardsHTML}
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAuth();
+        });
+    </script>
+</body>
+</html>
