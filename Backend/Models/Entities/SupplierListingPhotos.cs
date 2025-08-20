@@ -10,11 +10,11 @@ namespace FlowerSellingWebsite.Models.Entities
         public int SupplierListingId { get; set; }
 
         [Required]
-        public string Url { get; set; } = null!;
+        public string? Url { get; set; }
         [Required]
         public bool IsPrimary { get; set; }
 
         // Navigation properties
-        public virtual SupplierListings SupplierListing { get; set; } = null!;
+        public virtual SupplierListings? SupplierListing { get; set; }
     }
 }

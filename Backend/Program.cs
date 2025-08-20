@@ -17,7 +17,6 @@ using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
 using System.Text;
-using FlowerSellingWebsite.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +46,6 @@ builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 //builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IContactService, ContactService>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 // Application Services

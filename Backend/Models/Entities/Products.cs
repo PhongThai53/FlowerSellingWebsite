@@ -21,6 +21,6 @@ namespace FlowerSellingWebsite.Models.Entities
         public ICollection<ProductPriceHistories> PriceHistories { get; set; } = new List<ProductPriceHistories>();
 
         [ForeignKey(nameof(CategoryId))]
-        public ProductCategories ProductCategories { get; set; } = null!;
+        public required ProductCategories ProductCategories { get; set; }
     }
 }

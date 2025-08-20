@@ -12,9 +12,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         private readonly IUserRepository _userRepository;
 
         public CommentService(
-            ICommentRepository commentRepository, 
+            ICommentRepository commentRepository,
             IBlogRepository blogRepository,
-            IUserRepository userRepository) : base(commentRepository)
+            IUserRepository userRepository)
         {
             _commentRepository = commentRepository;
             _blogRepository = blogRepository;
@@ -130,16 +130,16 @@ namespace FlowerSellingWebsite.Services.Implementations
             var comments = await _commentRepository.GetCommentsByBlogIdAsync(blogId);
             return comments.Select(MapToCommentDTO).ToList();
         }
-        
+
         public async Task<List<CommentDTO>> GetAllCommentsByBlogIdAsync(int blogId, int currentUserId)
         {
             // Check if user is admin or blog owner
             var blog = await _blogRepository.getByIdAsync(blogId);
             if (blog == null)
                 throw new KeyNotFoundException($"Blog with ID {blogId} not found.");
-                
+
             bool isAdminOrOwner = blog.UserId == currentUserId || await IsAdminUser(currentUserId);
-            
+
             // If user is admin or blog owner, get all comments including hidden ones
             if (isAdminOrOwner)
             {
@@ -191,7 +191,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return false;
-                
+
             // Check if user has Admin role
             return user.Role?.RoleName == "Admin";
         }

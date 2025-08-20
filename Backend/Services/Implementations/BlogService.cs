@@ -6,12 +6,12 @@ using FlowerSellingWebsite.Services.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class BlogService : BaseService<Blog>, IBlogService
+    public class BlogService : IBlogService
     {
         private readonly IBlogRepository _blogRepository;
         private readonly IUserRepository _userRepository;
 
-        public BlogService(IBlogRepository blogRepository, IUserRepository userRepository) : base(blogRepository)
+        public BlogService(IBlogRepository blogRepository, IUserRepository userRepository)
         {
             _blogRepository = blogRepository;
             _userRepository = userRepository;
@@ -252,7 +252,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             {
                 await _blogRepository.updateAsync(blog);
             }
-            
+
             return removed;
         }
 
@@ -317,9 +317,9 @@ namespace FlowerSellingWebsite.Services.Implementations
         {
             // For regular users: get published blogs + their own blogs (any status)
             var (blogs, totalCount) = await _blogRepository.GetBlogsForUserWithPermissionAsync(filters, currentUserId);
-            
+
             var blogListDTOs = blogs.Select(MapToBlogListDTO).ToList();
-            
+
             return new PagedBlogResultDTO
             {
                 Blogs = blogListDTOs,
@@ -382,7 +382,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return false;
-                
+
             // Check if user has Admin role
             return user.Role?.RoleName == "Admin";
         }

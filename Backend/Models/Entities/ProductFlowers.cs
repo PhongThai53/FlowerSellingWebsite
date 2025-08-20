@@ -17,7 +17,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public int QuantityNeeded { get; set; }
 
         // Navigation properties
-        public virtual Products Product { get; set; } = null!;
-        public virtual Flowers Flower { get; set; } = null!;
+        public virtual Products? Product { get; set; }
+        public virtual Flowers Flower { get; set; }
     }
 }

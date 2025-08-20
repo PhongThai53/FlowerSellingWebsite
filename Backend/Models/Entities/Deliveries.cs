@@ -17,6 +17,6 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? ShipperName { get; set; }
 
         // Navigation properties
-        public virtual Orders Order { get; set; } = null!;
+        public virtual Orders? Order { get; set; }
     }
 }

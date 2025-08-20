@@ -21,7 +21,9 @@ namespace FlowerSellingWebsite.Models.Entities
         public decimal LineTotal { get; set; }
 
         // Navigation properties
-        public virtual PurchaseOrders PurchaseOrder { get; set; } = null!;
-        public virtual Flowers Flower { get; set; } = null!;
+        public virtual PurchaseOrders? PurchaseOrder { get; set; }
+        public virtual Flowers? Flower { get; set; }
+        public virtual ICollection<FlowerDamageLogs> FlowerDamageLogs { get; set; } = new HashSet<FlowerDamageLogs>();
+
     }
 }
