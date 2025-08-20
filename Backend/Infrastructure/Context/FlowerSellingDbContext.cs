@@ -306,12 +306,6 @@ namespace FlowerSelling.Data
 
                 // ===== RELATIONSHIPS =====
 
-                // Self-referencing Comment
-                modelBuilder.Entity<Comment>()
-                    .HasOne(c => c.Parent)
-                    .WithMany(c => c.Children)
-                    .HasForeignKey(c => c.ParentId)
-                    .OnDelete(DeleteBehavior.Restrict);
 
                 // Composite Keys
                 modelBuilder.Entity<RolePermissions>()
@@ -340,10 +334,16 @@ namespace FlowerSelling.Data
                     .HasComputedColumnSql("[Quantity] * [UnitPrice]", stored: true);
 
                 modelBuilder.Entity<Comment>()
-      .HasOne(c => c.Parent)
-      .WithMany(c => c.Children)
-      .HasForeignKey(c => c.ParentId)
-      .OnDelete(DeleteBehavior.Restrict); // hoặc .NoAction()
+                    .HasOne(c => c.Parent)
+                    .WithMany(c => c.Children)
+                    .HasForeignKey(c => c.ParentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Comment>()
+                     .HasOne(c => c.User)
+                     .WithMany(u => u.Comments)
+                      .HasForeignKey(c => c.UserId)
+                     .OnDelete(DeleteBehavior.Restrict);
             }
 
             private void ConfigureBaseEntityProperties<T>(ModelBuilder modelBuilder) where T : BaseEntity
