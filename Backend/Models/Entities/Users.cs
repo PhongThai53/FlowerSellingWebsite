@@ -15,6 +15,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        [ForeignKey("Supplier")]
         public int? SupplierId { get; set; }
 
         [Required]
@@ -26,5 +27,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public virtual Roles Role { get; set; } = null!;
         public virtual ICollection<Orders> Orders { get; set; } = new HashSet<Orders>();
         public virtual ICollection<FlowerPriceHistory> FlowerPriceHistories { get; set; } = new HashSet<FlowerPriceHistory>();
+        public virtual ICollection<FlowerDamageLogs> FlowerDamageLogs { get; set; } = new HashSet<FlowerDamageLogs>();
+        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
     }
 }

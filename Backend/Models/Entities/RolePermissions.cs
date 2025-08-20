@@ -13,9 +13,9 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation Properties
         [ForeignKey("RoleId")]
-        public virtual Roles Role { get; set; } = null!;
+        public virtual Roles? Role { get; set; }
 
         [ForeignKey("PermissionId")]
-        public virtual Permissions Permission { get; set; } = null!;
+        public virtual Permissions? Permission { get; set; }
     }
 }

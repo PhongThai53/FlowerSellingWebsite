@@ -2,6 +2,7 @@
 using FlowerSellingWebsite.Infrastructure.DbContext;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
+using FlowerSellingWebsite.Models.DTOs.ProductCategory;
 using FlowerSellingWebsite.Repositories.Implementations;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Implementations;
@@ -16,7 +17,6 @@ using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
 using System.Text;
-using FlowerSellingWebsite.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,11 +46,12 @@ builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 //builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IContactService, ContactService>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 // Application Services
-builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+builder.Services.AddScoped<
+    IBaseService<ProductCategoryCreateDTO, ProductCategoryUpdateDTO, ProductCategoryResponseDTO>,
+    ProductCategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationService, EmailVerificationService>();
@@ -60,7 +61,6 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 // Application Services

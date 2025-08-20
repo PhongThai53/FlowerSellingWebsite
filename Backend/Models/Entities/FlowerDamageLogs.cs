@@ -6,11 +6,9 @@ namespace FlowerSellingWebsite.Models.Entities
     public class FlowerDamageLogs : BaseEntity
     {
         [Required]
-        [ForeignKey("FlowerBatch")]
-        public int FlowerBatchId { get; set; }
+        public int PurchaseOrderDetailId { get; set; }
 
         [Required]
-        [ForeignKey("ReportedByUser")]
         public int ReportedByUserId { get; set; }
 
         [Required]
@@ -21,7 +19,10 @@ namespace FlowerSellingWebsite.Models.Entities
         public DateTime DamageDate { get; set; }
         public string? Notes { get; set; }
 
-        // Navigation properties
-        public virtual FlowerBatches FlowerBatch { get; set; } = null!;
+        [ForeignKey(nameof(PurchaseOrderDetailId))]
+        public virtual PurchaseOrderDetails PurchaseOrderDetail { get; set; } = null!;
+
+        [ForeignKey(nameof(ReportedByUserId))]
+        public virtual Users ReportedByUser { get; set; } = null!;
     }
 }

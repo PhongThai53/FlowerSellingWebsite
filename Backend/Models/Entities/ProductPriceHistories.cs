@@ -13,6 +13,6 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation
         [ForeignKey(nameof(ProductId))]
-        public Products Products { get; set; } = null!;
+        public Products? Products { get; set; }
     }
 }
