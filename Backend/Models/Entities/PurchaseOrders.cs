@@ -15,13 +15,13 @@ namespace FlowerSellingWebsite.Models.Entities
         [Required]
         public DateTime CreatedDate { get; set; }
         [Required]
-        public string Status { get; set; } = null!;
+        public string Status { get; set; } = "pending";
         [Required]
         public decimal TotalAmount { get; set; }
         public string? Notes { get; set; }
 
         // Navigation properties
-        public virtual Suppliers Supplier { get; set; } = null!;
+        public virtual Suppliers? Supplier { get; set; }
         public virtual ICollection<PurchaseOrderDetails> PurchaseOrderDetails { get; set; } = new HashSet<PurchaseOrderDetails>();
     }
 }

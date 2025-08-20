@@ -1,7 +1,6 @@
 ﻿namespace FlowerSellingWebsite.Controllers
 {
     using FlowerSellingWebsite.Models.DTOs;
-    using FlowerSellingWebsite.Models.Entities;
     using global::ProjectGreenLens.Services.Interfaces;
     using Microsoft.AspNetCore.Mvc;
 
@@ -9,74 +8,68 @@
     {
         [ApiController]
         [Route("api/[controller]")]
-        public class BaseController<T> : ControllerBase where T : BaseEntity
+        public class BaseController<TCreateDTO, TUpdateDTO, TResponseDTO> : ControllerBase
         {
-            private readonly IBaseService<T> _service;
+            private readonly IBaseService<TCreateDTO, TUpdateDTO, TResponseDTO> _service;
 
-            public BaseController(IBaseService<T> service)
+            public BaseController(IBaseService<TCreateDTO, TUpdateDTO, TResponseDTO> service)
             {
-                _service = service ?? throw new ArgumentNullException(nameof(service));
+                _service = service;
             }
 
             [HttpGet]
-            public async Task<ActionResult<ApiResponse<IEnumerable<T>>>> GetAll()
+            public async Task<IActionResult> GetAll()
             {
-                var items = await _service.getAllAsync();
-                return Ok(ApiResponse<IEnumerable<T>>.Ok(items));
+                var data = await _service.getAllAsync();
+                return Ok(ApiResponse<IEnumerable<TResponseDTO>>.Ok(data));
             }
 
-            [HttpGet("{id}")]
-            public async Task<ActionResult<ApiResponse<T>>> GetById(int id)
+            [HttpGet("{id:int}")]
+            public async Task<IActionResult> GetById(int id)
             {
                 try
                 {
-                    var entity = await _service.getByIdAsync(id);
-                    return Ok(ApiResponse<T>.Ok(entity));
+                    var data = await _service.getByIdAsync(id);
+                    return Ok(ApiResponse<TResponseDTO>.Ok(data));
                 }
                 catch (KeyNotFoundException ex)
                 {
-                    return NotFound(ApiResponse<T>.Fail(ex.Message));
+                    return NotFound(ApiResponse<TResponseDTO>.Fail(ex.Message));
                 }
             }
 
             [HttpPost]
-            public async Task<ActionResult<ApiResponse<T>>> Create([FromBody] T entity)
+            public async Task<IActionResult> Create([FromBody] TCreateDTO createDto)
             {
-                if (entity == null)
-                    return BadRequest(ApiResponse<T>.Fail("Entity cannot be null."));
-
-                var created = await _service.createAsync(entity);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, ApiResponse<T>.Ok(created, "Created successfully"));
+                var data = await _service.createAsync(createDto);
+                return Ok(ApiResponse<TResponseDTO>.Ok(data, "Created successfully"));
             }
 
-            [HttpPut("{id}")]
-            public async Task<ActionResult<ApiResponse<T>>> Update(int id, [FromBody] T entity)
-            {
-                if (id != entity.Id)
-                    return BadRequest(ApiResponse<T>.Fail("Id mismatch."));
-
-                try
-                {
-                    var updated = await _service.updateAsync(entity);
-                    return Ok(ApiResponse<T>.Ok(updated, "Updated successfully"));
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    return NotFound(ApiResponse<T>.Fail(ex.Message));
-                }
-            }
-
-            [HttpDelete("{id}")]
-            public async Task<ActionResult<ApiResponse<string>>> Delete(int id)
+            [HttpPut("{id:int}")]
+            public async Task<IActionResult> Update(int id, [FromBody] TUpdateDTO updateDto)
             {
                 try
                 {
-                    await _service.deleteAsync(id);
-                    return Ok(ApiResponse<string>.Ok("Deleted successfully"));
+                    var data = await _service.updateAsync(id, updateDto);
+                    return Ok(ApiResponse<TResponseDTO>.Ok(data, "Updated successfully"));
                 }
                 catch (KeyNotFoundException ex)
                 {
-                    return NotFound(ApiResponse<string>.Fail(ex.Message));
+                    return NotFound(ApiResponse<TResponseDTO>.Fail(ex.Message));
+                }
+            }
+
+            [HttpDelete("{id:int}")]
+            public async Task<IActionResult> Delete(int id)
+            {
+                try
+                {
+                    var success = await _service.deleteAsync(id);
+                    return Ok(ApiResponse<bool>.Ok(success, "Deleted successfully"));
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return NotFound(ApiResponse<bool>.Fail(ex.Message));
                 }
             }
         }

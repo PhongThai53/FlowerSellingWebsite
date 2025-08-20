@@ -1,8 +1,7 @@
 using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
-using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.DTOs.Product;
-using FlowerSellingWebsite.Models.DTOs.ProductCategoryDTO;
+using FlowerSellingWebsite.Models.DTOs.ProductCategory;
 using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using FlowerSellingWebsite.Models.Entities;
 
@@ -12,32 +11,6 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
     {
         public MappingProfile()
         {
-            // ------------------ Orders ------------------
-            CreateMap<Orders, OrderDTO>()
-                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
-                    src.Customer != null ? src.Customer.FullName : null))
-                .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src =>
-                    src.CreatedByUser != null ? src.CreatedByUser.FullName : null))
-                .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src =>
-                    src.OrderDetails.Where(od => !od.IsDeleted)));
-
-            CreateMap<CreateOrderDTO, Orders>();
-            CreateMap<UpdateOrderDTO, Orders>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
-            // ------------------ OrderDetails ------------------
-            CreateMap<OrderDetails, OrderDetailDTO>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src =>
-                    src.Product != null ? src.Product.Name : null))
-                .ForMember(dest => dest.FlowerBatchName, opt => opt.MapFrom(src =>
-                    src.FlowerBatch != null ? src.FlowerBatch.BatchCode : null))
-                .ForMember(dest => dest.SupplierListingName, opt => opt.MapFrom(src =>
-                    src.SupplierListing != null ? ("Supplier ID: " + src.SupplierListing.SupplierId.ToString()) : null));
-
-            CreateMap<CreateOrderDetailDTO, OrderDetails>();
-            CreateMap<UpdateOrderDetailDTO, OrderDetails>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));
@@ -47,7 +20,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             CreateMap<CreateProductDTO, Products>();
             CreateMap<UpdateProductDTO, Products>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); 
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // ------------------ ProductPhotos ------------------
             CreateMap<ProductPhotos, ProductPhotoDTO>();
@@ -57,11 +30,11 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<DeleteProductPhotoDTO, ProductPhotos>();
 
             // ------------------ ProductCategories ------------------
-            CreateMap<ProductCategories, ProductCategoryDTO>();
-            CreateMap<CreateProductCategoryDTO, ProductCategories>();
-            CreateMap<UpdateProductCategoryDTO, ProductCategories>()
+            CreateMap<ProductCategories, ProductCategoryResponseDTO>()
+              .ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.Products.Count));
+            CreateMap<ProductCategoryCreateDTO, ProductCategories>();
+            CreateMap<ProductCategoryUpdateDTO, ProductCategories>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<DeleteProductCategoryDTO, ProductCategories>();
 
             // ------------------ Users ------------------
             CreateMap<Users, UserDTO>()

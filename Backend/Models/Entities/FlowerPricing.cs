@@ -7,7 +7,8 @@ namespace FlowerSellingWebsite.Models.Entities
     {
         [Required]
         [ForeignKey("Flower")]
-        public int FlowerId { get; set; }  // Only connect to Flowers
+        public int FlowerId { get; set; }
+        // Only connect to Flowers
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
@@ -15,15 +16,15 @@ namespace FlowerSellingWebsite.Models.Entities
 
         [Required]
         [StringLength(3)]
-        public string Currency { get; set; } = null!; // VND, USD...
+        public required string Currency { get; set; } = "VND";
 
         [Required]
         public DateTime EffectiveDate { get; set; }
-        public DateTime? ExpiryDate { get; set; }    // NULL = no expiration
+        public DateTime? ExpiryDate { get; set; }
 
         [Required]
         [StringLength(20)]
-        public string PriceType { get; set; } = null!; // retail, wholesale, promotional
+        public string? PriceType { get; set; }
 
         [Required]
         public bool IsActive { get; set; }

@@ -12,9 +12,8 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? Address { get; set; }
 
         // Navigation properties
-        public virtual Users? User { get; set; }
+        public virtual ICollection<Users> Users { get; set; } = new HashSet<Users>();
         public virtual ICollection<SupplierListings> SupplierListings { get; set; } = new HashSet<SupplierListings>();
-        public virtual ICollection<FlowerBatches> FlowerBatches { get; set; } = new HashSet<FlowerBatches>();
         public virtual ICollection<PurchaseOrders> PurchaseOrders { get; set; } = new HashSet<PurchaseOrders>();
     }
 }

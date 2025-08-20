@@ -1,10 +1,8 @@
-using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Models.DTOs.Category;
-using ProjectGreenLens.Services.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Interfaces
 {
-    public interface ICategoryService : IBaseService<FlowerCategories>
+    public interface ICategoryService
     {
         Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
         Task<CategoryDTO> GetCategoryByIdAsync(int id);
