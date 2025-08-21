@@ -59,12 +59,17 @@ namespace FlowerSellingWebsite.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    var errors = ModelState.Values
+                    var firstError = ModelState.Values
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)
-                        .ToList();
+                        .FirstOrDefault();
+
+                    if (firstError != null)
+                    {
+                        return BadRequest(ApiResponse<UserDTO>.Fail(firstError));
+                    }
                     
-                    return BadRequest(ApiResponse<UserDTO>.Fail("Invalid input data", errors));
+                    return BadRequest(ApiResponse<UserDTO>.Fail("Invalid input data"));
                 }
 
                 // Get current user ID from token
@@ -112,12 +117,17 @@ namespace FlowerSellingWebsite.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    var errors = ModelState.Values
+                    var firstError = ModelState.Values
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)
-                        .ToList();
+                        .FirstOrDefault();
+
+                    if (firstError != null)
+                    {
+                        return BadRequest(ApiResponse<string>.Fail(firstError));
+                    }
                     
-                    return BadRequest(ApiResponse<string>.Fail("Invalid input data", errors));
+                    return BadRequest(ApiResponse<string>.Fail("Invalid input data"));
                 }
 
                 // Get current user ID from token
@@ -191,3 +201,4 @@ namespace FlowerSellingWebsite.Controllers
         }
     }
 }
+

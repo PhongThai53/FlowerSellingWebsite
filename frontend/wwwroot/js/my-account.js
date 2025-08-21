@@ -102,8 +102,10 @@ class MyAccountManager {
         error.message || "Failed to load user profile. Please try again.",
         "danger"
       );
-      // If profile fails to load, consider logging the user out as the token might be invalid
-      setTimeout(() => this.performLogout(true), 2000);
+      // If profile fails to load with an auth error, the token is likely invalid. Redirect to login.
+      if (error.isAuthError) {
+        setTimeout(() => this.performLogout(true), 2000);
+      }
     }
   }
 
@@ -456,8 +458,13 @@ class MyAccountManager {
   }
 
   isValidPassword(password) {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // This regex enforces:
+    // - at least 8 characters
+    // - at least one lowercase letter
+    // - at least one uppercase letter
+    // - at least one number
+    // - at least one special character from a wide set
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return passwordRegex.test(password);
   }
 
@@ -487,18 +494,46 @@ class MyAccountManager {
     console.log("Response status:", response.status);
     console.log("Response headers:", response.headers);
 
-    if (response.status === 401) {
-      console.error("Authentication failed - token expired or invalid");
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_data");
-      window.location.href = "/html/auth/login-register.html";
-      throw new Error("Authentication expired");
+    // Any non-ok response needs to be handled as an error.
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: An unexpected error occurred.`;
+      const isAuthError = response.status === 401;
+
+      try {
+        const errorJson = await response.json();
+        console.error("Error JSON:", errorJson);
+
+        // Handle custom ApiResponse format: { message: "..." }
+        if (errorJson.message) {
+          errorMessage = errorJson.message;
+        }
+        // Handle ASP.NET ValidationProblemDetails format: { errors: { Field: ["message"] } }
+        else if (errorJson.errors) {
+          const firstErrorKey = Object.keys(errorJson.errors)[0];
+          errorMessage = errorJson.errors[firstErrorKey][0];
+        }
+        // Handle simple string error
+        else if (typeof errorJson === "string") {
+          errorMessage = errorJson;
+        } else {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      } catch (e) {
+        // The response body was not JSON or was empty.
+        console.error("Could not parse error response as JSON.", e);
+        errorMessage = `HTTP ${response.status}: ${
+          response.statusText || "Server returned an error"
+        }`;
+      }
+
+      const error = new Error(errorMessage);
+      error.isAuthError = isAuthError; // Add a flag for auth errors
+      throw error;
     }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`HTTP ${response.status} error:`, errorText);
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    // If response is ok, but content is empty (e.g., 204 No Content)
+    if (response.status === 204) {
+      return null;
     }
 
     const result = await response.json();
