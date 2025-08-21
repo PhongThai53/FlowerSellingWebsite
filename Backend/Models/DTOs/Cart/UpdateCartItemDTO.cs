@@ -11,3 +11,4 @@ namespace FlowerSellingWebsite.Models.DTOs.Cart
         public int Quantity { get; set; }
     }
 }
+

@@ -1,4 +1,14 @@
-﻿// API Base URL
+﻿// Import config
+import("./config/config.js")
+  .then((module) => {
+    window.CONFIG = module.CONFIG;
+  })
+  .catch(() => {
+    // Fallback if config not available
+    window.CONFIG = { API_BASE_URL: "https://localhost:7062/api" };
+  });
+
+// API Base URL
 const API_BASE_URL = "https://localhost:7062/api";
 
 // Global variables
@@ -10,15 +20,11 @@ let pageSize = 6;
 
 // Helper functions
 function getProductImageUrl(product) {
-    const baseUrl = API_BASE_URL.replace('/api', ''); // Định nghĩa trước
-    if (!product || !product.id) {
-        return `${baseUrl}/Image/products/default/default.jpg`;
-    }
-    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
-}
-
-  // Fallback to default image
-  return "/images/product/default-product.jpg";
+  const baseUrl = API_BASE_URL.replace("/api", ""); // Định nghĩa trước
+  if (!product || !product.id) {
+    return `${baseUrl}/Image/products/default/default.jpg`;
+  }
+  return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
 }
 
 function formatPrice(price) {
@@ -104,10 +110,13 @@ class ItemsPage {
     }
   }
 
-    async loadCategories() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/ProductCategory/with-products`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  async loadCategories() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/ProductCategory/with-products`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       const result = await response.json();
       if (result.succeeded && result.data) {
@@ -122,11 +131,11 @@ class ItemsPage {
   renderCategories(categories) {
     if (!this.categoriesContainer) return;
 
-        let html = `<li><a href="#" data-category-id="" class="category-link">All <span>-</span></a></li>`;
+    let html = `<li><a href="#" data-category-id="" class="category-link">All <span>-</span></a></li>`;
 
-        categories.forEach(category => {
-            const productCount = category.totalProducts || 0;
-            html += `<li>
+    categories.forEach((category) => {
+      const productCount = category.totalProducts || 0;
+      html += `<li>
                         <a href="#" data-category-id="${category.id}" class="category-link">
                             ${category.name} <span>${productCount}</span>
                         </a>
@@ -386,9 +395,14 @@ class ItemsPage {
 
       if (e.target.closest(".add-to-cart-btn")) {
         e.preventDefault();
-        const productId = e.target
-          .closest(".add-to-cart-btn")
-          .getAttribute("data-product-id");
+        const btn = e.target.closest(".add-to-cart-btn");
+        const productId = btn.getAttribute("data-product-id");
+
+        // Prevent double-click and multiple additions
+        if (btn.classList.contains("adding-to-cart")) {
+          return;
+        }
+
         this.addToCart(productId);
       }
     });
@@ -463,73 +477,35 @@ class ItemsPage {
   }
 
   async addToCart(productId) {
+    const btn = document.querySelector(`[data-product-id="${productId}"]`);
+    const product = this.items.find((item) => item.id == productId);
+    const productName = product ? product.name : "Sản phẩm";
+
     try {
-      // Simple token check
-      const token = localStorage.getItem("auth_token");
+      // Show loading state
+      this.setButtonLoading(productId, true);
 
-      if (!token) {
-        this.showErrorToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
-        setTimeout(() => {
-          window.location.href = "/html/auth/login-register.html";
-        }, 2000);
-        return;
+      // Import CartManager dynamically to avoid circular dependencies
+      const { CartManager } = await import("./component/cart/CartManager.js");
+
+      // Check if CartManager instance exists globally, if not create one
+      if (!window.globalCartManager) {
+        window.globalCartManager = new CartManager();
       }
 
-      // Direct API call
-      const product = this.items.find((item) => item.id == productId);
-      const productName = product ? product.name : "Sản phẩm";
+      // Use the CartManager to add product to cart
+      await window.globalCartManager.addToCart(productId, 1);
 
-      const response = await fetch(`${API_BASE_URL}/Cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: parseInt(productId),
-          quantity: 1,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.succeeded) {
-        this.showSuccessToast(`${productName} đã được thêm vào giỏ hàng!`);
-
-        // Fetch updated cart summary to get the correct count
-        const summaryResponse = await fetch(`${API_BASE_URL}/Cart/summary`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const summaryResult = await summaryResponse.json();
-        if (summaryResult.succeeded) {
-          const newCount = summaryResult.data.total_items;
-          const cartCounts = document.querySelectorAll(
-            ".cart-count, .notification"
-          );
-          cartCounts.forEach((element) => {
-            element.textContent = newCount;
-          });
-        }
-      } else {
-        throw new Error(result.message || "Không thể thêm vào giỏ hàng");
-      }
+      // Show success message
+      this.showToast(`${productName} đã được thêm vào giỏ hàng!`, "success");
     } catch (error) {
       console.error("Error adding to cart:", error);
 
-      if (
-        error.message.includes("401") ||
-        error.message.includes("Unauthorized")
-      ) {
-        this.showErrorToast(
-          "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại"
-        );
-        localStorage.removeItem("auth_token");
-        setTimeout(() => {
-          window.location.href = "/html/auth/login-register.html";
-        }, 2000);
-      } else {
-        this.showErrorToast("Có lỗi xảy ra khi thêm vào giỏ hàng");
-      }
+      // Show error message
+      this.showToast("Có lỗi xảy ra khi thêm vào giỏ hàng", "error");
+    } finally {
+      // Reset button state
+      this.setButtonLoading(productId, false);
     }
   }
 
@@ -557,81 +533,73 @@ class ItemsPage {
     }
   }
 
-  showSuccessToast(message) {
-    this.createToast(message, "success");
-  }
-
-  showErrorToast(message) {
-    this.createToast(message, "error");
-  }
-
-  createToast(message, type) {
-    // Simple toast implementation
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: ${type === "success" ? "#28a745" : "#dc3545"};
-      color: white;
-      padding: 15px 20px;
-      border-radius: 5px;
-      z-index: 9999;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      min-width: 300px;
-    `;
-    toast.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <i class="fa fa-${
-          type === "success" ? "check" : "exclamation-triangle"
-        }" style="font-size: 18px;"></i>
-        <span>${message}</span>
-      </div>
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = "1";
-      toast.style.transform = "translateX(0)";
-    }, 100);
-
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
-  }
-
   forceSort(value) {
     this.sortBy = value;
     this.lastSortValue = value;
     this.currentPage = 1;
     this.loadItems();
   }
+
+  setButtonLoading(productId, isLoading) {
+    const buttons = document.querySelectorAll(
+      `[data-product-id="${productId}"]`
+    );
+    buttons.forEach((btn) => {
+      if (isLoading) {
+        btn.classList.add("adding-to-cart");
+        btn.disabled = true;
+        const originalIcon = btn.querySelector("i");
+        if (originalIcon) {
+          originalIcon.className = "fa fa-spinner fa-spin";
+        }
+      } else {
+        btn.classList.remove("adding-to-cart");
+        btn.disabled = false;
+        const icon = btn.querySelector("i");
+        if (icon) {
+          icon.className = "lnr lnr-cart";
+        }
+      }
+    });
+  }
+
+  showToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+       <div class="toast-content">
+         <i class="fa fa-${
+           type === "success" ? "check" : "exclamation-triangle"
+         }"></i>
+         <span>${message}</span>
+       </div>
+     `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("show");
+    }, 100);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
 }
 
-// Simple shop initialization
+// Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Shop.js: DOM loaded, initializing...");
-  if (!window.itemsPageInstance) {
+  setTimeout(() => {
     window.itemsPageInstance = new ItemsPage();
     window.forceSort = (value) => window.itemsPageInstance.forceSort(value);
-    console.log("Shop.js: ItemsPage initialized");
-  }
+  }, 100);
 });
 
-// Fallback if DOM already loaded
-if (document.readyState !== "loading") {
-  console.log("Shop.js: DOM already loaded, initializing immediately...");
+window.addEventListener("load", () => {
   if (!window.itemsPageInstance) {
     window.itemsPageInstance = new ItemsPage();
-    window.forceSort = (value) => window.itemsPageInstance.forceSort(value);
-    console.log("Shop.js: ItemsPage initialized");
   }
-}
+});
 
 // jQuery backup for sort functionality
 setTimeout(() => {
@@ -640,15 +608,13 @@ setTimeout(() => {
       window.itemsPageInstance.forceSort($(this).val());
     });
 
-        $(document).on('click', '.nice-select .option', function () {
-            setTimeout(() => {
-                const sortSelect = document.querySelector('select[name="sortBy"]');
-                if (sortSelect) {
-                    window.itemsPageInstance.forceSort(sortSelect.value);
-                }
-            }, 50);
-        });
-    }
+    $(document).on("click", ".nice-select .option", function () {
+      setTimeout(() => {
+        const sortSelect = document.querySelector('select[name="sortBy"]');
+        if (sortSelect) {
+          window.itemsPageInstance.forceSort(sortSelect.value);
+        }
+      }, 50);
+    });
+  }
 }, 3000);
-
-

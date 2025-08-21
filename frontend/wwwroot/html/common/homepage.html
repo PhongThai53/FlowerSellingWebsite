@@ -25,6 +25,8 @@
     <link href="../../css/vendor.css" rel="stylesheet" />
     <!-- Main Style CSS -->
     <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Cart CSS for toast notifications -->
+    <link href="../../css/cart.css" rel="stylesheet" />
 
     <!-- Custom CSS for auth pages -->
     <link href="../../css/auth.css" rel="stylesheet" />
@@ -230,27 +232,27 @@
       <!-- service policy end -->
       <!-- our product area start -->
       <section class="our-product section-space">
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="section-title text-center">
-          <h2>New Products</h2>
-          <p>
-            Accumsan vitae pede lacus ut ullamcorper sollicitudin quisque
-            libero
-          </p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="section-title text-center">
+                <h2>New Products</h2>
+                <p>
+                  Accumsan vitae pede lacus ut ullamcorper sollicitudin quisque
+                  libero
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Container cho sản phẩm -->
+          <div class="row mtn-40 loadproduct">
+            <!-- Sản phẩm sẽ được load vào đây bởi JavaScript -->
+
+            <!-- Button view more sẽ được JavaScript thêm vào cuối -->
+          </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- Container cho sản phẩm -->
-    <div class="row mtn-40 loadproduct">
-      <!-- Sản phẩm sẽ được load vào đây bởi JavaScript -->
-      
-      <!-- Button view more sẽ được JavaScript thêm vào cuối -->
-    </div>
-  </div>
-</section>
+      </section>
       <!-- our product area end -->
       <!-- banner statistics start -->
       <section class="banner-statistics-right">
@@ -816,6 +818,13 @@
     <script src="../../js/vendor.js"></script>
     <!-- Active Js -->
     <script src="../../js/active.js"></script>
+    <!-- Services and Components -->
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script type="module" src="../../js/component/cart/CartManager.js"></script>
+    <script
+      type="module"
+      src="../../js/component/header/HeaderManager.js"
+    ></script>
     <!-- Homepage Manager Js -->
     <script src="../../js/homepage-manager.js"></script>
     <script src="../../js/homepage.js"></script>
