@@ -111,6 +111,10 @@ export class ApiService {
     return this.request(`/Product/${id}`);
   }
 
+  static async getProductStock(productId) {
+    return this.request(`/Product/${productId}`);
+  }
+
   // ← New: Add method to get price range from server
   static async fetchPriceRange() {
     return this.request("/Product/price-range");
