@@ -1,49 +1,119 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FlowerSellingWebsite.Models.DTOs.Order
 {
     public class OrderDTO
     {
-        public int Id { get; set; }
-        public Guid PublicId { get; set; }
-        public string OrderNumber { get; set; } = string.Empty;
-        public bool IsSaleOrder { get; set; }
-        public int? CustomerId { get; set; }
-        public string? CustomerName { get; set; }
-        public int? SupplierId { get; set; }
-        public string? SupplierName { get; set; }
-        public int CreatedByUserId { get; set; }
-        public string CreatedByUserName { get; set; } = string.Empty;
+        [JsonPropertyName("order_number")]
+        public string OrderNumber { get; set; } = null!;
+
+        [JsonPropertyName("customer_id")]
+        public int CustomerId { get; set; }
+
+        [JsonPropertyName("order_date")]
         public DateTime OrderDate { get; set; }
+
+        [JsonPropertyName("required_date")]
         public DateTime? RequiredDate { get; set; }
-        public decimal EstimatedTotalAmount { get; set; }
-        public decimal? FinalTotalAmount { get; set; }
-        public string Status { get; set; } = string.Empty;
+
+        [JsonPropertyName("shipped_date")]
+        public DateTime? ShippedDate { get; set; }
+
+        [JsonPropertyName("cancelled_date")]
+        public DateTime? CancelledDate { get; set; }
+
+        [JsonPropertyName("status")]
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+        [JsonPropertyName("subtotal")]
+        public decimal Subtotal { get; set; }
+
+        [JsonPropertyName("discount_amount")]
+        public decimal DiscountAmount { get; set; }
+
+        [JsonPropertyName("tax_amount")]
+        public decimal TaxAmount { get; set; }
+
+        [JsonPropertyName("shipping_fee")]
+        public decimal ShippingFee { get; set; }
+
+        [JsonPropertyName("total_amount")]
+        public decimal TotalAmount { get; set; } // subtotal - discount + tax + ship
+
+        [JsonPropertyName("payment_status")]
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+
+        [JsonPropertyName("shipping_address")]
+        public string? ShippingAddress { get; set; }
+
+        [JsonPropertyName("billing_address")]
+        public string? BillingAddress { get; set; }
+
+        [JsonPropertyName("notes")]
         public string? Notes { get; set; }
+
+        [JsonPropertyName("supplier_notes")]
         public string? SupplierNotes { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+
+        [MaxLength(100)]
+        [JsonPropertyName("created_by")]
+        public string? CreatedBy { get; set; }
+
+        [MaxLength(100)]
+        [JsonPropertyName("updated_by")]
+        public string? UpdatedBy { get; set; }
+
+        [JsonPropertyName("order_details")]
         public List<OrderDetailDTO>? OrderDetails { get; set; }
     }
 
+    public enum OrderStatus
+    {
+        Pending,     
+        Confirmed,   
+        Preparing,   
+        Delivering,  
+        Delivered,   
+        Cancelled   
+    }
+
+    public enum PaymentStatus
+    {
+        Unpaid,      
+        Pending,     
+        Paid,         
+        Failed,       
+        Refunded
+    }
+
+
     public class OrderDetailDTO
     {
-        public int Id { get; set; }
-        public Guid PublicId { get; set; }
+        [JsonPropertyName("order_id")]
         public int OrderId { get; set; }
-        public int? ProductId { get; set; }
-        public string? ProductName { get; set; }
-        public int? FlowerBatchId { get; set; }
-        public string? FlowerBatchName { get; set; }
-        public int? SupplierListingId { get; set; }
-        public string? SupplierListingName { get; set; }
-        public string ItemName { get; set; } = string.Empty;
+
+        [JsonPropertyName("product_id")]
+        public int ProductId { get; set; }
+
+        [JsonPropertyName("item_name")]
+        public string? ItemName { get; set; }
+
+        [JsonPropertyName("quantity")]
         public int Quantity { get; set; }
-        public int? ApprovedQuantity { get; set; }
+
+        [JsonPropertyName("unit_price")]
         public decimal UnitPrice { get; set; }
-        public decimal? FinalUnitPrice { get; set; }
-        public decimal EstimatedAmount { get; set; }
-        public decimal? FinalAmount { get; set; }
+
+        [JsonPropertyName("line_total")]
+        public decimal LineTotal { get; set; }
+
+        [JsonPropertyName("expiration_date")]
+        public DateTime? ExpirationDate { get; set; }
+
+        [JsonPropertyName("notes")]
         public string? Notes { get; set; }
     }
 

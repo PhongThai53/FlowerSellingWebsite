@@ -38,5 +38,10 @@ namespace ProjectGreenLens.Repositories.Implementations
             entity.DeletedAt = DateTime.UtcNow;
             await updateAsync(entity);
         }
+
+        public IQueryable<T> AsQueryable()
+        {
+            return _context.Set<T>().AsQueryable();
+        }
     }
 }
