@@ -21,6 +21,8 @@ namespace FlowerSellingWebsite.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] int categoryId = 0,
+            [FromQuery] int min = 0,
+            [FromQuery] int max = 500000,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool asc = true,
@@ -28,13 +30,16 @@ namespace FlowerSellingWebsite.Controllers
         {
 
             var result = await _productService.GetPagedProductsAsync(
-                pageNumber, pageSize, categoryId, search, sortBy, asc, cancellationToken);
+                pageNumber, pageSize, categoryId, min, max, search, sortBy, asc, cancellationToken);
 
             var data = new
             {
                 items = result.Items,
                 totalPages = result.TotalPages,
-                totalCount = result.TotalCount
+                totalCount = result.TotalCount,
+                min = result.Min,
+                max = result.DbMax,
+                dbmax = result.DbMax
             };
 
             return Ok(ApiResponse<object>.Ok(data, "Products retrieved successfully"));

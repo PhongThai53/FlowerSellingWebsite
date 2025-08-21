@@ -26,9 +26,8 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation properties - added new collections
         public virtual FlowerCategories? FlowerCategory { get; set; }
-        public virtual FlowerTypes FlowerType { get; set; } = null!;
-        public virtual FlowerColors FlowerColor { get; set; } = null!;
-        public virtual ICollection<FlowerBatches> FlowerBatches { get; set; } = new HashSet<FlowerBatches>();
+        public virtual FlowerTypes? FlowerType { get; set; }
+        public virtual FlowerColors? FlowerColor { get; set; }
         public virtual ICollection<ProductFlowers> ProductFlowers { get; set; } = new HashSet<ProductFlowers>();
         public virtual ICollection<PurchaseOrderDetails> PurchaseOrderDetails { get; set; } = new HashSet<PurchaseOrderDetails>();
         // NEW - added these navigation properties

@@ -7,23 +7,19 @@ namespace FlowerSellingWebsite.Models.Entities
     {
         [Required]
         [ForeignKey("Flower")]
-        public int FlowerId { get; set; }  // Only connect to Flowers
+        public int FlowerId { get; set; }
 
         [Required]
         [StringLength(500)]
-        public string ImageUrl { get; set; } = null!;
+        public string? ImageUrl { get; set; }
 
-        [Required]
         [StringLength(50)]
-        public string ImageType { get; set; } = null!; // thumbnail, banner, icon, gallery
+        public string? ImageType { get; set; }
 
         [Required]
         public bool IsPrimary { get; set; }
         [Required]
         public int DisplayOrder { get; set; }
-        [Required]
-        public DateTime EffectiveDate { get; set; }  // from date
-        public DateTime? ExpiryDate { get; set; }    // to date (NULL = permanent)
         [Required]
         public bool IsActive { get; set; }
 

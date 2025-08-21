@@ -17,10 +17,12 @@ namespace FlowerSellingWebsite.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<(IEnumerable<ProductDTO> Items, int TotalPages, int TotalCount)> GetPagedProductsAsync(
+        public async Task<(IEnumerable<ProductDTO> Items, int TotalPages, int TotalCount, int Min, int Max, int DbMax)> GetPagedProductsAsync(
             int pageNumber,
             int pageSize,
             int categoryId,
+            int min,
+            int max,
             string? search,
             string? sortBy,
             bool asc = true,
@@ -31,10 +33,12 @@ namespace FlowerSellingWebsite.Services.Implementations
             if (pageSize < 0 || pageSize > 30) pageSize = 10;
 
             // Get Data
-            var (items, totalPages, totalCount) = await _productRepository.GetPagedProductsAsync(
+            var (items, totalPages, totalCount, Min, Max, DbMax) = await _productRepository.GetPagedProductsAsync(
             pageNumber,
             pageSize,
             categoryId,
+            min,
+            max,
             search,
             sortBy,
             asc,
@@ -43,7 +47,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             // Map DTO
             var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(items);
 
-            return (dtoItems, totalPages, totalCount);
+            return (dtoItems, totalPages, totalCount, Min, Max, DbMax);
         }
 
         public async Task<ProductDTO?> GetProductByIdAsync(int id)

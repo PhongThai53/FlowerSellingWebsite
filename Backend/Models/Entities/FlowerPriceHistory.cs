@@ -27,7 +27,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public DateTime ChangeDate { get; set; }
 
         // Navigation properties
-        public virtual FlowerPricing FlowerPricing { get; set; } = null!;
-        public virtual Users ChangedByUser { get; set; } = null!;
+        public virtual FlowerPricing? FlowerPricing { get; set; }
+        public virtual Users? ChangedByUser { get; set; }
     }
 }

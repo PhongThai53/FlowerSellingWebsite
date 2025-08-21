@@ -12,804 +12,353 @@ namespace FlowerSelling.Data
             {
             }
 
+            // DbSets
             public DbSet<Users> Users { get; set; }
             public DbSet<Roles> Roles { get; set; }
             public DbSet<Permissions> Permissions { get; set; }
             public DbSet<RolePermissions> RolePermissions { get; set; }
+
+            public DbSet<Flowers> Flowers { get; set; }
             public DbSet<FlowerCategories> FlowerCategories { get; set; }
             public DbSet<FlowerTypes> FlowerTypes { get; set; }
             public DbSet<FlowerColors> FlowerColors { get; set; }
-            public DbSet<Flowers> Flowers { get; set; }
-            public DbSet<FlowerBatches> FlowerBatches { get; set; }
-            public DbSet<FlowerDamageLogs> FlowerDamageLogs { get; set; }
+            public DbSet<FlowerImages> FlowerImages { get; set; }
             public DbSet<FlowerPricing> FlowerPricing { get; set; }
             public DbSet<FlowerPriceHistory> FlowerPriceHistory { get; set; }
-            public DbSet<FlowerImages> FlowerImages { get; set; } // Changed from FlowerCategoryImages to FlowerImages
+
             public DbSet<Products> Products { get; set; }
+            public DbSet<ProductCategories> ProductCategories { get; set; }
             public DbSet<ProductPhotos> ProductPhotos { get; set; }
             public DbSet<ProductFlowers> ProductFlowers { get; set; }
+            public DbSet<ProductPriceHistories> ProductPriceHistories { get; set; }
+
+            public DbSet<Cart> Cart { get; set; }
+            public DbSet<CartItem> CartItem { get; set; }
+            public DbSet<Orders> Orders { get; set; }
+            public DbSet<OrderDetails> OrderDetails { get; set; }
+
+            public DbSet<Payments> Payments { get; set; }
+            public DbSet<PaymentMethods> PaymentMethods { get; set; }
+            public DbSet<Deliveries> Deliveries { get; set; }
+
             public DbSet<Suppliers> Suppliers { get; set; }
             public DbSet<SupplierListings> SupplierListings { get; set; }
             public DbSet<SupplierListingPhotos> SupplierListingPhotos { get; set; }
             public DbSet<PurchaseOrders> PurchaseOrders { get; set; }
             public DbSet<PurchaseOrderDetails> PurchaseOrderDetails { get; set; }
-            public DbSet<Orders> Orders { get; set; }
-            public DbSet<OrderDetails> OrderDetails { get; set; }
-            public DbSet<PaymentMethods> PaymentMethods { get; set; }
-            public DbSet<Payments> Payments { get; set; }
-            public DbSet<Deliveries> Deliveries { get; set; }
+            public DbSet<FlowerDamageLogs> FlowerDamageLogs { get; set; }
+
             public DbSet<Blog> Blogs { get; set; }
             public DbSet<Comment> Comments { get; set; }
-            public DbSet<ProductPriceHistories> ProductPriceHistories { get; set; }
-            public DbSet<ProductCategories> ProductCategories { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 base.OnModelCreating(modelBuilder);
 
-                // Soft delete filter cho từng entity cụ thể
-                modelBuilder.Entity<Users>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Roles>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Permissions>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<RolePermissions>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerCategories>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerTypes>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerColors>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Flowers>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerBatches>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerDamageLogs>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerPricing>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerPriceHistory>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<FlowerImages>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Products>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<ProductPhotos>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<ProductFlowers>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Suppliers>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<SupplierListings>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<SupplierListingPhotos>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<PurchaseOrders>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<PurchaseOrderDetails>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Orders>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<OrderDetails>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<PaymentMethods>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Payments>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Deliveries>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Comment>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<ProductPriceHistories>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<ProductCategories>().HasQueryFilter(e => !e.IsDeleted);
+                // ===== CONFIGURE DATA TYPES =====
+
+                // BaseEntity properties for all entities
+                ConfigureBaseEntityProperties<Users>(modelBuilder);
+                ConfigureBaseEntityProperties<Roles>(modelBuilder);
+                ConfigureBaseEntityProperties<Permissions>(modelBuilder);
+                ConfigureBaseEntityProperties<RolePermissions>(modelBuilder);
+                ConfigureBaseEntityProperties<Flowers>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerCategories>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerTypes>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerColors>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerImages>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerPricing>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerPriceHistory>(modelBuilder);
+                ConfigureBaseEntityProperties<Products>(modelBuilder);
+                ConfigureBaseEntityProperties<ProductCategories>(modelBuilder);
+                ConfigureBaseEntityProperties<ProductPhotos>(modelBuilder);
+                ConfigureBaseEntityProperties<ProductFlowers>(modelBuilder);
+                ConfigureBaseEntityProperties<ProductPriceHistories>(modelBuilder);
+                ConfigureBaseEntityProperties<Cart>(modelBuilder);
+                ConfigureBaseEntityProperties<CartItem>(modelBuilder);
+                ConfigureBaseEntityProperties<Orders>(modelBuilder);
+                ConfigureBaseEntityProperties<OrderDetails>(modelBuilder);
+                ConfigureBaseEntityProperties<Payments>(modelBuilder);
+                ConfigureBaseEntityProperties<PaymentMethods>(modelBuilder);
+                ConfigureBaseEntityProperties<Deliveries>(modelBuilder);
+                ConfigureBaseEntityProperties<Suppliers>(modelBuilder);
+                ConfigureBaseEntityProperties<SupplierListings>(modelBuilder);
+                ConfigureBaseEntityProperties<SupplierListingPhotos>(modelBuilder);
+                ConfigureBaseEntityProperties<PurchaseOrders>(modelBuilder);
+                ConfigureBaseEntityProperties<PurchaseOrderDetails>(modelBuilder);
+                ConfigureBaseEntityProperties<FlowerDamageLogs>(modelBuilder);
+                ConfigureBaseEntityProperties<Blog>(modelBuilder);
+                ConfigureBaseEntityProperties<Comment>(modelBuilder);
+
+                // ===== USERS & ROLES =====
+                modelBuilder.Entity<Users>(entity =>
+                {
+                    entity.Property(e => e.UserName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.PasswordHash).HasMaxLength(500).IsRequired();
+                    entity.Property(e => e.FullName).HasMaxLength(200).IsRequired();
+                    entity.Property(e => e.Email).HasMaxLength(200).IsRequired();
+                    entity.Property(e => e.Phone).HasMaxLength(20);
+                    entity.Property(e => e.Address).HasMaxLength(500);
+
+                    entity.HasIndex(e => e.UserName).IsUnique();
+                    entity.HasIndex(e => e.Email).IsUnique();
+                });
+
+                modelBuilder.Entity<Roles>(entity =>
+                {
+                    entity.Property(e => e.RoleName).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(200);
+                });
+
+                modelBuilder.Entity<Permissions>(entity =>
+                {
+                    entity.Property(e => e.PermissionName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(200);
+                });
+
+                // ===== FLOWERS =====
+                modelBuilder.Entity<Flowers>(entity =>
+                {
+                    entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(1000);
+                    entity.Property(e => e.Size).HasMaxLength(50);
+                });
+
+                modelBuilder.Entity<FlowerCategories>(entity =>
+                {
+                    entity.Property(e => e.CategoryName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                });
+
+                modelBuilder.Entity<FlowerTypes>(entity =>
+                {
+                    entity.Property(e => e.TypeName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                });
+
+                modelBuilder.Entity<FlowerColors>(entity =>
+                {
+                    entity.Property(e => e.ColorName).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.HexCode).HasMaxLength(7).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(200);
+                });
+
+                modelBuilder.Entity<FlowerImages>(entity =>
+                {
+                    entity.Property(e => e.ImageUrl).HasMaxLength(500).IsRequired();
+                    entity.Property(e => e.ImageType).HasMaxLength(50);
+                });
+
+                modelBuilder.Entity<FlowerPricing>(entity =>
+                {
+                    entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Currency).HasMaxLength(3).IsRequired();
+                    entity.Property(e => e.PriceType).HasMaxLength(20);
+                });
+
+                modelBuilder.Entity<FlowerPriceHistory>(entity =>
+                {
+                    entity.Property(e => e.OldPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.NewPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.ChangeReason).HasMaxLength(500);
+                });
+
+                // ===== PRODUCTS =====
+                modelBuilder.Entity<Products>(entity =>
+                {
+                    entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(1000);
+                    entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
+                });
+
+                modelBuilder.Entity<ProductCategories>(entity =>
+                {
+                    entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                });
+
+                modelBuilder.Entity<ProductPhotos>(entity =>
+                {
+                    entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
+                });
+
+                modelBuilder.Entity<ProductPriceHistories>(entity =>
+                {
+                    entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                });
+
+                // ===== CART & ORDERS =====
+                modelBuilder.Entity<CartItem>(entity =>
+                {
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.LineTotal).HasColumnType("decimal(18,2)");
+                });
 
-                // BaseEntity configurations - không config cho abstract class
-                // Các config này sẽ được inherit bởi các entity con
-
-                // Users
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.UserName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.PasswordHash)
-                    .HasColumnType("nvarchar(500)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.FullName)
-                    .HasColumnType("nvarchar(200)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.Email)
-                    .HasColumnType("nvarchar(200)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.Phone)
-                    .HasColumnType("nvarchar(20)");
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.Address)
-                    .HasColumnType("nvarchar(500)");
-
-                modelBuilder.Entity<Users>()
-                    .Property(e => e.RoleId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                // Roles
-                modelBuilder.Entity<Roles>()
-                    .Property(e => e.RoleName)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Roles>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(200)");
-                // Permissions
-                modelBuilder.Entity<Permissions>()
-                    .Property(e => e.PermissionName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Permissions>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(200)");
-
-                // RolePermissions
-                modelBuilder.Entity<RolePermissions>()
-                    .Property(e => e.RoleId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<RolePermissions>()
-                    .Property(e => e.PermissionId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                // FlowerCategories
-                modelBuilder.Entity<FlowerCategories>()
-                    .Property(e => e.CategoryName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerCategories>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(500)");
-
-                // FlowerTypes
-                modelBuilder.Entity<FlowerTypes>()
-                    .Property(e => e.TypeName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerTypes>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(500)");
-
-                // FlowerColors
-                modelBuilder.Entity<FlowerColors>()
-                    .Property(e => e.ColorName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerColors>()
-                    .Property(e => e.HexCode)
-                    .HasColumnType("nvarchar(10)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerColors>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(500)");
-
-                // Flowers
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.Name)
-                    .HasColumnType("nvarchar(200)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(1000)");
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.FlowerCategoryId)
-                    .HasColumnType("int");
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.FlowerTypeId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.FlowerColorId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.Size)
-                    .HasColumnType("nvarchar(50)");
-
-                modelBuilder.Entity<Flowers>()
-                    .Property(e => e.ShelfLifeDays)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                // FlowerBatches
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.FlowerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.SupplierId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.BatchCode)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.ImportDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.ExpiryDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.QuantityAvailable)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerBatches>()
-                    .Property(e => e.TotalAmount)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                // FlowerDamageLogs
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.FlowerBatchId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.ReportedByUserId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.DamagedQuantity)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.DamageReason)
-                    .HasColumnType("nvarchar(500)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.DamageDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerDamageLogs>()
-                    .Property(e => e.Notes)
-                    .HasColumnType("nvarchar(1000)");
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.FlowerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.Price)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.Currency)
-                    .HasColumnType("nvarchar(3)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.EffectiveDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.ExpiryDate)
-                    .HasColumnType("datetime2");
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.PriceType)
-                    .HasColumnType("nvarchar(20)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPricing>()
-                    .Property(e => e.IsActive)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                // FlowerPriceHistory
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.FlowerPricingId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.OldPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.NewPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.ChangeReason)
-                    .HasColumnType("nvarchar(500)");
-
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.ChangedByUserId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerPriceHistory>()
-                    .Property(e => e.ChangeDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                // FlowerImages - UPDATED: Removed old nullable FKs, added FlowerId, removed Priority
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.FlowerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.ImageUrl)
-                    .HasColumnType("nvarchar(500)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.ImageType)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.IsPrimary)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.DisplayOrder)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.EffectiveDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.ExpiryDate)
-                    .HasColumnType("datetime2");
-
-                modelBuilder.Entity<FlowerImages>()
-                    .Property(e => e.IsActive)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                // Products
-                modelBuilder.Entity<Products>()
-                    .Property(e => e.Name)
-                    .HasColumnType("nvarchar(200)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Products>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(1000)");
-
-
-                modelBuilder.Entity<Products>()
-                    .HasMany(p => p.PriceHistories)
-                    .WithOne(ph => ph.Products)
-                    .HasForeignKey(ph => ph.ProductId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // ProductCategories
-                // Category - Product (1-n)
-                modelBuilder.Entity<ProductCategories>()
-                    .HasMany(c => c.Products)
-                    .WithOne(p => p.ProductCategories)
-                    .HasForeignKey(p => p.CategoryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Product History
-                modelBuilder.Entity<ProductPriceHistories>()
-                    .Property(ph => ph.Price)
-                    .HasColumnType("decimal(18,2)");
-
-                // ProductPhotos
-                modelBuilder.Entity<ProductPhotos>()
-                    .Property(e => e.ProductId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<ProductPhotos>()
-                    .Property(e => e.Url)
-                    .HasColumnType("nvarchar(500)")
-                    .IsRequired();
-
-                modelBuilder.Entity<ProductPhotos>()
-                    .Property(e => e.IsPrimary)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                // ProductFlowers
-                modelBuilder.Entity<ProductFlowers>()
-                    .Property(e => e.ProductId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<ProductFlowers>()
-                    .Property(e => e.FlowerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<ProductFlowers>()
-                    .Property(e => e.QuantityNeeded)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                // Suppliers
-                modelBuilder.Entity<Suppliers>()
-                    .Property(e => e.SupplierName)
-                    .HasColumnType("nvarchar(200)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Suppliers>()
-                    .Property(e => e.ContactPerson)
-                    .HasColumnType("nvarchar(200)");
-
-                modelBuilder.Entity<Suppliers>()
-                    .Property(e => e.Phone)
-                    .HasColumnType("nvarchar(20)");
-
-                modelBuilder.Entity<Suppliers>()
-                    .Property(e => e.Email)
-                    .HasColumnType("nvarchar(200)");
-
-                modelBuilder.Entity<Suppliers>()
-                    .Property(e => e.Address)
-                    .HasColumnType("nvarchar(500)");
-
-                // SupplierListings
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.SupplierId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.ProductId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.AvailableQuantity)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.ShelfLifeDays)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.MinOrderQty)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListings>()
-                    .Property(e => e.Status)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                // SupplierListingPhotos
-                modelBuilder.Entity<SupplierListingPhotos>()
-                    .Property(e => e.SupplierListingId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListingPhotos>()
-                    .Property(e => e.Url)
-                    .HasColumnType("nvarchar(500)")
-                    .IsRequired();
-
-                modelBuilder.Entity<SupplierListingPhotos>()
-                    .Property(e => e.IsPrimary)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                // PurchaseOrders
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.PurchaseOrderNumber)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.SupplierId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.CreatedDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.Status)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.TotalAmount)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrders>()
-                    .Property(e => e.Notes)
-                    .HasColumnType("nvarchar(1000)");
-
-                // PurchaseOrderDetails
-                modelBuilder.Entity<PurchaseOrderDetails>()
-                    .Property(e => e.PurchaseOrderId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrderDetails>()
-                    .Property(e => e.FlowerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrderDetails>()
-                    .Property(e => e.Quantity)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrderDetails>()
-                    .Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<PurchaseOrderDetails>()
-                    .Property(e => e.LineTotal)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                // Orders
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.OrderNumber)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.CustomerId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.OrderDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.Status)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.Subtotal)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.TaxAmount)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Orders>()
-                    .Property(e => e.Notes)
-                    .HasColumnType("nvarchar(1000)");
-
-                // OrderDetails
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.OrderId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.ProductId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.Quantity)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.UnitPrice)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.Discount)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<OrderDetails>()
-                    .Property(e => e.LineTotal)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                // PaymentMethods
-                modelBuilder.Entity<PaymentMethods>()
-                    .Property(e => e.MethodName)
-                    .HasColumnType("nvarchar(100)")
-                    .IsRequired();
-
-                modelBuilder.Entity<PaymentMethods>()
-                    .Property(e => e.Description)
-                    .HasColumnType("nvarchar(500)");
-
-                modelBuilder.Entity<PaymentMethods>()
-                    .Property(e => e.IsActive)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                // Payments
-                modelBuilder.Entity<Payments>()
-                    .Property(e => e.OrderId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Payments>()
-                    .Property(e => e.PaymentMethodId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Payments>()
-                    .Property(e => e.Amount)
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Payments>()
-                    .Property(e => e.PaymentDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<Payments>()
-                    .Property(e => e.Status)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                // Deliveries
-                modelBuilder.Entity<Deliveries>()
-                    .Property(e => e.OrderId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Deliveries>()
-                    .Property(e => e.DeliveryDate)
-                    .HasColumnType("datetime2")
-                    .IsRequired();
-
-                modelBuilder.Entity<Deliveries>()
-                    .Property(e => e.DeliveryStatus)
-                    .HasColumnType("nvarchar(50)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Deliveries>()
-                    .Property(e => e.TrackingNumber)
-                    .HasColumnType("nvarchar(100)");
-
-                modelBuilder.Entity<Deliveries>()
-                    .Property(e => e.ShipperName)
-                    .HasColumnType("nvarchar(200)");
-
-                // Relationships configuration
-                // Blog configurations
-                modelBuilder.Entity<Blog>()
-                    .Property(b => b.Title)
-                    .HasColumnType("nvarchar(250)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Blog>()
-                    .Property(b => b.Content)
-                    .HasColumnType("nvarchar(max)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Blog>()
-                    .Property(b => b.Tags)
-                    .HasColumnType("nvarchar(1000)");
-
-                modelBuilder.Entity<Blog>()
-                    .Property(b => b.Status)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Blog>()
-                    .Property(b => b.RejectionReason)
-                    .HasColumnType("nvarchar(500)");
-
-                modelBuilder.Entity<Blog>()
-                    .HasOne(b => b.Category)
-                    .WithMany(c => c.Blogs)
-                    .HasForeignKey(b => b.CategoryId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                modelBuilder.Entity<Blog>()
-                    .HasOne(b => b.User)
-                    .WithMany()
-                    .HasForeignKey(b => b.UserId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                // Comment configurations
-                modelBuilder.Entity<Comment>()
-                    .Property(c => c.Content)
-                    .HasColumnType("nvarchar(max)")
-                    .IsRequired();
-
-                modelBuilder.Entity<Comment>()
-                    .Property(c => c.IsHide)
-                    .HasColumnType("bit")
-                    .IsRequired();
-
-                modelBuilder.Entity<Comment>()
-                    .Property(c => c.UserId)
-                    .HasColumnType("int")
-                    .IsRequired();
-
-                modelBuilder.Entity<Comment>()
-                    .HasOne(c => c.User)
-                    .WithMany()
-                    .HasForeignKey(c => c.UserId)
-                    .OnDelete(DeleteBehavior.NoAction);
-                modelBuilder.Entity<Comment>()
-                    .HasOne(c => c.Parent)
-                    .WithMany(c => c.Children)
-                    .HasForeignKey(c => c.ParentId)
-                    .OnDelete(DeleteBehavior.NoAction);
-                modelBuilder.Entity<Comment>()
-                    .HasOne(c => c.Blog)
-                    .WithMany(b => b.Comments)
-                    .HasForeignKey(c => c.BlogId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                // A user can be a customer for many orders.
-                modelBuilder.Entity<Orders>()
-                    .HasOne(o => o.Customer)
-                    .WithMany(u => u.Orders) // The collection in the Users entity.
-                    .HasForeignKey(o => o.CustomerId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                // A user can create many orders.
-                // This relationship does not have a corresponding collection in the Users entity.
-                modelBuilder.Entity<Orders>()
-                    .HasOne(o => o.CreatedByUser)
-                    .WithMany() // No corresponding collection navigation property.
-                    .HasForeignKey(o => o.CreatedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                // Configure decimal precision
                 modelBuilder.Entity<Orders>(entity =>
                 {
-                    entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
-                    entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
-                    entity.Property(e => e.EstimatedTotalAmount).HasColumnType("decimal(18, 2)");
-                    entity.Property(e => e.FinalTotalAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.OrderNumber).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.Subtotal).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.TaxAmount).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.ShippingFee).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.PaymentStatus).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.ShippingAddress).HasMaxLength(500);
+                    entity.Property(e => e.BillingAddress).HasMaxLength(500);
+                    entity.Property(e => e.Notes).HasMaxLength(1000);
+                    entity.Property(e => e.SupplierNotes).HasMaxLength(1000);
+                    entity.Property(e => e.CreatedBy).HasMaxLength(100);
+                    entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                    entity.HasIndex(e => e.OrderNumber).IsUnique();
                 });
 
                 modelBuilder.Entity<OrderDetails>(entity =>
                 {
-                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
-                    entity.Property(e => e.FinalUnitPrice).HasColumnType("decimal(18, 2)");
-                    entity.Property(e => e.FinalAmount).HasColumnType("decimal(18, 2)");
+                    entity.Property(e => e.ItemName).HasMaxLength(200);
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.LineTotal).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Notes).HasMaxLength(500);
+                });
+
+                // ===== PAYMENTS & DELIVERY =====
+                modelBuilder.Entity<Payments>(entity =>
+                {
+                    entity.Property(e => e.MethodName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                    entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                });
+
+                modelBuilder.Entity<PaymentMethods>(entity =>
+                {
+                    entity.Property(e => e.MethodName).HasMaxLength(100).IsRequired();
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                });
+
+                modelBuilder.Entity<Deliveries>(entity =>
+                {
+                    entity.Property(e => e.DeliveryStatus).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.TrackingNumber).HasMaxLength(100);
+                    entity.Property(e => e.ShipperName).HasMaxLength(200);
+                });
+
+                // ===== SUPPLIERS =====
+                modelBuilder.Entity<Suppliers>(entity =>
+                {
+                    entity.Property(e => e.SupplierName).HasMaxLength(200).IsRequired();
+                    entity.Property(e => e.ContactPerson).HasMaxLength(200);
+                    entity.Property(e => e.Phone).HasMaxLength(20);
+                    entity.Property(e => e.Email).HasMaxLength(200);
+                    entity.Property(e => e.Address).HasMaxLength(500);
+                });
+
+                modelBuilder.Entity<SupplierListings>(entity =>
+                {
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                });
+
+                modelBuilder.Entity<SupplierListingPhotos>(entity =>
+                {
+                    entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
+                });
+
+                modelBuilder.Entity<PurchaseOrders>(entity =>
+                {
+                    entity.Property(e => e.PurchaseOrderNumber).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                    entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.Notes).HasMaxLength(1000);
+
+                    entity.HasIndex(e => e.PurchaseOrderNumber).IsUnique();
+                });
+
+                modelBuilder.Entity<PurchaseOrderDetails>(entity =>
+                {
+                    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                    entity.Property(e => e.LineTotal).HasColumnType("decimal(18,2)");
+                });
+
+                modelBuilder.Entity<FlowerDamageLogs>(entity =>
+                {
+                    entity.Property(e => e.DamageReason).HasMaxLength(500).IsRequired();
+                    entity.Property(e => e.Notes).HasMaxLength(1000);
+                });
+
+                // ===== BLOG =====
+                modelBuilder.Entity<Blog>(entity =>
+                {
+                    entity.Property(e => e.Title).HasMaxLength(250).IsRequired();
+                    entity.Property(e => e.Content).HasColumnType("ntext").IsRequired();
+                    entity.Property(e => e.Tags).HasMaxLength(1000);
+                    entity.Property(e => e.Images).HasColumnType("nvarchar(max)"); // JSON string
+                    entity.Property(e => e.Status).HasConversion<int>();
+                    entity.Property(e => e.RejectionReason).HasMaxLength(1000);
+                });
+
+                modelBuilder.Entity<Comment>(entity =>
+                {
+                    entity.Property(e => e.Content).HasMaxLength(2000).IsRequired();
+                });
+
+                // ===== RELATIONSHIPS =====
+
+
+                // Composite Keys
+                modelBuilder.Entity<RolePermissions>()
+                    .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+                modelBuilder.Entity<ProductFlowers>()
+                    .HasKey(pf => new { pf.ProductId, pf.FlowerId });
+
+                // Global query filters for soft delete
+                modelBuilder.Entity<Users>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Roles>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Permissions>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Flowers>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<FlowerCategories>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<FlowerTypes>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<FlowerColors>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Products>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<ProductCategories>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Orders>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Suppliers>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Comment>().HasQueryFilter(e => !e.IsDeleted);
+
+                modelBuilder.Entity<CartItem>()
+                    .Property(c => c.LineTotal)
+                    .HasComputedColumnSql("[Quantity] * [UnitPrice]", stored: true);
+
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Parent)
+                    .WithMany(c => c.Children)
+                    .HasForeignKey(c => c.ParentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Comment>()
+                     .HasOne(c => c.User)
+                     .WithMany(u => u.Comments)
+                      .HasForeignKey(c => c.UserId)
+                     .OnDelete(DeleteBehavior.Restrict);
+            }
+
+            private void ConfigureBaseEntityProperties<T>(ModelBuilder modelBuilder) where T : BaseEntity
+            {
+                modelBuilder.Entity<T>(entity =>
+                {
+                    entity.HasKey(e => e.Id);
+                    entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                    entity.Property(e => e.PublicId).IsRequired();
+                    entity.Property(e => e.CreatedAt).IsRequired();
+                    entity.Property(e => e.UpdatedAt);
+                    entity.Property(e => e.DeletedAt);
+                    entity.Property(e => e.IsDeleted).IsRequired().HasDefaultValue(false);
+
+                    entity.HasIndex(e => e.PublicId).IsUnique();
                 });
             }
 
@@ -828,22 +377,18 @@ namespace FlowerSelling.Data
             private void UpdateTimestamps()
             {
                 var entries = ChangeTracker.Entries().Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
-
                 foreach (var entry in entries)
                 {
                     var baseEntity = (BaseEntity)entry.Entity;
-
                     switch (entry.State)
                     {
                         case EntityState.Added:
                             baseEntity.CreatedAt = DateTime.UtcNow;
                             baseEntity.PublicId = Guid.NewGuid();
                             break;
-
                         case EntityState.Modified:
                             baseEntity.UpdatedAt = DateTime.UtcNow;
                             break;
-
                         case EntityState.Deleted:
                             entry.State = EntityState.Modified;
                             baseEntity.IsDeleted = true;

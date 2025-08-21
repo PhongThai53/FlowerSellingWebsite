@@ -2,20 +2,19 @@ using FlowerSellingWebsite.Models.DTOs.Comment;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
-using ProjectGreenLens.Services.Implementations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
-    public class CommentService : BaseService<Comment>, ICommentService
+    public class CommentService : ICommentService
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IBlogRepository _blogRepository;
         private readonly IUserRepository _userRepository;
 
         public CommentService(
-            ICommentRepository commentRepository, 
+            ICommentRepository commentRepository,
             IBlogRepository blogRepository,
-            IUserRepository userRepository) : base(commentRepository)
+            IUserRepository userRepository)
         {
             _commentRepository = commentRepository;
             _blogRepository = blogRepository;
@@ -27,7 +26,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var comment = await _commentRepository.GetCommentWithDetailsAsync(id);
             if (comment == null)
                 throw new KeyNotFoundException($"Comment with ID {id} not found.");
-                
+
             return MapToCommentDTO(comment);
         }
 
@@ -44,7 +43,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var parentComment = await _commentRepository.getByIdAsync(createCommentDTO.ParentId.Value);
                 if (parentComment == null)
                     throw new KeyNotFoundException($"Parent comment with ID {createCommentDTO.ParentId.Value} not found.");
-                
+
                 // Ensure parent comment belongs to the same blog
                 if (parentComment.BlogId != createCommentDTO.BlogId)
                     throw new InvalidOperationException("Parent comment must belong to the same blog.");
@@ -61,7 +60,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             var createdComment = await _commentRepository.createAsync(comment);
             var commentWithDetails = await _commentRepository.GetCommentWithDetailsAsync(createdComment.Id);
-            
+
             return MapToCommentDTO(commentWithDetails!);
         }
 
@@ -77,7 +76,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
             existingComment.Content = updateCommentDTO.Content;
             await _commentRepository.updateAsync(existingComment);
-            
+
             var updatedComment = await _commentRepository.GetCommentWithDetailsAsync(id);
             return MapToCommentDTO(updatedComment!);
         }
@@ -131,16 +130,16 @@ namespace FlowerSellingWebsite.Services.Implementations
             var comments = await _commentRepository.GetCommentsByBlogIdAsync(blogId);
             return comments.Select(MapToCommentDTO).ToList();
         }
-        
+
         public async Task<List<CommentDTO>> GetAllCommentsByBlogIdAsync(int blogId, int currentUserId)
         {
             // Check if user is admin or blog owner
             var blog = await _blogRepository.getByIdAsync(blogId);
             if (blog == null)
                 throw new KeyNotFoundException($"Blog with ID {blogId} not found.");
-                
+
             bool isAdminOrOwner = blog.UserId == currentUserId || await IsAdminUser(currentUserId);
-            
+
             // If user is admin or blog owner, get all comments including hidden ones
             if (isAdminOrOwner)
             {
@@ -192,7 +191,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return false;
-                
+
             // Check if user has Admin role
             return user.Role?.RoleName == "Admin";
         }

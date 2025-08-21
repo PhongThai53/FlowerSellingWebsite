@@ -15,6 +15,6 @@ namespace FlowerSellingWebsite.Models.Entities
         public bool IsPrimary { get; set; }
 
         // Navigation properties
-        public virtual Products Product { get; set; } = null!;
+        public virtual Products? Product { get; set; }
     }
 }
