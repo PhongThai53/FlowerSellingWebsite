@@ -6,6 +6,7 @@ using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using FlowerSellingWebsite.Models.DTOs.Cart;
 using FlowerSellingWebsite.Models.Entities;
 using System.Diagnostics;
+using FlowerSellingWebsite.Models.DTOs.Order;
 
 namespace FlowerSellingWebsite.Infrastructure.Mapping
 {
@@ -15,7 +16,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
         {
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
 
             CreateMap<Products, ProductListDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
@@ -64,6 +66,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<AddToCartDTO, CartItem>();
             CreateMap<UpdateCartItemDTO, CartItem>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Orders, OrderDTO>().ReverseMap();
         }
     }
 }

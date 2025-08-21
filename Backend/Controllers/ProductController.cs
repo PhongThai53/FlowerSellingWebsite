@@ -52,7 +52,6 @@ namespace FlowerSellingWebsite.Controllers
         {
             var product = await _productService.GetProductByIdAsync(id);
             return Ok(ApiResponse<object>.Ok(product!, "Product retrieved successfully"));
-
         }
 
         [HttpPost]
