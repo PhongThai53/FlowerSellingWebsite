@@ -1,5 +1,4 @@
 import { ApiService } from "./services/ApiService.js";
-import { CartManager } from "./component/cart/CartManager.js";
 import { Pagination } from "./component/pagination/Pagination.js";
 
 class CartPageManager {
