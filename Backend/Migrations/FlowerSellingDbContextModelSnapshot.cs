@@ -87,7 +87,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Blogs");
+                    b.ToTable("Blogs", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Cart", b =>
@@ -133,7 +133,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cart");
+                    b.ToTable("Cart", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.CartItem", b =>
@@ -187,7 +187,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("CartItem");
+                    b.ToTable("CartItem", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Comment", b =>
@@ -243,7 +243,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Deliveries", b =>
@@ -297,7 +297,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Deliveries");
+                    b.ToTable("Deliveries", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerCategories", b =>
@@ -339,7 +339,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerCategories");
+                    b.ToTable("FlowerCategories", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerColors", b =>
@@ -386,7 +386,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerColors");
+                    b.ToTable("FlowerColors", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerDamageLogs", b =>
@@ -444,7 +444,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("ReportedByUserId");
 
-                    b.ToTable("FlowerDamageLogs");
+                    b.ToTable("FlowerDamageLogs", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerImages", b =>
@@ -500,7 +500,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerImages");
+                    b.ToTable("FlowerImages", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPriceHistory", b =>
@@ -556,7 +556,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerPriceHistory");
+                    b.ToTable("FlowerPriceHistory", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
@@ -616,7 +616,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerPricing");
+                    b.ToTable("FlowerPricing", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerTypes", b =>
@@ -658,7 +658,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("FlowerTypes");
+                    b.ToTable("FlowerTypes", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Flowers", b =>
@@ -722,7 +722,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Flowers");
+                    b.ToTable("Flowers", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.OrderDetails", b =>
@@ -785,7 +785,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Orders", b =>
@@ -892,7 +892,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.PaymentMethods", b =>
@@ -937,7 +937,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("PaymentMethods");
+                    b.ToTable("PaymentMethods", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Payments", b =>
@@ -1000,7 +1000,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Permissions", b =>
@@ -1042,7 +1042,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductCategories", b =>
@@ -1084,7 +1084,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductFlowers", b =>
@@ -1128,7 +1128,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("ProductFlowers");
+                    b.ToTable("ProductFlowers", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductPhotos", b =>
@@ -1174,7 +1174,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("ProductPhotos");
+                    b.ToTable("ProductPhotos", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.ProductPriceHistories", b =>
@@ -1215,7 +1215,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("ProductPriceHistories");
+                    b.ToTable("ProductPriceHistories", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Products", b =>
@@ -1275,7 +1275,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.PurchaseOrderDetails", b =>
@@ -1327,7 +1327,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseOrderDetails");
+                    b.ToTable("PurchaseOrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.PurchaseOrders", b =>
@@ -1388,7 +1388,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("PurchaseOrders");
+                    b.ToTable("PurchaseOrders", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.RolePermissions", b =>
@@ -1429,7 +1429,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("RolePermissions");
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Roles", b =>
@@ -1471,7 +1471,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListingPhotos", b =>
@@ -1517,7 +1517,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("SupplierListingId");
 
-                    b.ToTable("SupplierListingPhotos");
+                    b.ToTable("SupplierListingPhotos", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListings", b =>
@@ -1572,7 +1572,7 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("SupplierListings");
+                    b.ToTable("SupplierListings", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Suppliers", b =>
@@ -1626,7 +1626,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Users", b =>
@@ -1703,7 +1703,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>

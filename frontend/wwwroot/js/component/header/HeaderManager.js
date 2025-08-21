@@ -18,6 +18,9 @@ export class HeaderManager {
 
     // Listen for cart update events
     this.setupCartEventListeners();
+
+    // Listen for HTMX events to handle dynamically loaded headers
+    this.setupHtmxEventListeners();
   }
 
   async setupHeader() {
@@ -50,6 +53,39 @@ export class HeaderManager {
         console.log("Auth data changed in another tab, updating user menu");
         this.setupUserMenu();
         this.updateCartCount();
+      }
+    });
+  }
+
+  setupHtmxEventListeners() {
+    // Listen for HTMX after swap events to handle dynamically loaded headers
+    document.addEventListener("htmx:afterSwap", (event) => {
+      // Check if the swapped content includes the header
+      if (
+        event.detail.target.id === "header-placeholder" ||
+        event.detail.target.closest("header") ||
+        event.detail.target.querySelector("header")
+      ) {
+        console.log("Header loaded via HTMX. Setting up user menu...");
+        setTimeout(() => {
+          this.setupUserMenu();
+          this.updateCartCount();
+        }, 100); // Small delay to ensure DOM is fully updated
+      }
+    });
+
+    // Listen for HTMX load events
+    document.addEventListener("htmx:load", (event) => {
+      if (
+        event.detail.target.id === "header-placeholder" ||
+        event.detail.target.closest("header") ||
+        event.detail.target.querySelector("header")
+      ) {
+        console.log("Header loaded via HTMX load. Setting up user menu...");
+        setTimeout(() => {
+          this.setupUserMenu();
+          this.updateCartCount();
+        }, 100);
       }
     });
   }
@@ -274,6 +310,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Also initialize on window load as fallback
 window.addEventListener("load", () => {
+  if (!headerManagerInstance) {
+    headerManagerInstance = new HeaderManager();
+    window.HeaderManager = headerManagerInstance;
+  }
+});
+
+// Initialize when HTMX content is loaded
+document.addEventListener("htmx:afterSwap", (event) => {
+  if (!headerManagerInstance) {
+    headerManagerInstance = new HeaderManager();
+    window.HeaderManager = headerManagerInstance;
+  }
+});
+
+// Initialize when HTMX content is loaded (load event)
+document.addEventListener("htmx:load", (event) => {
   if (!headerManagerInstance) {
     headerManagerInstance = new HeaderManager();
     window.HeaderManager = headerManagerInstance;
