@@ -14,3 +14,4 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<int> GetCartItemsCountAsync(int userId);
     }
 }
+

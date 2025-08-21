@@ -10,8 +10,18 @@ export class CartManager {
   }
 
   setupEventListeners() {
+    // Only handle cart-specific buttons, not general add-to-cart buttons
+    // General add-to-cart buttons are handled by individual page scripts (shop.js, homepage.js) to prevent conflicts
     document.addEventListener("click", (e) => {
-      if (e.target.closest(".add-to-cart-btn")) {
+      // Handle only cart page specific buttons or product detail pages
+      const isCartPage = window.location.pathname.includes("cart");
+      const isProductDetailPage =
+        window.location.pathname.includes("product-details");
+
+      if (
+        e.target.closest(".add-to-cart-btn") &&
+        (isCartPage || isProductDetailPage)
+      ) {
         e.preventDefault();
         const btn = e.target.closest(".add-to-cart-btn");
         const productId = btn.getAttribute("data-product-id");
@@ -68,7 +78,7 @@ export class CartManager {
         error.message.includes("Unauthorized")
       ) {
         // Clear invalid token and reset cart
-        localStorage.removeItem("token");
+        localStorage.removeItem("auth_token");
         this.cartSummary = { totalItems: 0, totalAmount: 0, cartId: 0 };
         this.updateCartCount();
       }
@@ -83,7 +93,7 @@ export class CartManager {
           "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng"
         );
         // Clear invalid token
-        localStorage.removeItem("token");
+        localStorage.removeItem("auth_token");
         // Redirect to login page
         setTimeout(() => {
           window.location.href = "/html/auth/login-register.html";
@@ -101,11 +111,23 @@ export class CartManager {
         const product = this.findProductById(productId);
         const productName = product ? product.name : "Sản phẩm";
 
-        this.showSuccessNotification(
-          `${productName} đã được thêm vào giỏ hàng`
-        );
+        // Only show notification if we're on cart page or product details page
+        // Homepage and shop pages handle their own notifications
+        const isCartPage = window.location.pathname.includes("cart");
+        const isProductDetailPage =
+          window.location.pathname.includes("product-details");
+
+        if (isCartPage || isProductDetailPage) {
+          this.showSuccessNotification(
+            `${productName} đã được thêm vào giỏ hàng`
+          );
+        }
+
         await this.loadCartData(); // Reload cart data
         this.dispatchCartUpdateEvent(productId, quantity);
+
+        // Update header cart count immediately
+        this.updateHeaderCartCount();
 
         // Trigger product re-render to prevent disappearing
         this.triggerProductRerender();
@@ -124,7 +146,7 @@ export class CartManager {
           "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại"
         );
         // Clear invalid token
-        localStorage.removeItem("token");
+        localStorage.removeItem("auth_token");
         setTimeout(() => {
           window.location.href = "/html/auth/login-register.html";
         }, 2000);
@@ -192,14 +214,21 @@ export class CartManager {
   }
 
   setButtonLoading(productId, isLoading) {
-    const btn = document.querySelector(`[data-product-id="${productId}"]`);
-    if (btn) {
-      if (isLoading) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="lnr lnr-cart"></i>';
+    // Only affect buttons on cart-related pages or product detail pages to avoid conflicts with shop.js/homepage.js
+    const isCartPage = window.location.pathname.includes("cart");
+    const isProductDetailPage =
+      window.location.pathname.includes("product-details");
+
+    if (isCartPage || isProductDetailPage) {
+      const btn = document.querySelector(`[data-product-id="${productId}"]`);
+      if (btn) {
+        if (isLoading) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="lnr lnr-cart"></i>';
+        }
       }
     }
   }
@@ -280,6 +309,26 @@ export class CartManager {
       );
       const event = new CustomEvent("productRerender", {
         detail: { timestamp: Date.now() },
+      });
+      document.dispatchEvent(event);
+    }
+  }
+
+  updateHeaderCartCount() {
+    // Update header cart count via HeaderManager if available
+    if (
+      window.HeaderManager &&
+      typeof window.HeaderManager.forceUpdateCartCount === "function"
+    ) {
+      window.HeaderManager.forceUpdateCartCount();
+    } else {
+      // Fallback: dispatch event for header to listen to
+      const event = new CustomEvent("updateCartCount", {
+        detail: {
+          totalItems:
+            this.cartSummary.total_items || this.cartSummary.totalItems || 0,
+          timestamp: Date.now(),
+        },
       });
       document.dispatchEvent(event);
     }

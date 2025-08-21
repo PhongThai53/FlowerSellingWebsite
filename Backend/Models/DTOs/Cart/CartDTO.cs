@@ -37,3 +37,4 @@ namespace FlowerSellingWebsite.Models.DTOs.Cart
         public decimal TotalAmount => CartItems?.Sum(item => item.LineTotal) ?? 0;
     }
 }
+

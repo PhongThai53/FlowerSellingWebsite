@@ -25,6 +25,8 @@
     <link href="../../css/vendor.css" rel="stylesheet" />
     <!-- Main Style CSS -->
     <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Cart CSS for toast notifications -->
+    <link href="../../css/cart.css" rel="stylesheet" />
 
     <!--[if lt IE 9]>
       <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -369,28 +371,28 @@
                 <!--single sidebar end-->
                 <!--single sidebar start-->
                 <!--<div class="sidebar-single">
-                                      <h3 class="sidebar-title">price</h3>
-                                      <div class="sidebar-body">
-                                          <div class="price-range-wrap">-->
+                                                  <h3 class="sidebar-title">price</h3>
+                                                  <div class="sidebar-body">
+                                                      <div class="price-range-wrap">-->
                 <!--SET RANGE TỪ DATABASE HOẶC DEFAULT-->
                 <!--<div class="price-range price-range-slider"
-                                                   data-min="0"
-                                                   data-max="650000"
-                                                   data-default-min="50000"
-                                                   data-default-max="500000">
-                                              </div>
-                                              <div class="range-slider">
-                                                  <form action="#" class="d-flex align-items-center justify-content-between">
-                                                      <div class="price-input">
-                                                          <label for="amount"></label>
-                                                          <input type="text" id="amount" readonly>
+                                                               data-min="0"
+                                                               data-max="650000"
+                                                               data-default-min="50000"
+                                                               data-default-max="500000">
+                                                          </div>
+                                                          <div class="range-slider">
+                                                              <form action="#" class="d-flex align-items-center justify-content-between">
+                                                                  <div class="price-input">
+                                                                      <label for="amount"></label>
+                                                                      <input type="text" id="amount" readonly>
+                                                                  </div>
+                                                                  <button type="button" class="filter-btn">filter</button>
+                                                              </form>
+                                                          </div>
                                                       </div>
-                                                      <button type="button" class="filter-btn">filter</button>
-                                                  </form>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>-->
+                                                  </div>
+                                              </div>-->
                 <!-- single sidebar start -->
                 <div class="sidebar-banner">
                   <div class="img-container">
@@ -504,10 +506,15 @@
     <!-- Active Js -->
     <script src="../../js/active.js"></script>
 
+    <!-- Import required services and components -->
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script type="module" src="../../js/component/cart/CartManager.js"></script>
     <script
       type="module"
-      src="../../js/component/AutoProductInitializer.js"
+      src="../../js/component/header/HeaderManager.js"
     ></script>
+
+    <script src="../../js/shop.js"></script>
 
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   </body>

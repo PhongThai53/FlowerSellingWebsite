@@ -57,7 +57,7 @@ class CartPageManager {
           <i class="fa fa-user-slash fa-3x text-danger mb-3"></i>
           <h4>Vui lòng đăng nhập</h4>
           <p>Bạn cần đăng nhập để xem giỏ hàng của mình.</p>
-          <a href="/html/auth/login-register.html" class="btn btn-primary">Đăng nhập</a>
+          <a href="../auth/login-register.html" class="btn" style="background-color: red; color: white;">Đăng nhập</a>
         </div>
       `;
       emptyContainer.style.display = "block";
@@ -65,19 +65,11 @@ class CartPageManager {
   }
 
   async loadComponents() {
-    try {
-      // Load header
-      const headerResponse = await fetch("../components/header.html");
-      const headerHTML = await headerResponse.text();
-      document.getElementById("header-container").innerHTML = headerHTML;
-
-      // Load footer
-      const footerResponse = await fetch("../components/footer.html");
-      const footerHTML = await footerResponse.text();
-      document.getElementById("footer-container").innerHTML = footerHTML;
-    } catch (error) {
-      console.error("Error loading components:", error);
-    }
+    // Components are loaded via HTMX, so we don't need to manually load them
+    // Just wait a bit for HTMX to complete loading
+    return new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
   }
 
   setupEventListeners() {
@@ -283,6 +275,7 @@ class CartPageManager {
       if (result.succeeded) {
         this.showToast("Cập nhật số lượng thành công", "success");
         await this.loadCartData(); // Reload to get updated totals
+        this.updateHeaderCartCount(); // Update header count
       } else {
         throw new Error(result.message || "Không thể cập nhật số lượng");
       }
@@ -315,6 +308,7 @@ class CartPageManager {
       if (result.succeeded) {
         this.showToast("Đã xóa sản phẩm khỏi giỏ hàng", "success");
         await this.loadCartData();
+        this.updateHeaderCartCount(); // Update header count
       } else {
         throw new Error(result.message || "Không thể xóa sản phẩm");
       }
@@ -345,6 +339,7 @@ class CartPageManager {
       if (result.succeeded) {
         this.showToast("Đã xóa tất cả sản phẩm khỏi giỏ hàng", "success");
         await this.loadCartData();
+        this.updateHeaderCartCount(); // Update header count
       } else {
         throw new Error(result.message || "Không thể xóa giỏ hàng");
       }
@@ -423,6 +418,26 @@ class CartPageManager {
       style: "currency",
       currency: "VND",
     }).format(amount);
+  }
+
+  updateHeaderCartCount() {
+    // Update header cart count via HeaderManager if available
+    if (
+      window.HeaderManager &&
+      typeof window.HeaderManager.forceUpdateCartCount === "function"
+    ) {
+      window.HeaderManager.forceUpdateCartCount();
+    } else {
+      // Fallback: dispatch event for header to listen to
+      const event = new CustomEvent("updateCartCount", {
+        detail: {
+          totalItems:
+            this.cartSummary.total_items || this.cartSummary.totalItems || 0,
+          timestamp: Date.now(),
+        },
+      });
+      document.dispatchEvent(event);
+    }
   }
 }
 
