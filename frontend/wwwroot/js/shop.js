@@ -193,60 +193,67 @@ class ItemsPage {
             const discountPercent = item.discountPercent || 0;
 
             html += `
-                <div class="col-md-4 col-sm-6">
-                    <div class="product-item">
-                        <figure class="product-thumb">
-                            <a href="product-details.html?id=${id}">
-                                <img class="pri-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                                <img class="sec-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                            </a>
-                            <div class="product-badge">
-                                ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
-                                ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
-                            </div>
-                            <div class="button-group">
-                                <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích"><i class="lnr lnr-heart"></i></a>
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" data-product-id="${id}"><span data-bs-toggle="tooltip" data-bs-placement="left" title="Xem nhanh"><i class="lnr lnr-magnifier"></i></span></a>
-                                <a href="#" class="add-to-cart-btn" data-product-id="${id}" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng"><i class="lnr lnr-cart"></i></a>
-                            </div>
-                        </figure>
-                        <div class="product-caption">
-                            <p class="product-name">
-                                <a href="product-details.html?id=${id}">${name}</a>
-                            </p>
-                            <div class="price-box">
-                                <span class="price-regular">${formatPrice(price)}</span>
-                                ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-list-item" style="display: none;">
-                        <figure class="product-thumb">
-                            <a href="product-details.html?id=${id}">
-                                <img class="pri-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                                <img class="sec-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                            </a>
-                            <div class="product-badge">
-                                ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
-                                ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
-                            </div>
-                        </figure>
-                        <div class="product-content-list">
-                            <h5 class="product-name"><a href="product-details.html?id=${id}">${name}</a></h5>
-                            <div class="price-box">
-                                <span class="price-regular">${formatPrice(price)}</span>
-                                ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
-                            </div>
-                            <p>${description || 'Sản phẩm chất lượng cao, được chọn lọc kỹ càng.'}</p>
-                            <div class="button-group-list">
-                                <a class="btn-big add-to-cart-btn" href="#" data-product-id="${id}" data-bs-toggle="tooltip" title="Thêm vào giỏ hàng"><i class="lnr lnr-cart"></i>Thêm vào giỏ</a>
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" data-product-id="${id}"><span data-bs-toggle="tooltip" title="Xem nhanh"><i class="lnr lnr-magnifier"></i></span></a>
-                                <a href="wishlist.html" data-bs-toggle="tooltip" title="Thêm vào yêu thích"><i class="lnr lnr-heart"></i></a>
-                            </div>
-                        </div>
-                    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="product-item">
+            <figure class="product-thumb">
+                <a href="product-details.html?id=${id}">
+                    <img style="width:100%;height:250px;object-fit:cover;" 
+                         class="pri-img" src="${imageUrl}" alt="${name}" 
+                         onerror="this.src='assets/img/product/default-product.jpg'">
+                    <img style="width:100%;height:250px;object-fit:cover;" 
+                         class="sec-img" src="${imageUrl}" alt="${name}" 
+                         onerror="this.src='assets/img/product/default-product.jpg'">
+                </a>
+                <div class="product-badge">
+                    ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
+                    ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
                 </div>
+                <div class="button-group">
+                    <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích"><i class="lnr lnr-heart"></i></a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" data-product-id="${id}"><span data-bs-toggle="tooltip" data-bs-placement="left" title="Xem nhanh"><i class="lnr lnr-magnifier"></i></span></a>
+                    <a href="#" class="add-to-cart-btn" data-product-id="${id}" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng"><i class="lnr lnr-cart"></i></a>
+                </div>
+            </figure>
+            <div class="product-caption">
+                <p class="product-name">
+                    <a href="product-details.html?id=${id}">${name}</a>
+                </p>
+                <div class="price-box">
+                    <span class="price-regular">${formatPrice(price)}</span>
+                    ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
+                </div>
+            </div>
+        </div>
+
+        <div class="product-list-item" style="display: none;">
+            <figure class="product-thumb">
+                <a href="product-details.html?id=${id}">
+                    <img style="width:120px;height:120px;object-fit:cover;" 
+                         class="pri-img" src="${imageUrl}" alt="${name}" 
+                         onerror="this.src='assets/img/product/default-product.jpg'">
+                    <img style="width:120px;height:120px;object-fit:cover;" 
+                         class="sec-img" src="${imageUrl}" alt="${name}" 
+                         onerror="this.src='assets/img/product/default-product.jpg'">
+                </a>
+                <div class="product-badge">
+                    ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
+                    ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
+                </div>
+            </figure>
+            <div class="product-content-list">
+                <h5 class="product-name"><a href="product-details.html?id=${id}">${name}</a></h5>
+                <div class="price-box">
+                    <span class="price-regular">${formatPrice(price)}</span>
+                    ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
+                </div>
+                <p>${description || 'Sản phẩm chất lượng cao, được chọn lọc kỹ càng.'}</p>
+                <div class="button-group-list">
+                    <a class="btn-big add-to-cart-btn" href="#" data-product-id="${id}" data-bs-toggle="tooltip" title="Thêm vào giỏ hàng"><i class="lnr lnr-cart"></i>Thêm vào giỏ</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" data-product-id="${id}"><span data-bs-toggle="tooltip" title="Xem nhanh"><i class="lnr lnr-magnifier"></i></span></a>
+                </div>
+            </div>
+        </div>
+    </div>
             `;
         });
 

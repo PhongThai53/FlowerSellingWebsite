@@ -170,6 +170,7 @@ namespace FlowerSelling.Data
                     entity.Property(e => e.Description).HasMaxLength(1000);
                     entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                     entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
+                    entity.Property(e => e.Stock).HasDefaultValue(0);
                 });
 
                 modelBuilder.Entity<ProductCategories>(entity =>

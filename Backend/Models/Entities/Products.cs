@@ -10,6 +10,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? Description { get; set; }
         public decimal? Price { get; set; }
         public string Url { get; set; } = null!;
+        public int Stock { get; set; }
 
         [Required]
         public int CategoryId { get; set; }

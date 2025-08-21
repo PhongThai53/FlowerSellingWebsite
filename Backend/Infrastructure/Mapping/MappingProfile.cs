@@ -13,7 +13,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
         {
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
 
             CreateMap<Products, ProductListDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name));
