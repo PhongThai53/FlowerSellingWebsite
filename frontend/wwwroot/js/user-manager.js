@@ -5,6 +5,7 @@ class UserManager {
         this.currentPage = 1;
         this.pageSize = 10;
         this.totalPages = 0;
+        this.totalItems = 0;
         this.currentUserId = null;
         this.loadingTimeout = null;
         this.isEditMode = false;
@@ -41,6 +42,22 @@ class UserManager {
         }
         
         this.showUserViewInfo();
+
+        // Wire search input for new UI if present
+        const newSearchInput = document.getElementById('exampleInputSearch');
+        if (newSearchInput) {
+            const debouncedSearch = this.debounce(() => {
+                this.currentPage = 1;
+                this.loadUsers();
+            }, 300);
+            newSearchInput.addEventListener('input', debouncedSearch);
+        }
+
+        // Prepare pagination container for new UI
+        const paginationContainer = document.querySelector('ul.pagination');
+        if (paginationContainer) {
+            // Nothing to bind now; we will rebuild on each update
+        }
         this.loadUsers();
     }
 
@@ -354,7 +371,11 @@ class UserManager {
                 const result = await response.json();
                 console.log('Users loaded:', result);
                 
-                this.totalPages = result.total_pages || 1;
+                this.totalPages = result.total_pages || result.totalPages || 1;
+                this.totalItems = result.total_items || result.totalItems || result.total || result.count || (Array.isArray(result.items) ? result.items.length : 0);
+                if (result.page_size || result.pageSize) {
+                    this.pageSize = result.page_size || result.pageSize;
+                }
                 this.renderUsers(result.items || []);
                 this.updatePaginationControls();
             } else {
@@ -402,7 +423,10 @@ class UserManager {
     // Get current filter values
     getFilters() {
         return {
-            search: document.getElementById('search-input')?.value || '',
+            // Support both old UI (#search-input) and new UI (#exampleInputSearch)
+            search: (document.getElementById('exampleInputSearch')?.value
+                || document.getElementById('search-input')?.value
+                || ''),
             role: document.getElementById('role-filter')?.value || '',
             sortBy: document.getElementById('sort-by')?.value || 'createdat',
             sortDirection: document.getElementById('sort-direction')?.value || 'Desc'
@@ -411,6 +435,24 @@ class UserManager {
 
     // Render users list
     renderUsers(users) {
+        // If new table-based UI exists, render into table body
+        const tableBody = document.querySelector('#user-list-table tbody');
+        if (tableBody) {
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center">Không tìm thấy người dùng</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const rowsHtml = users.map(user => this.getUserTableRowHTML(user)).join('');
+            tableBody.innerHTML = rowsHtml;
+            return;
+        }
+
+        // Fallback to old card-based UI
         const container = document.getElementById('users-container');
         if (!container) return;
 
@@ -424,6 +466,40 @@ class UserManager {
             <div class="row">
                 ${usersHTML}
             </div>
+        `;
+    }
+
+    // Generate HTML for a user row in the new table UI
+    getUserTableRowHTML(user) {
+        const initials = this.getInitials(user.fullName);
+        const createdDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '';
+        const phone = user.phoneNumber || '-';
+        const roleOrCompany = user.roleName || '-';
+        // Use a styled div avatar to avoid broken image paths
+        const avatarHtml = `
+            <div class="rounded d-inline-flex align-items-center justify-content-center avatar-40 bg-primary text-white">
+                <span>${initials}</span>
+            </div>
+        `;
+
+        return `
+            <tr>
+                <td class="text-center">${avatarHtml}</td>
+                <td>${user.fullName || '-'}</td>
+                <td>${phone}</td>
+                <td>${user.email || '-'}</td>
+                <td>-</td>
+                <td><span class="badge bg-primary">Active</span></td>
+                <td>${roleOrCompany}</td>
+                <td>${createdDate}</td>
+                <td>
+                    <div class="flex align-items-center list-user-action">
+                        <a class="btn btn-sm bg-primary" title="Add" href="javascript:void(0)" onclick="userManager.viewUser('${user.publicId}')"><i class="ri-user-add-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Edit" href="javascript:void(0)" onclick="userManager.editUser('${user.publicId}')"><i class="ri-pencil-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Delete" href="javascript:void(0)" onclick="userManager.openDeleteModal('${user.publicId}', '${(user.fullName || '').replace(/"/g, '\\"')}')"><i class="ri-delete-bin-line mr-0"></i></a>
+                    </div>
+                </td>
+            </tr>
         `;
     }
 
@@ -897,7 +973,10 @@ class UserManager {
     }
 
     clearFilters() {
-        document.getElementById('search-input').value = '';
+        const oldSearch = document.getElementById('search-input');
+        if (oldSearch) oldSearch.value = '';
+        const newSearch = document.getElementById('exampleInputSearch');
+        if (newSearch) newSearch.value = '';
         document.getElementById('role-filter').value = '';
         document.getElementById('sort-by').value = 'createdat';
         document.getElementById('sort-direction').value = 'Desc';
@@ -922,16 +1001,80 @@ class UserManager {
     }
 
     updatePaginationControls() {
+        // New UI: Update "Showing ..." and pagination list if present
+        const showingInfoContainer = document.getElementById('user-list-page-info');
+        if (showingInfoContainer) {
+            const infoSpan = showingInfoContainer.querySelector('span') || showingInfoContainer;
+            if (this.totalItems && this.totalItems > 0) {
+                const start = (this.currentPage - 1) * this.pageSize + 1;
+                const end = Math.min(this.currentPage * this.pageSize, this.totalItems);
+                infoSpan.textContent = `Showing ${start} to ${end} of ${this.totalItems} entries`;
+            } else {
+                infoSpan.textContent = `Trang ${this.currentPage} của ${this.totalPages}`;
+            }
+        }
+
+        const paginationUl = document.querySelector('ul.pagination');
+        if (paginationUl) {
+            paginationUl.innerHTML = this.buildPaginationHTML(this.currentPage, this.totalPages);
+        }
+
+        // Old UI controls fallback
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const paginationInfo = document.getElementById('pagination-info');
-
         if (prevBtn) prevBtn.disabled = this.currentPage <= 1;
         if (nextBtn) nextBtn.disabled = this.currentPage >= this.totalPages;
-        
-        if (paginationInfo) {
-            paginationInfo.textContent = `Trang ${this.currentPage} của ${this.totalPages}`;
+        if (paginationInfo) paginationInfo.textContent = `Trang ${this.currentPage} của ${this.totalPages}`;
+    }
+
+    buildPaginationHTML(currentPage, totalPages) {
+        if (!totalPages || totalPages < 1) return '';
+
+        const createPageItem = (page, isActive = false) => `
+            <li class="page-item ${isActive ? 'active' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.gotoPage(${page})">${page}</a>
+            </li>
+        `;
+
+        const prevClass = currentPage <= 1 ? 'disabled' : '';
+        const nextClass = currentPage >= totalPages ? 'disabled' : '';
+
+        const pages = [];
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
+        for (let p = startPage; p <= endPage; p++) {
+            pages.push(createPageItem(p, p === currentPage));
+        }
+
+        return `
+            <li class="page-item ${prevClass}">
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.previousPage()">Previous</a>
+            </li>
+            ${pages.join('')}
+            <li class="page-item ${nextClass}">
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.nextPage()">Next</a>
+            </li>
+        `;
+    }
+
+    gotoPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadUsers();
+    }
+
+    // Utils
+    debounce(fn, wait) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), wait);
+        };
     }
 
     // Utility methods
@@ -991,7 +1134,11 @@ class UserManager {
 
     showAlert(message, type = 'info') {
         const container = document.getElementById('alert-container');
-        if (!container) return;
+        if (!container) {
+            // Fallback if alert container doesn't exist in current UI
+            try { window.alert(message); } catch (_) {}
+            return;
+        }
 
         const alertHTML = `
             <div class="alert alert-${type} alert-dismissible">
