@@ -64,7 +64,8 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
-builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartService, CartService>()
+                .AddScoped<IOrderService, OrderService>();
 // Application Services
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();

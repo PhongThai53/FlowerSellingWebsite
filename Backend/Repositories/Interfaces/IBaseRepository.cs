@@ -7,5 +7,7 @@
         Task updateAsync(T entity);
         Task<T?> getByIdAsync(int id);
         Task deleteAsync(T entity);
+
+        IQueryable<T> AsQueryable();
     }
 }
