@@ -172,6 +172,11 @@
   background: #dc3545;
 }
 
+.toast.toast-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
 .toast-content {
   display: flex;
   align-items: center;
@@ -409,9 +414,166 @@
   }
 }
 
+/* Quantity Controls Styling */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 120px;
+}
+
+.quantity-controls button {
+  background: #f8f9fa;
+  border: none;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.quantity-controls button:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.quantity-controls button:active {
+  background: #dee2e6;
+}
+
+.quantity-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-quantity-input {
+  border: none;
+  text-align: center;
+  width: 50px;
+  height: 35px;
+  font-weight: 500;
+  outline: none;
+  background: white;
+}
+
+/* Hide native spinner arrows for number inputs */
+.cart-quantity-input::-webkit-outer-spin-button,
+.cart-quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.cart-quantity-input {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.cart-quantity-input:focus {
+  background: #f8f9fa;
+}
+
+.cart-quantity-input.has-changes {
+  border-color: #ffc107;
+  background: #fff3cd;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.cart-quantity-input.has-changes:focus {
+  border-color: #e0a800;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+/* Loading state for quantity controls */
+.quantity-controls.updating {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.quantity-controls.updating .cart-quantity-input {
+  background: #f0f0f0;
+}
+
+/* Add to Cart Button States */
+.add-to-cart-btn.adding-to-cart {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.add-to-cart-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn .fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* Original bounce animation for backwards compatibility */
 .cart-count {
   transition: all 0.3s ease;
+}
+
+/* Update Cart Button Styling */
+.update-cart-section {
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #eee;
+  background: #f8f9fa;
+}
+
+.update-cart-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.update-cart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.update-cart-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.update-cart-btn.btn-warning {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.update-cart-btn.btn-warning:hover {
+  background: #e0a800;
+  border-color: #d39e00;
+}
+
+.update-cart-info {
+  margin-top: 10px;
+  color: #6c757d;
+}
+
+.update-cart-info small {
+  font-size: 13px;
 }
 
 @keyframes bounce {

@@ -8,6 +8,7 @@ class CartPageManager {
     this.pageSize = 10;
     this.cartItems = [];
     this.cartSummary = { totalItems: 0, totalAmount: 0, cartId: 0 };
+    this.pendingChanges = new Map(); // Track pending quantity changes
 
     // Simple initialization
     this.init();
@@ -73,12 +74,50 @@ class CartPageManager {
   }
 
   setupEventListeners() {
-    // Quantity update handlers
+    // Prevent mouse wheel from changing quantity when focusing the input
+    document.addEventListener(
+      "wheel",
+      (e) => {
+        const input = e.target.closest(".cart-quantity-input");
+        if (input && document.activeElement === input) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    // Prevent arrow up/down from changing the number directly
+    document.addEventListener("keydown", (e) => {
+      if (e.target.classList?.contains("cart-quantity-input")) {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          e.preventDefault();
+        }
+      }
+    });
+
+    // Quantity input handlers - just validate, don't update immediately
     document.addEventListener("change", (e) => {
       if (e.target.classList.contains("cart-quantity-input")) {
         const cartItemId = e.target.getAttribute("data-cart-item-id");
-        const quantity = parseInt(e.target.value) || 1;
-        this.updateCartItemQuantity(cartItemId, quantity);
+        let quantity = parseInt(e.target.value) || 1;
+
+        // Validate quantity
+        if (quantity < 0) {
+          quantity = 1;
+          e.target.value = 1;
+          this.showToast("Số lượng không hợp lệ", "warning");
+        } else if (quantity === 0) {
+          // Quantity 0 means remove item from cart
+          e.target.value = 1; // Reset to 1 temporarily
+          this.showToast("Số lượng 0 sẽ xóa sản phẩm khỏi giỏ hàng", "info");
+        } else if (quantity > 100) {
+          quantity = 100;
+          e.target.value = 100;
+          this.showToast("Số lượng tối đa là 100", "warning");
+        }
+
+        // Mark this item as having changes
+        this.markItemAsChanged(cartItemId, quantity);
       }
     });
 
@@ -90,7 +129,9 @@ class CartPageManager {
         const currentValue = parseInt(input.value) || 1;
         if (currentValue > 1) {
           input.value = currentValue - 1;
-          input.dispatchEvent(new Event("change"));
+          // Manually trigger change detection since we're setting value directly
+          const cartItemId = input.getAttribute("data-cart-item-id");
+          this.markItemAsChanged(cartItemId, currentValue - 1);
         }
       }
 
@@ -98,8 +139,14 @@ class CartPageManager {
         e.preventDefault();
         const input = e.target.previousElementSibling;
         const currentValue = parseInt(input.value) || 1;
-        input.value = currentValue + 1;
-        input.dispatchEvent(new Event("change"));
+        if (currentValue < 100) {
+          input.value = currentValue + 1;
+          // Manually trigger change detection since we're setting value directly
+          const cartItemId = input.getAttribute("data-cart-item-id");
+          this.markItemAsChanged(cartItemId, currentValue + 1);
+        } else {
+          this.showToast("Số lượng tối đa là 100", "warning");
+        }
       }
 
       // Remove item buttons
@@ -115,6 +162,13 @@ class CartPageManager {
       if (clearCartButton) {
         e.preventDefault();
         this.clearCart();
+      }
+
+      // Update cart button
+      const updateCartButton = e.target.closest(".update-cart-btn");
+      if (updateCartButton) {
+        e.preventDefault();
+        this.updateCartWithChanges();
       }
     });
 
@@ -144,6 +198,10 @@ class CartPageManager {
       if (itemsResult.succeeded) {
         this.cartItems = itemsResult.data.cart_items;
         this.cartSummary = itemsResult.data.cart_summary;
+
+        // Debug: Log cart items for troubleshooting
+        console.log("Loaded cart items:", this.cartItems);
+        console.log("Cart summary:", this.cartSummary);
 
         if (this.cartItems.length === 0 && this.currentPage === 1) {
           this.showEmptyState();
@@ -182,19 +240,22 @@ class CartPageManager {
       return;
     }
 
-    container.innerHTML = this.cartItems
-      .map(
-        (item) => `
+    const cartItemsHTML = this.cartItems
+      .map((item) => {
+        // Debug: Log each item structure
+        console.log("Rendering cart item:", item);
+
+        return `
             <tr data-cart-item-id="${item.id}">
                 <td class="pro-thumbnail">
                     <a href="#">
                         <img class="img-fluid" 
-                             src="${
-                               item.product_image ||
-                               "../../images/product/default-product.jpg"
-                             }" 
+                             src="${this.getProductImageUrl({
+                               id: item.product_id,
+                             })}" 
                              alt="${item.product_name}" 
-                             style="width: 80px; height: 80px; object-fit: cover;" />
+                             style="width: 80px; height: 80px; object-fit: cover;"
+                             onerror="this.src='https://localhost:7062/Image/products/default/default.jpg'" />
                     </a>
                 </td>
                 <td class="pro-title">
@@ -211,8 +272,13 @@ class CartPageManager {
                         <input type="number" 
                                class="cart-quantity-input" 
                                value="${item.quantity}" 
-                               min="1"
-                               data-cart-item-id="${item.id}">
+                               min="0"
+                               max="100"
+                               step="1"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               data-cart-item-id="${item.id}"
+                               data-original-quantity="${item.quantity}">
                         <button type="button" class="quantity-plus">+</button>
                     </div>
                 </td>
@@ -226,9 +292,28 @@ class CartPageManager {
                     </button>
                 </td>
             </tr>
-        `
-      )
+        `;
+      })
       .join("");
+
+    // Add the cart items
+    container.innerHTML = cartItemsHTML;
+
+    // Add Update Cart button below the table
+    const updateButtonContainer = document.createElement("tr");
+    updateButtonContainer.innerHTML = `
+      <td colspan="6" class="text-center">
+        <div class="update-cart-section">
+          <button type="button" class="btn btn-primary update-cart-btn" id="update-cart-btn">
+            <i class="fa fa-refresh"></i> Cập nhật giỏ hàng
+          </button>
+          <div class="update-cart-info">
+            <small class="text-muted">Thay đổi số lượng và nhấn "Cập nhật giỏ hàng" để áp dụng</small>
+          </div>
+        </div>
+      </td>
+    `;
+    container.appendChild(updateButtonContainer);
   }
 
   renderPagination(data) {
@@ -269,31 +354,107 @@ class CartPageManager {
   }
 
   async updateCartItemQuantity(cartItemId, quantity) {
+    // Validate inputs
+    if (!cartItemId) {
+      console.error("Cart item ID is missing");
+      this.showToast("Lỗi: Không tìm thấy ID sản phẩm", "error");
+      return;
+    }
+
+    console.log(`Updating cart item ${cartItemId} to quantity ${quantity}`);
+
+    // Add visual feedback
+    const quantityControl = document
+      .querySelector(`[data-cart-item-id="${cartItemId}"]`)
+      .closest("tr")
+      .querySelector(".quantity-controls");
+
+    if (!quantityControl) {
+      console.error(`Quantity control not found for cart item ${cartItemId}`);
+      this.showToast("Lỗi: Không tìm thấy điều khiển số lượng", "error");
+      return;
+    }
+
+    const originalQuantity = quantityControl.querySelector(
+      ".cart-quantity-input"
+    ).value;
+
+    // Set loading state
+    quantityControl.classList.add("updating");
+    quantityControl
+      .querySelectorAll("button")
+      .forEach((btn) => (btn.disabled = true));
+
     try {
       const result = await ApiService.updateCartItem(cartItemId, quantity);
 
       if (result.succeeded) {
         this.showToast("Cập nhật số lượng thành công", "success");
-        await this.loadCartData(); // Reload to get updated totals
-        this.updateHeaderCartCount(); // Update header count
+
+        // Update the specific row instead of reloading all data for better UX
+        if (result.data) {
+          await this.updateCartItemDisplay(cartItemId, result.data);
+        }
+
+        // Update totals and header count
+        await this.loadCartSummary();
+        this.updateHeaderCartCount();
+
+        // Brief success visual feedback
+        quantityControl.style.borderColor = "#28a745";
+        setTimeout(() => {
+          quantityControl.style.borderColor = "";
+        }, 1500);
       } else {
         throw new Error(result.message || "Không thể cập nhật số lượng");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
 
-      // Handle authentication errors
+      // Revert to original quantity
+      quantityControl.querySelector(".cart-quantity-input").value =
+        originalQuantity;
+
+      // Handle specific error types
       if (
         error.message.includes("401") ||
         error.message.includes("Unauthorized")
       ) {
         localStorage.removeItem("auth_token");
         this.showAuthenticationError();
+      } else if (error.message.includes("404")) {
+        this.showToast(
+          "Sản phẩm không tồn tại trong giỏ hàng. Đang tải lại...",
+          "error"
+        );
+        // Reload cart data to refresh the view and remove stale items
+        setTimeout(() => {
+          this.loadCartData();
+        }, 1500);
+      } else if (error.message.includes("400")) {
+        this.showToast("Dữ liệu không hợp lệ. Vui lòng thử lại", "error");
       } else {
-        this.showToast("Có lỗi xảy ra khi cập nhật số lượng", "error");
-        // Reload to revert changes
-        await this.loadCartData();
+        // For any other error, try to refresh the cart to get latest data
+        this.showToast(
+          "Có lỗi xảy ra khi cập nhật số lượng. Đang tải lại giỏ hàng...",
+          "error"
+        );
+        setTimeout(() => {
+          this.loadCartData();
+        }, 2000);
       }
+
+      // Visual error feedback
+      quantityControl.style.borderColor = "#dc3545";
+      setTimeout(() => {
+        quantityControl.style.borderColor = "";
+      }, 3000);
+    } finally {
+      // Remove loading state
+      quantityControl.classList.remove("updating");
+      quantityControl
+        .querySelectorAll("button")
+        .forEach((btn) => (btn.disabled = false));
     }
   }
 
@@ -420,6 +581,47 @@ class CartPageManager {
     }).format(amount);
   }
 
+  getProductImageUrl(product) {
+    const baseUrl = "https://localhost:7062"; // Use the same base URL as shop/homepage
+    if (!product || !product.id) {
+      return `${baseUrl}/Image/products/default/default.jpg`;
+    }
+    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
+  }
+
+  async updateCartItemDisplay(cartItemId, updatedData) {
+    // Update the specific cart item row with new data
+    const row = document.querySelector(`tr[data-cart-item-id="${cartItemId}"]`);
+    if (row && updatedData) {
+      // Update quantity display
+      const quantityInput = row.querySelector(".cart-quantity-input");
+      if (quantityInput) {
+        quantityInput.value = updatedData.quantity;
+      }
+
+      // Update line total
+      const subtotalCell = row.querySelector(".pro-subtotal span");
+      if (subtotalCell && updatedData.line_total) {
+        subtotalCell.textContent = this.formatCurrency(updatedData.line_total);
+      }
+    }
+  }
+
+  async loadCartSummary() {
+    try {
+      // Load just the cart summary for totals
+      const summaryResult = await ApiService.getCartSummary();
+      if (summaryResult.succeeded) {
+        this.cartSummary = summaryResult.data;
+        this.updateCartSummary();
+      }
+    } catch (error) {
+      console.error("Error loading cart summary:", error);
+      // Fallback to full reload if summary endpoint doesn't exist
+      await this.loadCartData();
+    }
+  }
+
   updateHeaderCartCount() {
     // Update header cart count via HeaderManager if available
     if (
@@ -439,9 +641,253 @@ class CartPageManager {
       document.dispatchEvent(event);
     }
   }
+
+  // Track changes to cart items
+  markItemAsChanged(cartItemId, newQuantity) {
+    if (!this.pendingChanges) {
+      this.pendingChanges = new Map();
+    }
+
+    const quantityInput = document.querySelector(
+      `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
+    );
+    if (!quantityInput) return;
+
+    const originalQuantity = parseInt(
+      quantityInput.getAttribute("data-original-quantity")
+    );
+
+    if (newQuantity !== originalQuantity) {
+      this.pendingChanges.set(cartItemId, {
+        originalQuantity,
+        newQuantity,
+        action: newQuantity === 0 ? "remove" : "update",
+      });
+
+      // Add visual feedback to the input
+      quantityInput.classList.add("has-changes");
+
+      // Update the Update Cart button to show pending changes
+      this.updateUpdateCartButton();
+    } else {
+      // Remove from pending changes if quantity is back to original
+      this.pendingChanges.delete(cartItemId);
+
+      // Remove visual feedback
+      quantityInput.classList.remove("has-changes");
+
+      this.updateUpdateCartButton();
+    }
+  }
+
+  updateUpdateCartButton() {
+    const updateBtn = document.getElementById("update-cart-btn");
+    if (updateBtn) {
+      if (this.pendingChanges && this.pendingChanges.size > 0) {
+        updateBtn.textContent = `Cập nhật giỏ hàng (${this.pendingChanges.size} thay đổi)`;
+        updateBtn.classList.add("btn-warning");
+        updateBtn.classList.remove("btn-primary");
+        updateBtn.disabled = false;
+      } else {
+        updateBtn.innerHTML = '<i class="fa fa-refresh"></i> Cập nhật giỏ hàng';
+        updateBtn.classList.remove("btn-warning");
+        updateBtn.classList.add("btn-primary");
+        updateBtn.disabled = true;
+      }
+    }
+  }
+
+  async updateCartWithChanges() {
+    if (!this.pendingChanges || this.pendingChanges.size === 0) {
+      this.showToast("Không có thay đổi nào để cập nhật", "info");
+      return;
+    }
+
+    // First, verify that all cart items still exist
+    console.log("Verifying cart items before update...");
+    const validChanges = new Map();
+
+    for (const [cartItemId, change] of this.pendingChanges) {
+      // Check if this cart item still exists in current data
+      const itemExists = this.cartItems.find(
+        (item) => item.id.toString() === cartItemId.toString()
+      );
+      if (itemExists) {
+        validChanges.set(cartItemId, change);
+        console.log(`Cart item ${cartItemId} is valid`);
+      } else {
+        console.warn(`Cart item ${cartItemId} no longer exists, skipping...`);
+        // Remove visual feedback for this item
+        const input = document.querySelector(
+          `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
+        );
+        if (input) {
+          input.classList.remove("has-changes");
+        }
+      }
+    }
+
+    // Update pendingChanges to only include valid items
+    this.pendingChanges = validChanges;
+
+    if (this.pendingChanges.size === 0) {
+      this.showToast("Không có thay đổi hợp lệ để cập nhật", "warning");
+      this.updateUpdateCartButton();
+      return;
+    }
+
+    const updateBtn = document.getElementById("update-cart-btn");
+    if (updateBtn) {
+      updateBtn.disabled = true;
+      updateBtn.innerHTML =
+        '<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...';
+    }
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Process all changes
+      for (const [cartItemId, change] of this.pendingChanges) {
+        try {
+          console.log(`Processing cart item ${cartItemId}:`, change);
+
+          if (change.action === "remove") {
+            // Remove item
+            console.log(`Removing cart item ${cartItemId}`);
+            const result = await ApiService.removeCartItem(cartItemId);
+            if (result.succeeded) {
+              console.log(`Successfully removed cart item ${cartItemId}`);
+              successCount++;
+            } else {
+              console.error(
+                `Failed to remove cart item ${cartItemId}:`,
+                result
+              );
+              errorCount++;
+            }
+          } else {
+            // Update quantity
+            console.log(
+              `Updating cart item ${cartItemId} to quantity ${change.newQuantity}`
+            );
+            const result = await ApiService.updateCartItem(
+              cartItemId,
+              change.newQuantity
+            );
+            if (result.succeeded) {
+              console.log(`Successfully updated cart item ${cartItemId}`);
+              successCount++;
+            } else {
+              console.error(
+                `Failed to update cart item ${cartItemId}:`,
+                result
+              );
+              errorCount++;
+            }
+          }
+        } catch (error) {
+          console.error(`Error updating cart item ${cartItemId}:`, error);
+
+          // Log more details about the error
+          if (error.message.includes("404")) {
+            console.error(
+              `Cart item ${cartItemId} not found - it may have been removed or doesn't exist`
+            );
+          } else if (error.message.includes("401")) {
+            console.error(
+              `Authentication error for cart item ${cartItemId} - token may be invalid`
+            );
+          } else if (error.message.includes("403")) {
+            console.error(
+              `Forbidden error for cart item ${cartItemId} - user may not own this item`
+            );
+          }
+
+          errorCount++;
+        }
+      }
+
+      // Show results
+      if (errorCount === 0) {
+        this.showToast(
+          `Cập nhật thành công ${successCount} sản phẩm!`,
+          "success"
+        );
+        this.pendingChanges.clear();
+        this.updateUpdateCartButton();
+
+        // Clear visual feedback from all inputs
+        document
+          .querySelectorAll(".cart-quantity-input.has-changes")
+          .forEach((input) => {
+            input.classList.remove("has-changes");
+          });
+
+        // Reload cart data to show updated totals
+        await this.loadCartData();
+        this.updateHeaderCartCount();
+      } else {
+        this.showToast(
+          `Cập nhật ${successCount} sản phẩm thành công, ${errorCount} lỗi`,
+          "warning"
+        );
+
+        // If we had 404 errors, the cart data might be stale
+        if (errorCount > 0) {
+          console.log(
+            "Some updates failed, refreshing cart data to get latest state..."
+          );
+          setTimeout(async () => {
+            await this.loadCartData();
+          }, 1000);
+        }
+
+        // Keep failed changes in pendingChanges for retry
+        this.updateUpdateCartButton();
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      this.showToast("Có lỗi xảy ra khi cập nhật giỏ hàng", "error");
+    } finally {
+      // Reset button
+      if (updateBtn) {
+        updateBtn.disabled = false;
+        this.updateUpdateCartButton();
+      }
+    }
+  }
+
+  // Debug helper method - can be called from browser console
+  debugCartState() {
+    console.log("=== CART DEBUG INFO ===");
+    console.log("Cart Items:", this.cartItems);
+    console.log("Cart Summary:", this.cartSummary);
+    console.log("Current Page:", this.currentPage);
+    console.log("Page Size:", this.pageSize);
+    console.log("Pending Changes:", this.pendingChanges);
+
+    // Check all cart item elements
+    const cartRows = document.querySelectorAll("[data-cart-item-id]");
+    console.log("Cart rows in DOM:", cartRows.length);
+    cartRows.forEach((row, index) => {
+      const cartItemId = row.getAttribute("data-cart-item-id");
+      const quantityInput = row.querySelector(".cart-quantity-input");
+      console.log(
+        `Row ${index + 1}: ID=${cartItemId}, Quantity=${quantityInput?.value}`
+      );
+    });
+    console.log("======================");
+  }
 }
 
 // Initialize cart page when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  new CartPageManager();
+  const cartManager = new CartPageManager();
+
+  // Make debug method globally accessible
+  window.debugCart = () => cartManager.debugCartState();
+
+  // Also store the instance for access from console
+  window.cartManager = cartManager;
 });

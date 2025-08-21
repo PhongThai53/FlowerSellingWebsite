@@ -83,7 +83,8 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<CartItemDTO> UpdateCartItemAsync(int userId, int cartItemId, UpdateCartItemDTO updateDto)
         {
-            var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
+            // Load cart WITH items to ensure CartItems collection is populated
+            var cart = await _cartRepository.GetCartWithItemsByUserIdAsync(userId);
             if (cart == null)
             {
                 throw new UnauthorizedAccessException("Cart not found for the user.");
@@ -104,6 +105,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<bool> RemoveCartItemAsync(int userId, int cartItemId)
         {
+            // Load cart WITH items to ensure CartItems collection is populated
             var cart = await _cartRepository.GetCartWithItemsByUserIdAsync(userId);
             if (cart == null)
             {
