@@ -48,6 +48,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 // Application Services
 builder.Services.AddScoped<
     IBaseService<ProductCategoryCreateDTO, ProductCategoryUpdateDTO, ProductCategoryResponseDTO>,
@@ -63,6 +64,7 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+builder.Services.AddScoped<ICartService, CartService>();
 // Application Services
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
