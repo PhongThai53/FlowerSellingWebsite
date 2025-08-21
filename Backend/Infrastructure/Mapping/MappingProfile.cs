@@ -19,7 +19,10 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             CreateMap<Products, ProductListDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => GetProductImageUrlFromProduct(src)));
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
+                    src.ProductPhotos.Any(pp => !pp.IsDeleted)
+                        ? src.ProductPhotos.First(pp => !pp.IsDeleted).Url
+                        : "/images/product/default-product.jpg"));
 
             CreateMap<CreateProductDTO, Products>();
             CreateMap<UpdateProductDTO, Products>()
@@ -52,30 +55,15 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             CreateMap<CartItem, CartItemDTO>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty))
                 .ForMember(dest => dest.ProductUrl, opt => opt.MapFrom(src => src.Product != null ? src.Product.Url : string.Empty))
-                .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src => GetProductImageUrl(src)));
+                .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src =>
+                    src.Product != null && src.Product.ProductPhotos.Any(pp => !pp.IsDeleted)
+                        ? src.Product.ProductPhotos.First(pp => !pp.IsDeleted).Url
+                        : "/images/product/default-product.jpg"));
 
 
             CreateMap<AddToCartDTO, CartItem>();
             CreateMap<UpdateCartItemDTO, CartItem>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-        }
-
-        private static string GetProductImageUrl(CartItem cartItem)
-        {
-            if (cartItem.Product != null && cartItem.Product.ProductPhotos.Any(pp => !pp.IsDeleted))
-            {
-                return cartItem.Product.ProductPhotos.First(pp => !pp.IsDeleted).Url;
-            }
-            return "/images/product/default-product.jpg";
-        }
-
-        private static string GetProductImageUrlFromProduct(Products product)
-        {
-            if (product.ProductPhotos.Any(pp => !pp.IsDeleted))
-            {
-                return product.ProductPhotos.First(pp => !pp.IsDeleted).Url;
-            }
-            return "/images/product/default-product.jpg";
         }
     }
 }
