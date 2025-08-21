@@ -10,9 +10,11 @@ let pageSize = 6;
 
 // Helper functions
 function getProductImageUrl(product) {
-    if (!product.id) return 'assets/img/product/default-product.jpg';
-    const baseUrl = API_BASE_URL.replace('/api', '');
-    return `${baseUrl}/Image/products/${product.id}/product-${product.id}.jpg`;
+    const baseUrl = API_BASE_URL.replace('/api', ''); // Định nghĩa trước
+    if (!product || !product.id) {
+        return `${baseUrl}/Image/products/default/default.jpg`;
+    }
+    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
 }
 
 function formatPrice(price) {
@@ -95,7 +97,7 @@ class ItemsPage {
 
     async loadCategories() {
         try {
-            const response = await fetch(`${API_BASE_URL}/ProductCategory`);
+            const response = await fetch(`${API_BASE_URL}/ProductCategory/with-products`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
             const result = await response.json();
@@ -111,10 +113,10 @@ class ItemsPage {
     renderCategories(categories) {
         if (!this.categoriesContainer) return;
 
-        let html = `<li><a href="#" data-category-id="" class="category-link">Tất cả <span>-</span></a></li>`;
+        let html = `<li><a href="#" data-category-id="" class="category-link">All <span>-</span></a></li>`;
 
         categories.forEach(category => {
-            const productCount = category.productCount || 0;
+            const productCount = category.totalProducts || 0;
             html += `<li>
                         <a href="#" data-category-id="${category.id}" class="category-link">
                             ${category.name} <span>${productCount}</span>
@@ -462,3 +464,5 @@ setTimeout(() => {
         });
     }
 }, 3000);
+
+

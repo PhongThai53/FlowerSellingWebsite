@@ -3,15 +3,11 @@ const API_BASE_URL = 'https://localhost:7062/api';
 
 // Helper function để lấy URL ảnh đầy đủ
 function getProductImageUrl(product) {
-    if (!product.id) return 'assets/img/product/default-product.jpg';
-
-    const baseUrl = API_BASE_URL.replace('/api', ''); // https://localhost:7062
-
-    // Xây dựng URL theo structure thực tế: \Image\products\[Id]\product-[Id].jpg
-    // Chuyển thành: /Image/products/1/product-1.jpg
-    const imageUrl = `/Image/products/${product.id}/product-${product.id}.jpg`;
-
-    return `${baseUrl}${imageUrl}`;
+    const baseUrl = API_BASE_URL.replace('/api', ''); // ✅ FIX: Định nghĩa baseUrl trước
+    if (!product || !product.id) {
+        return `${baseUrl}/Image/products/default/default.jpg`;
+    }
+    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
 }
 
 // Helper function để format giá tiền VND
@@ -26,7 +22,8 @@ function formatPrice(price) {
 // Function để fetch danh sách sản phẩm
 async function fetchProducts() {
     try {
-        const response = await fetch(`${API_BASE_URL}/product?pageSize=12`);
+        // ✅ FIX: Đổi từ /products sang /Product
+        const response = await fetch(`${API_BASE_URL}/Product?pageSize=12`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -93,7 +90,7 @@ function createProductHTML(product) {
 // Function để hiển thị sản phẩm trong section "New Products"
 async function loadNewProducts() {
     const products = await fetchProducts();
-    const newProductsContainer = document.querySelector('.our-product .row.mtn-40');
+    const newProductsContainer = document.querySelector('.loadproduct');
 
     console.log('Products received:', products);
 
@@ -107,7 +104,7 @@ async function loadNewProducts() {
         return;
     }
 
-    // Lưu lại nút "view more products" nếu có
+    // ✅ FIX: Lưu lại nút "view more products" nếu có
     const viewMoreBtn = newProductsContainer.querySelector('.view-more-btn');
 
     // Xóa nội dung cũ
@@ -120,18 +117,14 @@ async function loadNewProducts() {
         newProductsContainer.innerHTML += createProductHTML(product);
     });
 
-    // Thêm lại nút "view more products"
-    if (viewMoreBtn) {
-        newProductsContainer.appendChild(viewMoreBtn);
-    } else {
-        newProductsContainer.innerHTML += `
-            <div class="col-12">
-                <div class="view-more-btn">
-                    <a class="btn-hero btn-load-more" href="shop.html">Xem thêm sản phẩm</a>
-                </div>
+    // ✅ FIX: Thêm lại nút "view more products" - Luôn tạo mới để tránh lỗi
+    newProductsContainer.innerHTML += `
+        <div class="col-12">
+            <div class="view-more-btn">
+                <a class="btn-hero btn-load-more" href="shop.html">View More Products</a>
             </div>
-        `;
-    }
+        </div>
+    `;
 }
 
 // Function để tạo HTML cho sản phẩm trending (carousel)
