@@ -227,3 +227,4 @@ export function normalizePaginationData(apiResponse) {
     hasPrev: apiResponse.has_prev || apiResponse.hasPrev || false,
   };
 }
+

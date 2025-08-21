@@ -85,6 +85,62 @@ export class CartManager {
     }
   }
 
+  // Check if adding to cart would exceed stock
+  async checkStockLimit(productId, quantityToAdd = 1) {
+    try {
+      const stockResult = await ApiService.getProductStock(productId);
+      if (stockResult && stockResult.succeeded) {
+        const currentStock = stockResult.data.stock || 0;
+
+        // Check if requested quantity exceeds stock
+        if (quantityToAdd > currentStock) {
+          return {
+            allowed: false,
+            message: `Không thể thêm ${quantityToAdd} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
+            currentStock,
+          };
+        }
+
+        // Check if adding this quantity would exceed stock when combined with existing cart items
+        const existingCartItem = this.cartItems.find(
+          (item) =>
+            item.productId && item.productId.toString() === productId.toString()
+        );
+
+        if (existingCartItem) {
+          const totalQuantity = existingCartItem.quantity + quantityToAdd;
+          if (totalQuantity > currentStock) {
+            return {
+              allowed: false,
+              message: `Không thể thêm ${quantityToAdd} sản phẩm. Tổng số lượng sẽ vượt quá tồn kho (${currentStock}).`,
+              currentStock,
+              existingQuantity: existingCartItem.quantity,
+            };
+          }
+        }
+
+        return {
+          allowed: true,
+          currentStock,
+          existingQuantity: existingCartItem ? existingCartItem.quantity : 0,
+        };
+      }
+
+      return {
+        allowed: true,
+        currentStock: 0,
+        message: "Không thể kiểm tra tồn kho, cho phép thêm vào giỏ hàng",
+      };
+    } catch (error) {
+      console.warn("Error checking stock limit:", error);
+      return {
+        allowed: true,
+        currentStock: 0,
+        message: "Không thể kiểm tra tồn kho, cho phép thêm vào giỏ hàng",
+      };
+    }
+  }
+
   async addToCart(productId, quantity = 1) {
     try {
       // Check if user is authenticated
@@ -99,6 +155,21 @@ export class CartManager {
           window.location.href = "/html/auth/login-register.html";
         }, 2000);
         return;
+      }
+
+      // Check current stock before adding to cart
+      try {
+        const stockCheck = await this.checkStockLimit(productId, quantity);
+        if (!stockCheck.allowed) {
+          this.showErrorNotification(stockCheck.message);
+          return;
+        }
+      } catch (stockError) {
+        console.warn(
+          "Could not verify stock, proceeding with cart addition:",
+          stockError
+        );
+        // Continue with cart addition if stock check fails
       }
 
       // Show loading state on button
@@ -158,8 +229,66 @@ export class CartManager {
     }
   }
 
+  // Check if updating cart item would exceed stock
+  async checkCartUpdateStockLimit(cartItemId, newQuantity) {
+    try {
+      // Find the cart item
+      const cartItem = this.cartItems.find(
+        (item) => item.id.toString() === cartItemId.toString()
+      );
+
+      if (!cartItem || !cartItem.productId) {
+        return {
+          allowed: false,
+          message: "Không thể tìm thấy sản phẩm trong giỏ hàng",
+        };
+      }
+
+      const stockResult = await ApiService.getProductStock(cartItem.productId);
+      if (stockResult && stockResult.succeeded) {
+        const currentStock = stockResult.data.stock || 0;
+
+        if (newQuantity > currentStock) {
+          return {
+            allowed: false,
+            message: `Không thể cập nhật số lượng ${newQuantity}. Chỉ còn ${currentStock} sản phẩm trong kho.`,
+            currentStock,
+          };
+        }
+
+        return {
+          allowed: true,
+          currentStock,
+        };
+      }
+
+      return {
+        allowed: true,
+        currentStock: 0,
+        message: "Không thể kiểm tra tồn kho, cho phép cập nhật",
+      };
+    } catch (error) {
+      console.warn("Error checking cart update stock limit:", error);
+      return {
+        allowed: true,
+        currentStock: 0,
+        message: "Không thể kiểm tra tồn kho, cho phép cập nhật",
+      };
+    }
+  }
+
   async updateCartItem(cartItemId, quantity) {
     try {
+      // Check stock limit before updating
+      const stockCheck = await this.checkCartUpdateStockLimit(
+        cartItemId,
+        quantity
+      );
+      if (!stockCheck.allowed) {
+        this.showErrorNotification(stockCheck.message);
+        return;
+      }
+
       const result = await ApiService.updateCartItem(cartItemId, quantity);
 
       if (result.succeeded) {

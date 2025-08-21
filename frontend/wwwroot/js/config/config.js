@@ -160,3 +160,4 @@ export const UTILS = {
     return temp.innerHTML;
   },
 };
+

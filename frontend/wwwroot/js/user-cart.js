@@ -1,5 +1,4 @@
 import { ApiService } from "./services/ApiService.js";
-import { CartManager } from "./component/cart/CartManager.js";
 import { Pagination } from "./component/pagination/Pagination.js";
 
 class CartPageManager {
@@ -116,8 +115,28 @@ class CartPageManager {
           this.showToast("Số lượng tối đa là 100", "warning");
         }
 
-        // Mark this item as having changes
-        this.markItemAsChanged(cartItemId, quantity);
+        // Check stock validation asynchronously
+        this.validateQuantityAgainstStock(cartItemId, quantity, e.target);
+      }
+    });
+
+    // Real-time quantity validation
+    document.addEventListener("input", (e) => {
+      if (e.target.classList.contains("cart-quantity-input")) {
+        const cartItemId = e.target.getAttribute("data-cart-item-id");
+        const quantity = parseInt(e.target.value) || 0;
+
+        // Basic validation
+        if (quantity < 0) {
+          e.target.value = 0;
+        } else if (quantity > 100) {
+          e.target.value = 100;
+        }
+
+        // Mark as changed for real-time feedback (async)
+        if (quantity > 0) {
+          this.markItemAsChanged(cartItemId, quantity);
+        }
       }
     });
 
@@ -128,10 +147,9 @@ class CartPageManager {
         const input = e.target.nextElementSibling;
         const currentValue = parseInt(input.value) || 1;
         if (currentValue > 1) {
-          input.value = currentValue - 1;
-          // Manually trigger change detection since we're setting value directly
-          const cartItemId = input.getAttribute("data-cart-item-id");
-          this.markItemAsChanged(cartItemId, currentValue - 1);
+          const newQuantity = currentValue - 1;
+          // Check stock before allowing decrease
+          this.validateQuantityChange(input, newQuantity);
         }
       }
 
@@ -140,10 +158,9 @@ class CartPageManager {
         const input = e.target.previousElementSibling;
         const currentValue = parseInt(input.value) || 1;
         if (currentValue < 100) {
-          input.value = currentValue + 1;
-          // Manually trigger change detection since we're setting value directly
-          const cartItemId = input.getAttribute("data-cart-item-id");
-          this.markItemAsChanged(cartItemId, currentValue + 1);
+          const newQuantity = currentValue + 1;
+          // Check stock before allowing increase
+          this.validateQuantityChange(input, newQuantity);
         } else {
           this.showToast("Số lượng tối đa là 100", "warning");
         }
@@ -642,42 +659,285 @@ class CartPageManager {
     }
   }
 
-  // Track changes to cart items
-  markItemAsChanged(cartItemId, newQuantity) {
+  // Function to validate all pending changes against stock
+  async validateAllPendingChanges() {
+    const validChanges = new Map();
+    const invalidChanges = [];
+
+    for (const [cartItemId, change] of this.pendingChanges) {
+      if (change.action === "update" && change.newQuantity > 0) {
+        const cartItem = this.cartItems.find(
+          (item) => item.id.toString() === cartItemId.toString()
+        );
+
+        if (cartItem && cartItem.productId) {
+          try {
+            const stockResult = await ApiService.getProductStock(
+              cartItem.productId
+            );
+            if (stockResult && stockResult.succeeded) {
+              const currentStock = stockResult.data.stock || 0;
+
+              if (change.newQuantity > currentStock) {
+                invalidChanges.push({
+                  cartItemId,
+                  requestedQuantity: change.newQuantity,
+                  currentStock,
+                  productName: cartItem.productName || "Sản phẩm",
+                });
+
+                // Reset the input to original value
+                const input = document.querySelector(
+                  `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
+                );
+                if (input) {
+                  input.value = input.getAttribute("data-original-quantity");
+                  input.classList.remove("has-changes");
+                }
+
+                continue; // Skip this change
+              }
+            }
+          } catch (error) {
+            console.warn(
+              "Could not validate stock for cart item:",
+              cartItemId,
+              error
+            );
+            // Allow if stock check fails
+          }
+        }
+      }
+
+      // Add to valid changes
+      validChanges.set(cartItemId, change);
+    }
+
+    // Show error message for invalid changes
+    if (invalidChanges.length > 0) {
+      const errorMessage = invalidChanges
+        .map(
+          (item) =>
+            `${item.productName}: ${item.requestedQuantity} > ${item.currentStock}`
+        )
+        .join(", ");
+
+      this.showToast(
+        `Không thể cập nhật một số sản phẩm vì vượt quá tồn kho: ${errorMessage}`,
+        "error"
+      );
+    }
+
+    return validChanges;
+  }
+
+  // Function to validate quantity against stock
+  async validateQuantityAgainstStock(cartItemId, quantity, inputElement) {
+    // Find the cart item to get product ID
+    const cartItem = this.cartItems.find(
+      (item) => item.id.toString() === cartItemId.toString()
+    );
+
+    if (!cartItem || !cartItem.productId) {
+      console.warn(
+        "Could not find cart item or product ID for stock validation"
+      );
+      // Mark as changed if we can't validate
+      await this.markItemAsChanged(cartItemId, quantity);
+      return true;
+    }
+
+    try {
+      // Get current stock for the product
+      const stockResult = await ApiService.getProductStock(cartItem.productId);
+      if (stockResult && stockResult.succeeded) {
+        const currentStock = stockResult.data.stock || 0;
+
+        if (quantity > currentStock) {
+          // Show error message
+          this.showToast(
+            `Không thể đặt ${quantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
+            "error"
+          );
+
+          // Reset input to original value
+          this.resetCartItemInput(cartItemId);
+
+          return false; // Validation failed
+        }
+      }
+
+      // Stock validation passed, mark as changed
+      await this.markItemAsChanged(cartItemId, quantity);
+      return true; // Validation passed
+    } catch (error) {
+      console.warn(
+        "Could not validate stock, allowing quantity change:",
+        error
+      );
+      // Allow if stock check fails
+      await this.markItemAsChanged(cartItemId, quantity);
+      return true;
+    }
+  }
+
+  // Function to validate quantity change (for +/- buttons)
+  async validateQuantityChange(inputElement, newQuantity) {
+    const cartItemId = inputElement.getAttribute("data-cart-item-id");
+
+    if (!cartItemId) {
+      console.error("Cart item ID is missing for quantity change validation");
+      return;
+    }
+
+    // Find the cart item to get product ID
+    const cartItem = this.cartItems.find(
+      (item) => item.id.toString() === cartItemId.toString()
+    );
+
+    if (!cartItem || !cartItem.productId) {
+      console.warn(
+        "Could not find cart item or product ID for quantity change validation"
+      );
+      // Mark as changed if we can't validate
+      inputElement.value = newQuantity;
+      await this.markItemAsChanged(cartItemId, newQuantity);
+      return;
+    }
+
+    try {
+      const stockResult = await ApiService.getProductStock(cartItem.productId);
+      if (stockResult && stockResult.succeeded) {
+        const currentStock = stockResult.data.stock || 0;
+
+        if (newQuantity > currentStock) {
+          this.showToast(
+            `Không thể đặt ${newQuantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
+            "error"
+          );
+          // Revert to original quantity
+          const originalQuantity = inputElement.getAttribute(
+            "data-original-quantity"
+          );
+          inputElement.value = originalQuantity;
+          await this.markItemAsChanged(cartItemId, parseInt(originalQuantity));
+          return;
+        }
+      }
+      // Stock validation passed, mark as changed
+      inputElement.value = newQuantity;
+      await this.markItemAsChanged(cartItemId, newQuantity);
+    } catch (error) {
+      console.warn("Could not validate stock for quantity change:", error);
+      // Allow if stock check fails
+      inputElement.value = newQuantity;
+      await this.markItemAsChanged(cartItemId, newQuantity);
+    }
+  }
+
+  // Function to reset cart item input to original value
+  resetCartItemInput(cartItemId) {
+    const input = document.querySelector(
+      `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
+    );
+    if (input) {
+      const originalQuantity = input.getAttribute("data-original-quantity");
+      input.value = originalQuantity;
+      input.classList.remove("has-changes");
+
+      // Remove from pending changes
+      this.pendingChanges.delete(cartItemId);
+
+      // Update button state
+      this.updateUpdateCartButton();
+    }
+  }
+
+  // Function to check if cart item still exists and is valid
+  isCartItemValid(cartItemId) {
+    return this.cartItems.some(
+      (item) => item.id.toString() === cartItemId.toString()
+    );
+  }
+
+  // Function to mark an item as changed
+  async markItemAsChanged(cartItemId, newQuantity) {
     if (!this.pendingChanges) {
       this.pendingChanges = new Map();
     }
 
-    const quantityInput = document.querySelector(
+    // Check if cart item still exists
+    if (!this.isCartItemValid(cartItemId)) {
+      console.warn(
+        `Cart item ${cartItemId} no longer exists, cannot mark as changed`
+      );
+      return;
+    }
+
+    // Check if quantity is valid
+    if (newQuantity < 0) {
+      console.warn(
+        `Invalid quantity ${newQuantity} for cart item ${cartItemId}`
+      );
+      return;
+    }
+
+    // Check stock validation before marking as changed
+    const cartItem = this.cartItems.find(
+      (item) => item.id.toString() === cartItemId.toString()
+    );
+
+    if (cartItem && cartItem.productId && newQuantity > 0) {
+      try {
+        const stockResult = await ApiService.getProductStock(
+          cartItem.productId
+        );
+        if (stockResult && stockResult.succeeded) {
+          const currentStock = stockResult.data.stock || 0;
+
+          if (newQuantity > currentStock) {
+            this.showToast(
+              `Không thể đặt ${newQuantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
+              "error"
+            );
+
+            // Reset input to original value
+            const input = document.querySelector(
+              `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
+            );
+            if (input) {
+              input.value = input.getAttribute("data-original-quantity");
+              input.classList.remove("has-changes");
+            }
+
+            return; // Don't mark as changed
+          }
+        }
+      } catch (error) {
+        console.warn(
+          "Could not validate stock, allowing quantity change:",
+          error
+        );
+        // Continue if stock check fails
+      }
+    }
+
+    // Mark as changed
+    this.pendingChanges.set(cartItemId, {
+      action: newQuantity === 0 ? "remove" : "update",
+      newQuantity: newQuantity,
+    });
+
+    // Update visual feedback
+    const input = document.querySelector(
       `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
     );
-    if (!quantityInput) return;
-
-    const originalQuantity = parseInt(
-      quantityInput.getAttribute("data-original-quantity")
-    );
-
-    if (newQuantity !== originalQuantity) {
-      this.pendingChanges.set(cartItemId, {
-        originalQuantity,
-        newQuantity,
-        action: newQuantity === 0 ? "remove" : "update",
-      });
-
-      // Add visual feedback to the input
-      quantityInput.classList.add("has-changes");
-
-      // Update the Update Cart button to show pending changes
-      this.updateUpdateCartButton();
-    } else {
-      // Remove from pending changes if quantity is back to original
-      this.pendingChanges.delete(cartItemId);
-
-      // Remove visual feedback
-      quantityInput.classList.remove("has-changes");
-
-      this.updateUpdateCartButton();
+    if (input) {
+      input.classList.add("has-changes");
     }
+
+    // Update the update cart button state
+    this.updateUpdateCartButton();
   }
 
   updateUpdateCartButton() {
@@ -703,17 +963,30 @@ class CartPageManager {
       return;
     }
 
-    // First, verify that all cart items still exist
-    console.log("Verifying cart items before update...");
-    const validChanges = new Map();
+    // First, validate all pending changes against stock
+    console.log("Validating all pending changes against stock...");
+    const validChanges = await this.validateAllPendingChanges();
+
+    if (validChanges.size === 0) {
+      this.showToast("Không có thay đổi hợp lệ để cập nhật", "warning");
+      this.updateUpdateCartButton();
+      return;
+    }
+
+    // Update pendingChanges to only include valid items
+    this.pendingChanges = validChanges;
+
+    // Verify that all cart items still exist
+    console.log("Verifying cart items still exist...");
+    const existingChanges = new Map();
 
     for (const [cartItemId, change] of this.pendingChanges) {
-      // Check if this cart item still exists in current data
       const itemExists = this.cartItems.find(
         (item) => item.id.toString() === cartItemId.toString()
       );
+
       if (itemExists) {
-        validChanges.set(cartItemId, change);
+        existingChanges.set(cartItemId, change);
         console.log(`Cart item ${cartItemId} is valid`);
       } else {
         console.warn(`Cart item ${cartItemId} no longer exists, skipping...`);
@@ -727,8 +1000,8 @@ class CartPageManager {
       }
     }
 
-    // Update pendingChanges to only include valid items
-    this.pendingChanges = validChanges;
+    // Update pendingChanges to only include existing items
+    this.pendingChanges = existingChanges;
 
     if (this.pendingChanges.size === 0) {
       this.showToast("Không có thay đổi hợp lệ để cập nhật", "warning");
