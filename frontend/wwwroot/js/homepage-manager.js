@@ -30,6 +30,12 @@ class HomepageManager {
     const token = localStorage.getItem("auth_token");
     const userData = JSON.parse(localStorage.getItem("user_data") || "null");
     this.updateUserDropdown(token, userData);
+
+    // Trigger auth change event for other components to listen
+    const authEvent = new CustomEvent("authChanged", {
+      detail: { token, userData },
+    });
+    document.dispatchEvent(authEvent);
   }
 
   updateUserDropdown(token, userData) {
@@ -107,7 +113,7 @@ class HomepageManager {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user_data");
       this.showAlert("Success", "You have been logged out.", "success");
-      this.updateUserInterface(); // Refresh UI after logout
+      this.updateUserInterface(); // Refresh UI after logout (will trigger authChanged event)
       setTimeout(() => {
         // Optional: redirect to home or login page after a short delay
         if (window.location.pathname.includes("/user/")) {

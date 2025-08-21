@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Cart - Flower eCommerce" />
+    <title>Shopping Cart - Flower eCommerce</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Cart Specific CSS -->
+    <link href="../../css/cart.css" rel="stylesheet" />
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <!-- Load Header Component -->
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>Shopping Cart</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="../common/homepage.html"
+                        ><i class="fa fa-home"></i
+                      ></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Shopping Cart
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- cart main wrapper start -->
+      <div class="cart-main-wrapper section-space pb-0">
+        <div class="container">
+          <div class="section-bg-color">
+            <div id="cart-loading" class="text-center p-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p class="mt-2">Loading your cart...</p>
+            </div>
+
+            <div
+              id="cart-auth-error"
+              class="text-center p-5"
+              style="display: none"
+            >
+              <h3>Authentication Error</h3>
+              <p>You must be logged in to view your cart.</p>
+              <a href="../auth/login-register.html" class="btn btn__bg"
+                >Login or Register</a
+              >
+            </div>
+
+            <div id="cart-empty" class="text-center p-5" style="display: none">
+              <h3>Your Cart is Empty</h3>
+              <p>Looks like you haven't added any flowers to your cart yet.</p>
+              <a href="../common/shop.html" class="btn btn__bg"
+                >Continue Shopping</a
+              >
+            </div>
+
+            <div id="cart-content" style="display: none;">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- Cart Summary Card -->
+                        <div class="cart-summary-card">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Total Items: <span id="cart-total-items">0</span></h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Total Amount: <span id="cart-total-amount">$0.00</span></h5>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Cart Table Area -->
+                        <div class="cart-table table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                          <th class="pro-thumbnail">Image</th>
+                          <th class="pro-title">Product</th>
+                          <th class="pro-price">Price</th>
+                          <th class="pro-quantity">Quantity</th>
+                          <th class="pro-subtotal">Total</th>
+                          <th class="pro-remove">Remove</th>
+                        </tr>
+                      </thead>
+                      <tbody id="cart-items-container">
+                        <!-- Cart items will be populated here -->
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="cart-update-buttons">
+                    <button class="btn btn__bg clear-cart-btn">
+                      Clear Cart
+                    </button>
+                    <a href="../common/shop.html" class="btn btn__bg"
+                      >Continue Shopping</a
+                    >
+                  </div>
+
+                  <!-- Pagination Area -->
+                  <div class="paginatoin-area text-center mt-4">
+                      <div id="cart-pagination"></div>
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-5 ms-auto">
+                  <div class="cart-calculator-wrapper">
+                    <div class="cart-calculate-items">
+                      <h3>Cart Totals</h3>
+                      <div class="table-responsive">
+                        <table class="table">
+                          <tr>
+                            <td>Sub Total</td>
+                            <td id="subtotal-amount">$0.00</td>
+                          </tr>
+                          <tr class="total">
+                            <td>Total</td>
+                            <td class="total-amount" id="final-total-amount">
+                              $5.00
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                    <a href="checkout.html" class="btn btn__bg d-block"
+                      >Proceed To Checkout</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- cart main wrapper end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+
+    <!-- Scripts -->
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script type="module" src="../../js/component/cart/CartManager.js"></script>
+    <script type="module" src="../../js/component/header/HeaderManager.js"></script>
+    <script type="module" src="../../js/user-cart.js"></script>
+  </body>
+</html>
