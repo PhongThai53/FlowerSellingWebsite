@@ -10,10 +10,12 @@ let pageSize = 6;
 
 // Helper functions
 function getProductImageUrl(product) {
-  // Use the actual image URL from the database if available
-  if (product && product.imageUrl) {
-    return product.imageUrl;
-  }
+    const baseUrl = API_BASE_URL.replace('/api', ''); // Định nghĩa trước
+    if (!product || !product.id) {
+        return `${baseUrl}/Image/products/default/default.jpg`;
+    }
+    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
+}
 
   // Fallback to default image
   return "/images/product/default-product.jpg";
@@ -102,11 +104,10 @@ class ItemsPage {
     }
   }
 
-  async loadCategories() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ProductCategory`);
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+    async loadCategories() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ProductCategory/with-products`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const result = await response.json();
       if (result.succeeded && result.data) {
@@ -121,11 +122,11 @@ class ItemsPage {
   renderCategories(categories) {
     if (!this.categoriesContainer) return;
 
-    let html = `<li><a href="#" data-category-id="" class="category-link">Tất cả <span>-</span></a></li>`;
+        let html = `<li><a href="#" data-category-id="" class="category-link">All <span>-</span></a></li>`;
 
-    categories.forEach((category) => {
-      const productCount = category.productCount || 0;
-      html += `<li>
+        categories.forEach(category => {
+            const productCount = category.totalProducts || 0;
+            html += `<li>
                         <a href="#" data-category-id="${category.id}" class="category-link">
                             ${category.name} <span>${productCount}</span>
                         </a>
@@ -639,13 +640,15 @@ setTimeout(() => {
       window.itemsPageInstance.forceSort($(this).val());
     });
 
-    $(document).on("click", ".nice-select .option", function () {
-      setTimeout(() => {
-        const sortSelect = document.querySelector('select[name="sortBy"]');
-        if (sortSelect) {
-          window.itemsPageInstance.forceSort(sortSelect.value);
-        }
-      }, 50);
-    });
-  }
+        $(document).on('click', '.nice-select .option', function () {
+            setTimeout(() => {
+                const sortSelect = document.querySelector('select[name="sortBy"]');
+                if (sortSelect) {
+                    window.itemsPageInstance.forceSort(sortSelect.value);
+                }
+            }, 50);
+        });
+    }
 }, 3000);
+
+
