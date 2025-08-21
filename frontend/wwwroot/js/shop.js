@@ -1,5 +1,5 @@
 ﻿// API Base URL
-const API_BASE_URL = 'https://localhost:7062/api';
+const API_BASE_URL = "https://localhost:7062/api";
 
 // Global variables
 let productsData = [];
@@ -17,101 +17,110 @@ function getProductImageUrl(product) {
     return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
 }
 
+  // Fallback to default image
+  return "/images/product/default-product.jpg";
+}
+
 function formatPrice(price) {
-    if (!price) return 'Liên hệ';
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-    }).format(price);
+  if (!price) return "Liên hệ";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
 }
 
 class ItemsPage {
-    constructor() {
-        this.currentPage = 1;
-        this.currentCategory = '';
-        this.itemsPerPage = 6;
-        this.totalPages = 0;
-        this.totalProducts = 0;
-        this.items = [];
-        this.categories = [];
-        this.sortBy = 'default';
-        this.isLoading = false;
-        this.lastSortValue = 'default';
+  constructor() {
+    this.currentPage = 1;
+    this.currentCategory = "";
+    this.itemsPerPage = 6;
+    this.totalPages = 0;
+    this.totalProducts = 0;
+    this.items = [];
+    this.categories = [];
+    this.sortBy = "default";
+    this.isLoading = false;
+    this.lastSortValue = "default";
 
-        this.init();
+    this.init();
+  }
+
+  async init() {
+    if (document.readyState !== "complete") {
+      await new Promise((resolve) => window.addEventListener("load", resolve));
     }
 
-    async init() {
-        if (document.readyState !== 'complete') {
-            await new Promise(resolve => window.addEventListener('load', resolve));
-        }
+    this.initDOMElements();
 
-        this.initDOMElements();
-
-        try {
-            await this.loadCategories();
-            await this.loadItems();
-            this.setupEventListeners();
-            this.startSortMonitoring();
-        } catch (error) {
-            console.error('Error initializing ItemsPage:', error);
-        }
+    try {
+      await this.loadCategories();
+      await this.loadItems();
+      this.setupEventListeners();
+      this.startSortMonitoring();
+    } catch (error) {
+      console.error("Error initializing ItemsPage:", error);
     }
+  }
 
-    initDOMElements() {
-        this.productContainer = document.querySelector('.shop-product-wrap') ||
-            document.querySelector('.shop-product-wrapper .row');
+  initDOMElements() {
+    this.productContainer =
+      document.querySelector(".shop-product-wrap") ||
+      document.querySelector(".shop-product-wrapper .row");
 
-        this.paginationContainer = document.querySelector('.pagination-box') ||
-            document.querySelector('.paginatoin-area ul') ||
-            document.querySelector('.pagination');
+    this.paginationContainer =
+      document.querySelector(".pagination-box") ||
+      document.querySelector(".paginatoin-area ul") ||
+      document.querySelector(".pagination");
 
-        this.productAmountElement = document.querySelector('.product-amount p') ||
-            document.querySelector('.product-amount');
+    this.productAmountElement =
+      document.querySelector(".product-amount p") ||
+      document.querySelector(".product-amount");
 
-        this.sortSelect = document.querySelector('select[name="sortBy"]') ||
-            document.querySelector('.product-short select');
+    this.sortSelect =
+      document.querySelector('select[name="sortBy"]') ||
+      document.querySelector(".product-short select");
 
-        this.categoriesContainer = document.querySelector('.shop-categories') ||
-            document.querySelector('.sidebar-body ul');
+    this.categoriesContainer =
+      document.querySelector(".shop-categories") ||
+      document.querySelector(".sidebar-body ul");
 
-        if (!this.paginationContainer) {
-            this.createPaginationContainer();
-        }
+    if (!this.paginationContainer) {
+      this.createPaginationContainer();
     }
+  }
 
-    createPaginationContainer() {
-        const paginationArea = document.querySelector('.paginatoin-area');
-        if (paginationArea) {
-            const ul = paginationArea.querySelector('ul');
-            if (ul) {
-                this.paginationContainer = ul;
-            } else {
-                const newUl = document.createElement('ul');
-                newUl.className = 'pagination-box';
-                paginationArea.appendChild(newUl);
-                this.paginationContainer = newUl;
-            }
-        }
+  createPaginationContainer() {
+    const paginationArea = document.querySelector(".paginatoin-area");
+    if (paginationArea) {
+      const ul = paginationArea.querySelector("ul");
+      if (ul) {
+        this.paginationContainer = ul;
+      } else {
+        const newUl = document.createElement("ul");
+        newUl.className = "pagination-box";
+        paginationArea.appendChild(newUl);
+        this.paginationContainer = newUl;
+      }
     }
+  }
 
     async loadCategories() {
         try {
             const response = await fetch(`${API_BASE_URL}/ProductCategory/with-products`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            const result = await response.json();
-            if (result.succeeded && result.data) {
-                this.categories = result.data;
-                this.renderCategories(result.data);
-            }
-        } catch (error) {
-            console.error('Error loading categories:', error);
-        }
+      const result = await response.json();
+      if (result.succeeded && result.data) {
+        this.categories = result.data;
+        this.renderCategories(result.data);
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
     }
+  }
 
-    renderCategories(categories) {
-        if (!this.categoriesContainer) return;
+  renderCategories(categories) {
+    if (!this.categoriesContainer) return;
 
         let html = `<li><a href="#" data-category-id="" class="category-link">All <span>-</span></a></li>`;
 
@@ -122,77 +131,81 @@ class ItemsPage {
                             ${category.name} <span>${productCount}</span>
                         </a>
                      </li>`;
-        });
+    });
 
-        this.categoriesContainer.innerHTML = html;
+    this.categoriesContainer.innerHTML = html;
+  }
+
+  async loadItems() {
+    if (this.isLoading) return;
+
+    try {
+      this.isLoading = true;
+      this.showLoading(true);
+
+      let apiUrl = `${API_BASE_URL}/Product?pageNumber=${this.currentPage}&pageSize=${this.itemsPerPage}`;
+
+      if (this.currentCategory) {
+        apiUrl += `&categoryId=${this.currentCategory}`;
+      }
+      if (this.sortBy && this.sortBy !== "default") {
+        apiUrl += `&sortBy=${this.sortBy}`;
+      }
+
+      const response = await fetch(apiUrl);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const result = await response.json();
+
+      if (result.succeeded) {
+        this.items = result.data?.items || result.data || [];
+        this.totalPages =
+          result.data?.totalPages ||
+          Math.ceil((result.data?.totalCount || 0) / this.itemsPerPage);
+        this.totalProducts = result.data?.totalCount || this.items.length;
+
+        productsData = this.items;
+        totalPages = this.totalPages;
+        currentPage = this.currentPage;
+
+        this.renderItems();
+        this.renderPagination();
+        this.updateProductCount();
+      } else {
+        throw new Error(result.message || "Failed to load products");
+      }
+    } catch (error) {
+      console.error("Error loading items:", error);
+      this.showError("Không thể tải sản phẩm. Vui lòng thử lại sau.");
+    } finally {
+      this.isLoading = false;
+      this.showLoading(false);
+    }
+  }
+
+  renderItems() {
+    if (!this.productContainer || !this.items || this.items.length === 0) {
+      if (this.productContainer) {
+        this.productContainer.innerHTML =
+          '<div class="col-12"><p class="text-center">Không có sản phẩm nào.</p></div>';
+      }
+      return;
     }
 
-    async loadItems() {
-        if (this.isLoading) return;
+    let html = "";
 
-        try {
-            this.isLoading = true;
-            this.showLoading(true);
+    this.items.forEach((item) => {
+      const imageUrl = getProductImageUrl(item);
+      const name = item.name || "Sản phẩm";
+      const price = item.price || 0;
+      const originalPrice = item.originalPrice || item.oldPrice;
+      const description = item.description || "";
+      const id = item.id;
+      const isNew = item.isNew || false;
+      const discountPercent = item.discountPercent || 0;
 
-            let apiUrl = `${API_BASE_URL}/Product?pageNumber=${this.currentPage}&pageSize=${this.itemsPerPage}`;
-
-            if (this.currentCategory) {
-                apiUrl += `&categoryId=${this.currentCategory}`;
-            }
-            if (this.sortBy && this.sortBy !== 'default') {
-                apiUrl += `&sortBy=${this.sortBy}`;
-            }
-
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const result = await response.json();
-
-            if (result.succeeded) {
-                this.items = result.data?.items || result.data || [];
-                this.totalPages = result.data?.totalPages || Math.ceil((result.data?.totalCount || 0) / this.itemsPerPage);
-                this.totalProducts = result.data?.totalCount || this.items.length;
-
-                productsData = this.items;
-                totalPages = this.totalPages;
-                currentPage = this.currentPage;
-
-                this.renderItems();
-                this.renderPagination();
-                this.updateProductCount();
-            } else {
-                throw new Error(result.message || 'Failed to load products');
-            }
-        } catch (error) {
-            console.error('Error loading items:', error);
-            this.showError('Không thể tải sản phẩm. Vui lòng thử lại sau.');
-        } finally {
-            this.isLoading = false;
-            this.showLoading(false);
-        }
-    }
-
-    renderItems() {
-        if (!this.productContainer || !this.items || this.items.length === 0) {
-            if (this.productContainer) {
-                this.productContainer.innerHTML = '<div class="col-12"><p class="text-center">Không có sản phẩm nào.</p></div>';
-            }
-            return;
-        }
-
-        let html = '';
-
-        this.items.forEach(item => {
-            const imageUrl = getProductImageUrl(item);
-            const name = item.name || 'Sản phẩm';
-            const price = item.price || 0;
-            const originalPrice = item.originalPrice || item.oldPrice;
-            const description = item.description || '';
-            const id = item.id;
-            const isNew = item.isNew || false;
-            const discountPercent = item.discountPercent || 0;
-
-            html += `
+      html += `
                 <div class="col-md-4 col-sm-6">
                     <div class="product-item">
                         <figure class="product-thumb">
@@ -201,8 +214,16 @@ class ItemsPage {
                                 <img class="sec-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
                             </a>
                             <div class="product-badge">
-                                ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
-                                ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
+                                ${
+                                  isNew
+                                    ? '<div class="product-label new"><span>mới</span></div>'
+                                    : ""
+                                }
+                                ${
+                                  discountPercent > 0
+                                    ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>`
+                                    : ""
+                                }
                             </div>
                             <div class="button-group">
                                 <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích"><i class="lnr lnr-heart"></i></a>
@@ -215,8 +236,16 @@ class ItemsPage {
                                 <a href="product-details.html?id=${id}">${name}</a>
                             </p>
                             <div class="price-box">
-                                <span class="price-regular">${formatPrice(price)}</span>
-                                ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
+                                <span class="price-regular">${formatPrice(
+                                  price
+                                )}</span>
+                                ${
+                                  originalPrice && originalPrice > price
+                                    ? `<span class="price-old"><del>${formatPrice(
+                                        originalPrice
+                                      )}</del></span>`
+                                    : ""
+                                }
                             </div>
                         </div>
                     </div>
@@ -228,17 +257,36 @@ class ItemsPage {
                                 <img class="sec-img" src="${imageUrl}" alt="${name}" onerror="this.src='assets/img/product/default-product.jpg'">
                             </a>
                             <div class="product-badge">
-                                ${isNew ? '<div class="product-label new"><span>mới</span></div>' : ''}
-                                ${discountPercent > 0 ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>` : ''}
+                                ${
+                                  isNew
+                                    ? '<div class="product-label new"><span>mới</span></div>'
+                                    : ""
+                                }
+                                ${
+                                  discountPercent > 0
+                                    ? `<div class="product-label discount"><span>-${discountPercent}%</span></div>`
+                                    : ""
+                                }
                             </div>
                         </figure>
                         <div class="product-content-list">
                             <h5 class="product-name"><a href="product-details.html?id=${id}">${name}</a></h5>
                             <div class="price-box">
-                                <span class="price-regular">${formatPrice(price)}</span>
-                                ${originalPrice && originalPrice > price ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>` : ''}
+                                <span class="price-regular">${formatPrice(
+                                  price
+                                )}</span>
+                                ${
+                                  originalPrice && originalPrice > price
+                                    ? `<span class="price-old"><del>${formatPrice(
+                                        originalPrice
+                                      )}</del></span>`
+                                    : ""
+                                }
                             </div>
-                            <p>${description || 'Sản phẩm chất lượng cao, được chọn lọc kỹ càng.'}</p>
+                            <p>${
+                              description ||
+                              "Sản phẩm chất lượng cao, được chọn lọc kỹ càng."
+                            }</p>
                             <div class="button-group-list">
                                 <a class="btn-big add-to-cart-btn" href="#" data-product-id="${id}" data-bs-toggle="tooltip" title="Thêm vào giỏ hàng"><i class="lnr lnr-cart"></i>Thêm vào giỏ</a>
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" data-product-id="${id}"><span data-bs-toggle="tooltip" title="Xem nhanh"><i class="lnr lnr-magnifier"></i></span></a>
@@ -248,211 +296,349 @@ class ItemsPage {
                     </div>
                 </div>
             `;
-        });
+    });
 
-        this.productContainer.innerHTML = html;
+    this.productContainer.innerHTML = html;
+  }
+
+  renderPagination() {
+    if (!this.paginationContainer || this.totalPages <= 1) {
+      if (this.paginationContainer) this.paginationContainer.innerHTML = "";
+      return;
     }
 
-    renderPagination() {
-        if (!this.paginationContainer || this.totalPages <= 1) {
-            if (this.paginationContainer) this.paginationContainer.innerHTML = '';
-            return;
-        }
+    let html = "";
 
-        let html = '';
-
-        if (this.currentPage > 1) {
-            html += `<li><a class="previous pagination-btn" href="#" data-page="${this.currentPage - 1}"><i class="lnr lnr-chevron-left"></i></a></li>`;
-        }
-
-        const startPage = Math.max(1, this.currentPage - 2);
-        const endPage = Math.min(this.totalPages, this.currentPage + 2);
-
-        if (startPage > 1) {
-            html += `<li><a class="pagination-btn" href="#" data-page="1">1</a></li>`;
-            if (startPage > 2) html += `<li><span>...</span></li>`;
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === this.currentPage;
-            html += `<li class="${isActive ? 'active' : ''}"><a class="pagination-btn" href="#" data-page="${i}">${i}</a></li>`;
-        }
-
-        if (endPage < this.totalPages) {
-            if (endPage < this.totalPages - 1) html += `<li><span>...</span></li>`;
-            html += `<li><a class="pagination-btn" href="#" data-page="${this.totalPages}">${this.totalPages}</a></li>`;
-        }
-
-        if (this.currentPage < this.totalPages) {
-            html += `<li><a class="next pagination-btn" href="#" data-page="${this.currentPage + 1}"><i class="lnr lnr-chevron-right"></i></a></li>`;
-        }
-
-        this.paginationContainer.innerHTML = html;
+    if (this.currentPage > 1) {
+      html += `<li><a class="previous pagination-btn" href="#" data-page="${
+        this.currentPage - 1
+      }"><i class="lnr lnr-chevron-left"></i></a></li>`;
     }
 
-    setupEventListeners() {
-        if (this.categoriesContainer) {
-            this.categoriesContainer.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const categoryLink = e.target.closest('.category-link');
-                if (!categoryLink) return;
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
 
-                const categoryId = categoryLink.getAttribute('data-category-id');
-
-                this.categoriesContainer.querySelectorAll('.category-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-                categoryLink.classList.add('active');
-
-                this.currentCategory = categoryId || '';
-                this.currentPage = 1;
-                await this.loadItems();
-            });
-        }
-
-        document.addEventListener('click', async (e) => {
-            if (e.target.closest('.pagination-btn')) {
-                e.preventDefault();
-                const paginationBtn = e.target.closest('.pagination-btn');
-                const newPage = parseInt(paginationBtn.getAttribute('data-page'));
-
-                if (newPage && newPage !== this.currentPage && newPage >= 1 && newPage <= this.totalPages) {
-                    this.currentPage = newPage;
-                    await this.loadItems();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }
-
-            if (e.target.closest('.add-to-cart-btn')) {
-                e.preventDefault();
-                const productId = e.target.closest('.add-to-cart-btn').getAttribute('data-product-id');
-                this.addToCart(productId);
-            }
-        });
-
-        const viewModeButtons = document.querySelectorAll('.product-view-mode a');
-        viewModeButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                viewModeButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const target = btn.getAttribute('data-target');
-                this.toggleViewMode(target);
-            });
-        });
+    if (startPage > 1) {
+      html += `<li><a class="pagination-btn" href="#" data-page="1">1</a></li>`;
+      if (startPage > 2) html += `<li><span>...</span></li>`;
     }
 
-    startSortMonitoring() {
-        setTimeout(() => {
-            const sortSelect = document.querySelector('select[name="sortBy"]');
-            if (sortSelect) {
-                sortSelect.onchange = () => this.handleSortChange(sortSelect.value);
-            }
-        }, 1000);
-
-        setInterval(() => {
-            const sortSelect = document.querySelector('select[name="sortBy"]');
-            if (sortSelect && sortSelect.value !== this.lastSortValue) {
-                this.lastSortValue = sortSelect.value;
-                this.handleSortChange(sortSelect.value);
-            }
-        }, 300);
-
-        const sortSelect = document.querySelector('select[name="sortBy"]');
-        if (sortSelect) {
-            const observer = new MutationObserver(() => {
-                if (sortSelect.value !== this.lastSortValue) {
-                    this.lastSortValue = sortSelect.value;
-                    this.handleSortChange(sortSelect.value);
-                }
-            });
-
-            observer.observe(sortSelect, {
-                attributes: true,
-                attributeFilter: ['value'],
-                childList: true,
-                subtree: true
-            });
-        }
+    for (let i = startPage; i <= endPage; i++) {
+      const isActive = i === this.currentPage;
+      html += `<li class="${
+        isActive ? "active" : ""
+      }"><a class="pagination-btn" href="#" data-page="${i}">${i}</a></li>`;
     }
 
-    async handleSortChange(newValue) {
-        if (newValue !== this.sortBy) {
-            this.sortBy = newValue;
-            this.currentPage = 1;
-            await this.loadItems();
-        }
+    if (endPage < this.totalPages) {
+      if (endPage < this.totalPages - 1) html += `<li><span>...</span></li>`;
+      html += `<li><a class="pagination-btn" href="#" data-page="${this.totalPages}">${this.totalPages}</a></li>`;
     }
 
-    toggleViewMode(mode) {
-        const productItems = document.querySelectorAll('.product-item');
-        const productListItems = document.querySelectorAll('.product-list-item');
-
-        if (mode === 'list-view') {
-            productItems.forEach(item => item.style.display = 'none');
-            productListItems.forEach(item => item.style.display = 'flex');
-            isListView = true;
-        } else {
-            productItems.forEach(item => item.style.display = 'block');
-            productListItems.forEach(item => item.style.display = 'none');
-            isListView = false;
-        }
+    if (this.currentPage < this.totalPages) {
+      html += `<li><a class="next pagination-btn" href="#" data-page="${
+        this.currentPage + 1
+      }"><i class="lnr lnr-chevron-right"></i></a></li>`;
     }
 
-    addToCart(productId) {
-        const product = this.items.find(item => item.id == productId);
-        const productName = product ? product.name : 'Sản phẩm';
-        alert(`${productName} đã được thêm vào giỏ hàng!`);
-    }
+    this.paginationContainer.innerHTML = html;
+  }
 
-    updateProductCount() {
-        if (this.productAmountElement && this.items) {
-            const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
-            const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.totalProducts);
-            this.productAmountElement.textContent = `Showing ${startIndex}–${endIndex} of ${this.totalProducts} results`;
-        }
-    }
+  setupEventListeners() {
+    if (this.categoriesContainer) {
+      this.categoriesContainer.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const categoryLink = e.target.closest(".category-link");
+        if (!categoryLink) return;
 
-    showLoading(show) {
-        if (this.productContainer && show) {
-            this.productContainer.innerHTML = '<div class="col-12"><div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Đang tải sản phẩm...</p></div></div>';
-        }
-    }
+        const categoryId = categoryLink.getAttribute("data-category-id");
 
-    showError(message) {
-        if (this.productContainer) {
-            this.productContainer.innerHTML = `<div class="col-12"><div class="text-center p-5 text-danger"><i class="fa fa-exclamation-triangle fa-2x"></i><p class="mt-2">${message}</p></div></div>`;
-        }
-    }
+        this.categoriesContainer
+          .querySelectorAll(".category-link")
+          .forEach((link) => {
+            link.classList.remove("active");
+          });
+        categoryLink.classList.add("active");
 
-    forceSort(value) {
-        this.sortBy = value;
-        this.lastSortValue = value;
+        this.currentCategory = categoryId || "";
         this.currentPage = 1;
-        this.loadItems();
+        await this.loadItems();
+      });
     }
+
+    document.addEventListener("click", async (e) => {
+      if (e.target.closest(".pagination-btn")) {
+        e.preventDefault();
+        const paginationBtn = e.target.closest(".pagination-btn");
+        const newPage = parseInt(paginationBtn.getAttribute("data-page"));
+
+        if (
+          newPage &&
+          newPage !== this.currentPage &&
+          newPage >= 1 &&
+          newPage <= this.totalPages
+        ) {
+          this.currentPage = newPage;
+          await this.loadItems();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
+
+      if (e.target.closest(".add-to-cart-btn")) {
+        e.preventDefault();
+        const productId = e.target
+          .closest(".add-to-cart-btn")
+          .getAttribute("data-product-id");
+        this.addToCart(productId);
+      }
+    });
+
+    const viewModeButtons = document.querySelectorAll(".product-view-mode a");
+    viewModeButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        viewModeButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const target = btn.getAttribute("data-target");
+        this.toggleViewMode(target);
+      });
+    });
+  }
+
+  startSortMonitoring() {
+    setTimeout(() => {
+      const sortSelect = document.querySelector('select[name="sortBy"]');
+      if (sortSelect) {
+        sortSelect.onchange = () => this.handleSortChange(sortSelect.value);
+      }
+    }, 1000);
+
+    setInterval(() => {
+      const sortSelect = document.querySelector('select[name="sortBy"]');
+      if (sortSelect && sortSelect.value !== this.lastSortValue) {
+        this.lastSortValue = sortSelect.value;
+        this.handleSortChange(sortSelect.value);
+      }
+    }, 300);
+
+    const sortSelect = document.querySelector('select[name="sortBy"]');
+    if (sortSelect) {
+      const observer = new MutationObserver(() => {
+        if (sortSelect.value !== this.lastSortValue) {
+          this.lastSortValue = sortSelect.value;
+          this.handleSortChange(sortSelect.value);
+        }
+      });
+
+      observer.observe(sortSelect, {
+        attributes: true,
+        attributeFilter: ["value"],
+        childList: true,
+        subtree: true,
+      });
+    }
+  }
+
+  async handleSortChange(newValue) {
+    if (newValue !== this.sortBy) {
+      this.sortBy = newValue;
+      this.currentPage = 1;
+      await this.loadItems();
+    }
+  }
+
+  toggleViewMode(mode) {
+    const productItems = document.querySelectorAll(".product-item");
+    const productListItems = document.querySelectorAll(".product-list-item");
+
+    if (mode === "list-view") {
+      productItems.forEach((item) => (item.style.display = "none"));
+      productListItems.forEach((item) => (item.style.display = "flex"));
+      isListView = true;
+    } else {
+      productItems.forEach((item) => (item.style.display = "block"));
+      productListItems.forEach((item) => (item.style.display = "none"));
+      isListView = false;
+    }
+  }
+
+  async addToCart(productId) {
+    try {
+      // Simple token check
+      const token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        this.showErrorToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+        setTimeout(() => {
+          window.location.href = "/html/auth/login-register.html";
+        }, 2000);
+        return;
+      }
+
+      // Direct API call
+      const product = this.items.find((item) => item.id == productId);
+      const productName = product ? product.name : "Sản phẩm";
+
+      const response = await fetch(`${API_BASE_URL}/Cart/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: parseInt(productId),
+          quantity: 1,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.succeeded) {
+        this.showSuccessToast(`${productName} đã được thêm vào giỏ hàng!`);
+
+        // Fetch updated cart summary to get the correct count
+        const summaryResponse = await fetch(`${API_BASE_URL}/Cart/summary`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const summaryResult = await summaryResponse.json();
+        if (summaryResult.succeeded) {
+          const newCount = summaryResult.data.total_items;
+          const cartCounts = document.querySelectorAll(
+            ".cart-count, .notification"
+          );
+          cartCounts.forEach((element) => {
+            element.textContent = newCount;
+          });
+        }
+      } else {
+        throw new Error(result.message || "Không thể thêm vào giỏ hàng");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+
+      if (
+        error.message.includes("401") ||
+        error.message.includes("Unauthorized")
+      ) {
+        this.showErrorToast(
+          "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại"
+        );
+        localStorage.removeItem("auth_token");
+        setTimeout(() => {
+          window.location.href = "/html/auth/login-register.html";
+        }, 2000);
+      } else {
+        this.showErrorToast("Có lỗi xảy ra khi thêm vào giỏ hàng");
+      }
+    }
+  }
+
+  updateProductCount() {
+    if (this.productAmountElement && this.items) {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+      const endIndex = Math.min(
+        this.currentPage * this.itemsPerPage,
+        this.totalProducts
+      );
+      this.productAmountElement.textContent = `Showing ${startIndex}–${endIndex} of ${this.totalProducts} results`;
+    }
+  }
+
+  showLoading(show) {
+    if (this.productContainer && show) {
+      this.productContainer.innerHTML =
+        '<div class="col-12"><div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Đang tải sản phẩm...</p></div></div>';
+    }
+  }
+
+  showError(message) {
+    if (this.productContainer) {
+      this.productContainer.innerHTML = `<div class="col-12"><div class="text-center p-5 text-danger"><i class="fa fa-exclamation-triangle fa-2x"></i><p class="mt-2">${message}</p></div></div>`;
+    }
+  }
+
+  showSuccessToast(message) {
+    this.createToast(message, "success");
+  }
+
+  showErrorToast(message) {
+    this.createToast(message, "error");
+  }
+
+  createToast(message, type) {
+    // Simple toast implementation
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === "success" ? "#28a745" : "#dc3545"};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+    `;
+    toast.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fa fa-${
+          type === "success" ? "check" : "exclamation-triangle"
+        }" style="font-size: 18px;"></i>
+        <span>${message}</span>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = "1";
+      toast.style.transform = "translateX(0)";
+    }, 100);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  forceSort(value) {
+    this.sortBy = value;
+    this.lastSortValue = value;
+    this.currentPage = 1;
+    this.loadItems();
+  }
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        window.itemsPageInstance = new ItemsPage();
-        window.forceSort = (value) => window.itemsPageInstance.forceSort(value);
-    }, 100);
+// Simple shop initialization
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Shop.js: DOM loaded, initializing...");
+  if (!window.itemsPageInstance) {
+    window.itemsPageInstance = new ItemsPage();
+    window.forceSort = (value) => window.itemsPageInstance.forceSort(value);
+    console.log("Shop.js: ItemsPage initialized");
+  }
 });
 
-window.addEventListener('load', () => {
-    if (!window.itemsPageInstance) {
-        window.itemsPageInstance = new ItemsPage();
-    }
-});
+// Fallback if DOM already loaded
+if (document.readyState !== "loading") {
+  console.log("Shop.js: DOM already loaded, initializing immediately...");
+  if (!window.itemsPageInstance) {
+    window.itemsPageInstance = new ItemsPage();
+    window.forceSort = (value) => window.itemsPageInstance.forceSort(value);
+    console.log("Shop.js: ItemsPage initialized");
+  }
+}
 
 // jQuery backup for sort functionality
 setTimeout(() => {
-    if (window.itemsPageInstance) {
-        $(document).on('change', 'select[name="sortBy"]', function () {
-            window.itemsPageInstance.forceSort($(this).val());
-        });
+  if (window.itemsPageInstance) {
+    $(document).on("change", 'select[name="sortBy"]', function () {
+      window.itemsPageInstance.forceSort($(this).val());
+    });
 
         $(document).on('click', '.nice-select .option', function () {
             setTimeout(() => {
