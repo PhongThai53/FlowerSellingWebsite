@@ -208,7 +208,11 @@ namespace FlowerSellingWebsite.Services.Implementations
                 {
                     throw new InvalidOperationException("Email is already registered");
                 }
-
+                // Check if email already exists
+                if (await _userRepository.UsernameExistsAsync(request.Username))
+                {
+                    throw new InvalidOperationException("Email is already registered");
+                }
                 // Hash password
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -223,6 +227,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 var newUser = new Users
                 {
                     FullName = request.FullName,
+                    UserName = request.Username,
                     Email = request.Email,
                     PasswordHash = passwordHash,
                     Phone = request.PhoneNumber,
