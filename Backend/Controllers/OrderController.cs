@@ -17,8 +17,17 @@ namespace FlowerSellingWebsite.Controllers
             _orderService = orderService;
         }
 
-        [HttpPost("{customerId?}/list")]
-        public async Task<PagedResult<OrderDTO>> GetListOrderAsync([FromBody] UrlQueryParams queryParams, int? customerId = null)
+        [HttpPost("list")]
+        public async Task<PagedResult<OrderDTO>> GetListOrderAsync(
+    [FromBody] UrlQueryParams queryParams)
+        {
+            return await _orderService.GetOrderHistoryAsync(queryParams, null);
+        }
+
+        [HttpPost("{customerId:int}/list")]
+        public async Task<PagedResult<OrderDTO>> GetListOrderByCustomerAsync(
+            [FromBody] UrlQueryParams queryParams,
+            int customerId)
         {
             return await _orderService.GetOrderHistoryAsync(queryParams, customerId);
         }
