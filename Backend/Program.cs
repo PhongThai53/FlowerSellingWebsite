@@ -17,8 +17,8 @@ using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
 using System.Text;
-using VNPAY.NET;
 using System.Text.Json.Serialization;
+using VNPAY.NET;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +52,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
