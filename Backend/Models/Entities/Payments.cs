@@ -10,9 +10,13 @@ namespace FlowerSellingWebsite.Models.Entities
         public int OrderId { get; set; }
 
         [Required]
-        public string MethodName { get; set; } = null!;   // Trực tiếp lưu tên phương thức
+        [ForeignKey("PaymentMethod")]
+        public int PaymentMethodId { get; set; }
 
-        public string? Description { get; set; }          // Mô tả thêm (nếu cần)
+        [Required]
+        public string MethodName { get; set; } = null!;
+
+        public string? Description { get; set; }
 
         [Required]
         public decimal Amount { get; set; }
@@ -21,9 +25,26 @@ namespace FlowerSellingWebsite.Models.Entities
         public DateTime PaymentDate { get; set; }
 
         [Required]
-        public string Status { get; set; } = null!;       // Pending, Completed, Failed...
+        public string Status { get; set; } = null!; // Pending, Completed, Failed, Refunded
+
+        // VNPay specific fields
+        public string? VNPayTransactionId { get; set; }
+        public string? VNPayResponseCode { get; set; }
+        public string? VNPayResponseMessage { get; set; }
+        public string? VNPayBankCode { get; set; }
+        public string? VNPayCardType { get; set; }
+        public string? VNPaySecureHash { get; set; }
+        public DateTime? VNPayProcessDate { get; set; }
+        public string? VNPayGatewayUrl { get; set; }
+        public string? VNPayLocale { get; set; }
+        public string? VNPayCurrencyCode { get; set; }
+        public string? VNPayTxnRef { get; set; }
+        public string? VNPayOrderInfo { get; set; }
+        public string? VNPayReturnUrl { get; set; }
+        public string? VNPayCancelUrl { get; set; }
 
         // Navigation
         public virtual Orders Order { get; set; } = null!;
+        public virtual PaymentMethods PaymentMethod { get; set; } = null!;
     }
 }

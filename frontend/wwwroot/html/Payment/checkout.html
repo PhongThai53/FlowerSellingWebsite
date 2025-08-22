@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Checkout - Flower eCommerce" />
+    <title>Checkout - Flower eCommerce</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Cart CSS for styling -->
+    <link href="../../css/cart.css" rel="stylesheet" />
+    <!-- Checkout CSS for styling -->
+    <link href="../../css/checkout.css" rel="stylesheet" />
+
+    <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <!-- Load Header Component -->
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>Checkout</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="../common/homepage.html"
+                        ><i class="fa fa-home"></i
+                      ></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                      <a href="../user/cart.html">Cart</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Checkout
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- checkout main wrapper start -->
+      <div class="checkout-page-wrapper section-space pb-0">
+        <div class="container">
+          <div class="row">
+            <!-- Checkout Billing Details -->
+            <div class="col-lg-6">
+              <div class="checkout-billing-details-wrap">
+                <h2>Billing Details</h2>
+                <div class="billing-form-wrap">
+                  <form id="checkoutForm">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="single-input-item">
+                          <label for="firstName" class="required"
+                            >First Name</label
+                          >
+                          <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            placeholder="First Name"
+                            required
+                          />
+                          <div class="form-error" id="firstNameError">
+                            First name is required
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="single-input-item">
+                          <label for="lastName" class="required"
+                            >Last Name</label
+                          >
+                          <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            placeholder="Last Name"
+                            required
+                          />
+                          <div class="form-error" id="lastNameError">
+                            Last name is required
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="email" class="required">Email Address</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Email Address"
+                        required
+                      />
+                      <div class="form-error" id="emailError">
+                        Valid email address is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="companyName">Company Name</label>
+                      <input
+                        type="text"
+                        id="companyName"
+                        name="companyName"
+                        placeholder="Company Name"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="country" class="required">Country</label>
+                      <select name="country" id="country" required>
+                        <option value="">Select Country</option>
+                        <option value="Vietnam">Vietnam</option>
+                        <option value="United States">United States</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="Japan">Japan</option>
+                        <option value="South Korea">South Korea</option>
+                      </select>
+                      <div class="form-error" id="countryError">
+                        Country is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="streetAddress" class="required"
+                        >Street Address</label
+                      >
+                      <input
+                        type="text"
+                        id="streetAddress"
+                        name="streetAddress"
+                        placeholder="Street Address Line 1"
+                        required
+                      />
+                      <div class="form-error" id="streetAddressError">
+                        Street address is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <input
+                        type="text"
+                        id="streetAddress2"
+                        name="streetAddress2"
+                        placeholder="Street Address Line 2 (Optional)"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="city" class="required">Town / City</label>
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        placeholder="Town / City"
+                        required
+                      />
+                      <div class="form-error" id="cityError">
+                        City is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="state">State / Division</label>
+                      <input
+                        type="text"
+                        id="state"
+                        name="state"
+                        placeholder="State / Division"
+                      />
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="postcode" class="required"
+                        >Postcode / ZIP</label
+                      >
+                      <input
+                        type="text"
+                        id="postcode"
+                        name="postcode"
+                        placeholder="Postcode / ZIP"
+                        required
+                      />
+                      <div class="form-error" id="postcodeError">
+                        Postcode is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="phone" class="required">Phone</label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="Phone"
+                        required
+                      />
+                      <div class="form-error" id="phoneError">
+                        Phone number is required
+                      </div>
+                    </div>
+
+                    <div class="single-input-item">
+                      <label for="orderNotes">Order Note</label>
+                      <textarea
+                        name="orderNotes"
+                        id="orderNotes"
+                        cols="30"
+                        rows="3"
+                        placeholder="Notes about your order, e.g. special notes for delivery."
+                      ></textarea>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Summary Details -->
+            <div class="col-lg-6">
+              <div class="order-summary-details">
+                <h2>Your Order Summary</h2>
+                <div class="order-summary-content">
+                  <!-- Order Summary Table -->
+                  <div class="order-summary-table table-responsive text-center">
+                    <!-- Loading State -->
+                    <div id="orderSummaryLoading" class="text-center p-4">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <p class="mt-2">Loading your cart...</p>
+                    </div>
+
+                    <table
+                      class="table table-bordered"
+                      id="orderSummaryTable"
+                      style="display: none"
+                    >
+                      <thead>
+                        <tr>
+                          <th><strong>Products</strong></th>
+                          <th><strong>Total</strong></th>
+                        </tr>
+                      </thead>
+                      <tbody id="orderSummaryBody">
+                        <!-- Cart items will be populated here -->
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td>Sub Total</td>
+                          <td id="subtotalAmount">$0.00</td>
+                        </tr>
+                        <tr class="total-row">
+                          <td><strong>Total Amount</strong></td>
+                          <td id="totalAmount"><strong>$0.00</strong></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <!-- Cart Empty State -->
+                  <div
+                    id="cartEmptyState"
+                    class="text-center p-4"
+                    style="display: none"
+                  >
+                    <i class="fa fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h5>Your Cart is Empty</h5>
+                    <p class="text-muted">
+                      Please add items to your cart before proceeding to
+                      checkout.
+                    </p>
+                    <div class="mb-3">
+                      <a href="../user/cart.html" class="btn btn__bg me-2"
+                        >View Cart</a
+                      >
+                      <button
+                        type="button"
+                        id="refreshCartBtn"
+                        class="btn btn-outline-primary"
+                      >
+                        Refresh Cart
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Order Payment Method -->
+                  <div class="order-payment-method">
+                    <div class="single-payment-method show">
+                      <div class="payment-method-name">
+                        <div class="custom-control custom-radio">
+                          <input
+                            type="radio"
+                            id="cashOnDelivery"
+                            name="paymentMethod"
+                            value="cash"
+                            class="custom-control-input"
+                            checked
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="cashOnDelivery"
+                            >Tiền mặt khi nhận hàng</label
+                          >
+                        </div>
+                      </div>
+                      <div
+                        class="payment-method-details show"
+                        data-method="cash"
+                      >
+                        <p>
+                          Thanh toán bằng tiền mặt khi nhận hàng. Đơn hàng sẽ
+                          được xử lý ngay lập tức.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="single-payment-method">
+                      <div class="payment-method-name">
+                        <div class="custom-control custom-radio">
+                          <input
+                            type="radio"
+                            id="vnpay"
+                            name="paymentMethod"
+                            value="vnpay"
+                            class="custom-control-input"
+                          />
+                          <label class="custom-control-label" for="vnpay"
+                            >Thanh toán bằng VNPay</label
+                          >
+                        </div>
+                      </div>
+                      <div class="payment-method-details" data-method="vnpay">
+                        <p>
+                          Thanh toán an toàn qua VNPay. Bạn sẽ được chuyển đến
+                          trang thanh toán của VNPay.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="summary-footer-area">
+                      <button
+                        type="button"
+                        id="placeOrderBtn"
+                        class="btn btn__bg"
+                      >
+                        Place Order
+                        <span class="loading-spinner" id="orderLoadingSpinner">
+                          <i class="fa fa-spinner fa-spin"></i>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- checkout main wrapper end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+
+    <!-- Services and Components -->
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script
+      type="module"
+      src="../../js/component/header/HeaderManager.js"
+    ></script>
+    <script type="module" src="../../js/checkout.js"></script>
+
+    <script type="module">
+      // Initialize checkout functionality
+      import { CheckoutManager } from "../../js/checkout.js";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize checkout functionality
+        console.log("Creating CheckoutManager instance...");
+        window.checkoutManager = new CheckoutManager();
+        console.log("CheckoutManager created:", window.checkoutManager);
+      });
+    </script>
+  </body>
+</html>

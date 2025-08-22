@@ -35,7 +35,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Cart
         public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("updated_at")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }
 

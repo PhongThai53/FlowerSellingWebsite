@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Cancelled - Floda Flower Shop</title>
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/payment.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="header-placeholder"></div>
+
+    <main class="payment-cancelled-container">
+      <div class="payment-cancelled-card">
+        <div class="cancelled-icon">
+          <i class="fas fa-ban"></i>
+        </div>
+
+        <h1>Payment Cancelled</h1>
+        <p class="cancelled-message">You have cancelled the payment process.</p>
+
+        <div class="payment-details">
+          <div class="detail-row">
+            <span class="label">Order Number:</span>
+            <span class="value" id="orderNumber">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Status:</span>
+            <span class="value">Cancelled by User</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">VNPay</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="../Payment/checkout.html" class="btn btn-primary">
+            <i class="fas fa-redo"></i> Try Again
+          </a>
+          <a href="../shop.html" class="btn btn-secondary">
+            <i class="fas fa-shopping-cart"></i> Continue Shopping
+          </a>
+          <a href="../user/orders.html" class="btn btn-outline">
+            <i class="fas fa-list"></i> View Orders
+          </a>
+        </div>
+
+        <div class="info-section">
+          <h3>Important Information</h3>
+          <ul>
+            <li>Your order has been created but is not yet confirmed</li>
+            <li>You can complete the payment later from your orders page</li>
+            <li>Orders are held for 24 hours before automatic cancellation</li>
+            <li>No charges have been made to your account</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script
+      src="../../js/component/header/HeaderManager.js"
+      type="module"
+    ></script>
+    <script
+      src="../../js/component/footer/FooterManager.js"
+      type="module"
+    ></script>
+    <script>
+      // Extract URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderNumber = urlParams.get("orderNumber");
+
+      // Update the page with order details
+      if (orderNumber) {
+        document.getElementById("orderNumber").textContent = orderNumber;
+      }
+    </script>
+  </body>
+</html>
+
+

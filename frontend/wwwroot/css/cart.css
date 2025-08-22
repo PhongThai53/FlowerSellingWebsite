@@ -601,3 +601,108 @@
   color: #868e96;
   margin-bottom: 30px;
 }
+
+/* Order Confirmation Page Styles */
+.order-confirmation-wrapper {
+  padding: 60px 0;
+}
+
+.order-confirmation-content {
+  background: #fff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  color: #28a745;
+}
+
+.order-details {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
+}
+
+.order-details p {
+  margin-bottom: 8px;
+}
+
+.order-details .badge {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+.order-message {
+  color: #6c757d;
+  line-height: 1.6;
+}
+
+.order-message p {
+  margin-bottom: 8px;
+}
+
+.action-buttons {
+  margin-top: 30px;
+}
+
+.action-buttons .btn {
+  margin: 5px;
+  min-width: 150px;
+}
+
+/* Shipping note styling */
+.shipping-note {
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 4px;
+  padding: 12px 15px;
+}
+
+.shipping-note p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.shipping-note i {
+  color: #0066cc;
+}
+
+/* Total row styling for checkout */
+.total-row {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.total-row td {
+  border-top: 2px solid #dee2e6;
+}
+
+/* Cart empty state styling */
+#cartEmptyState {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+#cartEmptyState i {
+  color: #6c757d;
+}
+
+#cartEmptyState h5 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+#cartEmptyState p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+/* Disabled button styling */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
