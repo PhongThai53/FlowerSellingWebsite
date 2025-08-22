@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Order Confirmation - Flower eCommerce" />
+    <title>Order Confirmation - Flower eCommerce</title>
+
+    <!--=== Favicon ===-->
+    <link
+      rel="shortcut icon"
+      href="../../images/favicon.ico"
+      type="image/x-icon"
+    />
+
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+
+    <!-- All Vendor & plugins CSS include -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <!-- Main Style CSS -->
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- Cart CSS for styling -->
+    <link href="../../css/cart.css" rel="stylesheet" />
+
+    <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <!-- Load Header Component -->
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
+
+    <!-- main wrapper start -->
+    <main>
+      <!-- breadcrumb area start -->
+      <div class="breadcrumb-area common-bg">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="breadcrumb-wrap">
+                <nav aria-label="breadcrumb">
+                  <h1>Order Confirmation</h1>
+                  <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="../common/homepage.html"
+                        ><i class="fa fa-home"></i
+                      ></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                      <a href="../user/cart.html">Cart</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                      <a href="../Payment/checkout.html">Checkout</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Order Confirmation
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- breadcrumb area end -->
+
+      <!-- order confirmation main wrapper start -->
+      <div class="order-confirmation-wrapper section-space pb-0">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-8">
+              <div class="order-confirmation-content text-center">
+                <div class="success-icon mb-4">
+                  <i
+                    class="fa fa-check-circle text-success"
+                    style="font-size: 4rem"
+                  ></i>
+                </div>
+
+                <h2 class="mb-4">Thank You for Your Order!</h2>
+
+                <div class="order-details mb-4">
+                  <p class="mb-2">
+                    <strong>Order Number:</strong>
+                    <span id="orderNumber">-</span>
+                  </p>
+                  <p class="mb-2">
+                    <strong>Order ID:</strong> <span id="orderId">-</span>
+                  </p>
+                  <p class="mb-2">
+                    <strong>Payment Method:</strong> Cash on Delivery
+                  </p>
+                  <p class="mb-2">
+                    <strong>Status:</strong>
+                    <span class="badge bg-warning">Processing</span>
+                  </p>
+                </div>
+
+                <div class="order-message mb-4">
+                  <p>
+                    Your order has been successfully placed and is being
+                    processed.
+                  </p>
+                  <p>
+                    You will receive a confirmation email shortly with order
+                    details.
+                  </p>
+                  <p>
+                    For Cash on Delivery orders, please have the exact amount
+                    ready when the delivery arrives.
+                  </p>
+                </div>
+
+                <div class="action-buttons">
+                  <a href="../common/shop.html" class="btn btn__bg me-3">
+                    Continue Shopping
+                  </a>
+                  <a
+                    href="../user/order-history.html"
+                    class="btn btn-outline-primary"
+                  >
+                    View Order History
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- order confirmation main wrapper end -->
+    </main>
+    <!-- main wrapper end -->
+
+    <!-- Load Footer Component -->
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+
+    <!-- Services and Components -->
+    <script
+      type="module"
+      src="../../js/component/header/HeaderManager.js"
+    ></script>
+
+    <script>
+      // Initialize HeaderManager
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof HeaderManager !== "undefined") {
+          window.headerManager = new HeaderManager();
+        }
+
+        // Get order details from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get("orderId");
+        const orderNumber = urlParams.get("orderNumber");
+
+        // Display order details
+        if (orderId) {
+          document.getElementById("orderId").textContent = orderId;
+        }
+        if (orderNumber) {
+          document.getElementById("orderNumber").textContent = orderNumber;
+        }
+      });
+    </script>
+  </body>
+</html>

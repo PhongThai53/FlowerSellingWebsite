@@ -58,34 +58,61 @@ export class HeaderManager {
   }
 
   setupHtmxEventListeners() {
-    // Listen for HTMX after swap events to handle dynamically loaded headers
+    // Listen for HTMX afterSwap events
     document.addEventListener("htmx:afterSwap", (event) => {
-      // Check if the swapped content includes the header
-      if (
-        event.detail.target.id === "header-placeholder" ||
-        event.detail.target.closest("header") ||
-        event.detail.target.querySelector("header")
-      ) {
-        console.log("Header loaded via HTMX. Setting up user menu...");
-        setTimeout(() => {
-          this.setupUserMenu();
-          this.updateCartCount();
-        }, 100); // Small delay to ensure DOM is fully updated
+      try {
+        // Check if event and target exist
+        if (!event || !event.detail || !event.detail.target) {
+          console.log("HTMX afterSwap event missing target, skipping...");
+          return;
+        }
+
+        const target = event.detail.target;
+
+        // Check if target has the required properties before accessing them
+        if (
+          (target.id && target.id === "header-placeholder") ||
+          target.closest("header") ||
+          target.querySelector("header")
+        ) {
+          console.log(
+            "Header loaded via HTMX afterSwap. Setting up user menu..."
+          );
+          setTimeout(() => {
+            this.setupUserMenu();
+            this.updateCartCount();
+          }, 100); // Small delay to ensure DOM is fully updated
+        }
+      } catch (error) {
+        console.error("Error in HTMX afterSwap event handler:", error);
       }
     });
 
     // Listen for HTMX load events
     document.addEventListener("htmx:load", (event) => {
-      if (
-        event.detail.target.id === "header-placeholder" ||
-        event.detail.target.closest("header") ||
-        event.detail.target.querySelector("header")
-      ) {
-        console.log("Header loaded via HTMX load. Setting up user menu...");
-        setTimeout(() => {
-          this.setupUserMenu();
-          this.updateCartCount();
-        }, 100);
+      try {
+        // Check if event and target exist
+        if (!event || !event.detail || !event.detail.target) {
+          console.log("HTMX load event missing target, skipping...");
+          return;
+        }
+
+        const eventTarget = event.detail.target;
+
+        // Check if target has the required properties before accessing them
+        if (
+          (eventTarget.id && eventTarget.id === "header-placeholder") ||
+          eventTarget.closest("header") ||
+          eventTarget.querySelector("header")
+        ) {
+          console.log("Header loaded via HTMX load. Setting up user menu...");
+          setTimeout(() => {
+            this.setupUserMenu();
+            this.updateCartCount();
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error in HTMX load event handler:", error);
       }
     });
   }
@@ -100,11 +127,14 @@ export class HeaderManager {
 
       // Get cart summary from API
       const result = await ApiService.getCartSummary();
+      console.log("Cart summary API response:", result);
 
-      if (result && result.succeeded) {
-        const totalItems = result.data?.total_items || 0;
+      if (result && result.succeeded && result.data) {
+        const totalItems =
+          result.data.total_items || result.data.totalItems || 0;
         this.setCartCount(totalItems);
       } else {
+        console.log("Cart summary not available, setting count to 0");
         this.setCartCount(0);
       }
     } catch (error) {
@@ -112,10 +142,14 @@ export class HeaderManager {
 
       // Handle authentication errors
       if (
-        error.message.includes("401") ||
-        error.message.includes("Unauthorized")
+        error.message &&
+        (error.message.includes("401") ||
+          error.message.includes("Unauthorized"))
       ) {
         localStorage.removeItem("auth_token");
+        this.setCartCount(0);
+      } else {
+        // For other errors, just set count to 0
         this.setCartCount(0);
       }
     }
