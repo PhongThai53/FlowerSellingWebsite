@@ -641,16 +641,25 @@ class UserManager {
 
     // Populate user form with data
     populateUserForm(user) {
+        // Basic information
         document.getElementById('fullName').value = user.fullName || '';
         document.getElementById('email').value = user.email || '';
         document.getElementById('phoneNumber').value = user.phoneNumber || '';
         document.getElementById('address').value = user.address || '';
         document.getElementById('roleName').value = user.roleName || '';
         
+        // Additional information
         if (user.createdAt) {
             const createdDate = new Date(user.createdAt).toLocaleString('vi-VN');
             document.getElementById('createdAt').value = createdDate;
         }
+        
+        // Status (default to Active if not provided)
+        document.getElementById('status').value = user.status || 'Active';
+        
+        // User IDs
+        document.getElementById('publicId').value = user.publicId || '';
+        document.getElementById('id').value = user.id || '';
 
         // Update avatar
         const avatar = document.getElementById('user-avatar');
@@ -658,8 +667,9 @@ class UserManager {
             avatar.innerHTML = this.getInitials(user.fullName);
         }
 
-        // Update card title
+        // Update card title and breadcrumb
         document.getElementById('card-title').textContent = `Chi tiết: ${user.fullName}`;
+        this.updateBreadcrumb(user.fullName);
     }
 
     // Update breadcrumb
@@ -716,22 +726,26 @@ class UserManager {
             form.classList.remove('view-mode');
             form.classList.add('edit-mode');
             
+            // Only allow editing of specific fields
             inputs.forEach(input => {
-                if (input.id !== 'email' && input.id !== 'createdAt') { // Email is usually not editable
+                if (['fullName', 'phoneNumber', 'address', 'roleName'].includes(input.id)) {
                     input.removeAttribute('readonly');
                     input.removeAttribute('disabled');
+                    input.classList.remove('form-control-readonly');
                 }
             });
         } else {
             form.classList.remove('edit-mode');
             form.classList.add('view-mode');
             
+            // Make all fields read-only
             inputs.forEach(input => {
                 if (input.tagName === 'SELECT') {
                     input.setAttribute('disabled', '');
                 } else {
                     input.setAttribute('readonly', '');
                 }
+                input.classList.add('form-control-readonly');
             });
         }
     }
@@ -764,8 +778,16 @@ class UserManager {
 
         try {
             const formData = this.getFormData();
-            delete formData.email; // Don't send email in update
-            delete formData.password; // Don't send password in update
+            
+            // Only send editable fields
+            const updateData = {
+                fullName: formData.fullName,
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                roleName: formData.roleName
+            };
+
+            console.log('Updating user with data:', updateData);
 
             const response = await this.makeAuthenticatedRequest(
                 `${this.apiBaseUrl}/user/${this.currentUserId}`,
@@ -774,7 +796,7 @@ class UserManager {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(updateData)
                 }
             );
 
@@ -839,15 +861,16 @@ class UserManager {
         const form = document.getElementById('user-form');
         const inputs = form.querySelectorAll('input, select, textarea');
         
-                    inputs.forEach(input => {
-                if (input.name && input.value !== '') {
-                    if (input.type === 'checkbox') {
-                        formData[input.name] = input.checked;
-                    } else {
-                        formData[input.name] = input.value;
-                    }
+        // Only get data from editable fields
+        inputs.forEach(input => {
+            if (input.name && ['fullName', 'phoneNumber', 'address', 'roleName'].includes(input.id)) {
+                if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked;
+                } else {
+                    formData[input.name] = input.value.trim();
                 }
-            });
+            }
+        });
 
         return formData;
     }
@@ -855,21 +878,25 @@ class UserManager {
     // Validate form
     validateForm() {
         const form = document.getElementById('user-form');
-        const inputs = form.querySelectorAll('input[required], select[required]');
+        // Only validate editable fields
+        const editableFields = ['fullName', 'phoneNumber', 'address', 'roleName'];
         let isValid = true;
 
-        inputs.forEach(input => {
-            this.clearValidation(input);
-            
-            if (!input.value.trim()) {
-                this.showValidationError(input, 'Trường này là bắt buộc');
-                isValid = false;
-            } else if (input.type === 'email' && !this.isValidEmail(input.value)) {
-                this.showValidationError(input, 'Email không hợp lệ');
-                isValid = false;
-            } else if (input.name === 'password' && input.value.length < 6) {
-                this.showValidationError(input, 'Mật khẩu phải có ít nhất 6 ký tự');
-                isValid = false;
+        editableFields.forEach(fieldId => {
+            const input = document.getElementById(fieldId);
+            if (input) {
+                this.clearValidation(input);
+                
+                if (fieldId === 'fullName' && !input.value.trim()) {
+                    this.showValidationError(input, 'Họ và tên là bắt buộc');
+                    isValid = false;
+                } else if (fieldId === 'phoneNumber' && input.value.trim() && !this.isValidPhone(input.value.trim())) {
+                    this.showValidationError(input, 'Số điện thoại không hợp lệ');
+                    isValid = false;
+                } else if (fieldId === 'roleName' && !input.value.trim()) {
+                    this.showValidationError(input, 'Vai trò là bắt buộc');
+                    isValid = false;
+                }
             }
         });
 
@@ -898,6 +925,13 @@ class UserManager {
     isValidEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
+    }
+    
+    // Validate phone number
+    isValidPhone(phone) {
+        // Allow Vietnamese phone numbers: +84, 84, 0 followed by 9-10 digits
+        const re = /^(\+84|84|0)?[0-9]{9,10}$/;
+        return re.test(phone);
     }
 
     // Delete user
