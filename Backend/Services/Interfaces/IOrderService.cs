@@ -9,7 +9,7 @@ namespace FlowerSellingWebsite.Services.Interfaces
 
         Task<OrderDTO?> GetOrderByIdAsync(int orderId);
 
-        Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId);
+        Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId, string clientIpAddress = null);
         
         Task<UserDTO?> GetUserByPublicIdAsync(Guid publicId);
     }

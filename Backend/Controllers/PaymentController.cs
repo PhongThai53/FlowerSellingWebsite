@@ -25,12 +25,12 @@ namespace FlowerSellingWebsite.Controllers
                 if (result.IsSuccess)
                 {
                     // Payment successful - redirect to success page
-                    return Redirect($"/payment/success?orderNumber={result.OrderNumber}&transactionId={result.TransactionId}");
+                    return Redirect($"/html/Payment/payment-success.html?orderNumber={result.OrderNumber}&transactionId={result.TransactionId}&amount={result.Amount}");
                 }
                 else
                 {
                     // Payment failed - redirect to failure page
-                    return Redirect($"/payment/failed?orderNumber={result.OrderNumber}&message={result.ResponseMessage}");
+                    return Redirect($"/html/Payment/payment-failed.html?orderNumber={result.OrderNumber}&message={result.ResponseMessage}");
                 }
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace FlowerSellingWebsite.Controllers
         public IActionResult VNPayCancel([FromQuery] string orderNumber)
         {
             // Payment was cancelled by user
-            return Redirect($"/payment/cancelled?orderNumber={orderNumber}");
+            return Redirect($"/html/Payment/payment-cancelled.html?orderNumber={orderNumber}");
         }
 
         [HttpGet("status/{orderNumber}")]

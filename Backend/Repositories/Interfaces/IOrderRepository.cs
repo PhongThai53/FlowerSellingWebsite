@@ -17,5 +17,6 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<bool> UpdatePaymentStatusAsync(int orderId, string paymentStatus);
         Task<PaymentMethods?> GetPaymentMethodByNameAsync(string methodName);
         Task<PaymentMethods> CreatePaymentMethodAsync(PaymentMethods paymentMethod);
+        Task<bool> DeleteOrderAsync(int orderId);
     }
 }
