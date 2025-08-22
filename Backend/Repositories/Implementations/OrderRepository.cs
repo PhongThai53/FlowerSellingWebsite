@@ -114,5 +114,40 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             await _context.SaveChangesAsync();
             return paymentMethod;
         }
+
+        public async Task<bool> DeleteOrderAsync(int orderId)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.OrderDetails)
+                    .Include(o => o.Payments)
+                    .FirstOrDefaultAsync(o => o.Id == orderId);
+
+                if (order == null) return false;
+
+                // Remove related entities first
+                if (order.OrderDetails != null)
+                {
+                    _context.OrderDetails.RemoveRange(order.OrderDetails);
+                }
+
+                if (order.Payments != null)
+                {
+                    _context.Payments.RemoveRange(order.Payments);
+                }
+
+                // Remove the order
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error deleting order {orderId}: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

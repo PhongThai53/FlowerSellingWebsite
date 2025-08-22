@@ -70,7 +70,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
-        public async Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId)
+        public async Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId, string clientIpAddress = null)
         {
             try
             {
@@ -196,25 +196,47 @@ namespace FlowerSellingWebsite.Services.Implementations
                         var returnUrl = $"{baseUrl}/api/payment/vnpay/return";
                         var cancelUrl = $"{baseUrl}/api/payment/vnpay/cancel?orderNumber={orderNumber}";
                         
+                        // Use provided client IP or get a fallback IP
+                        var ipAddress = clientIpAddress ?? VNPayService.GetClientIpAddress();
+                        
                         var paymentUrl = await _vnPayService.CreatePaymentUrlAsync(
                             orderNumber, 
                             checkoutRequest.TotalAmount, 
                             returnUrl, 
-                            cancelUrl
+                            cancelUrl,
+                            ipAddress
                         );
                         
+                        if (string.IsNullOrEmpty(paymentUrl))
+                        {
+                            throw new InvalidOperationException("VNPay payment URL is empty");
+                        }
+                        
+                        // Test if the VNPay URL is actually valid by checking if it contains required parameters
+                        if (!paymentUrl.Contains("vnp_SecureHash=") || !paymentUrl.Contains("vnp_TmnCode="))
+                        {
+                            throw new InvalidOperationException("VNPay payment URL is malformed");
+                        }
+                        
                         response.Data.PaymentUrl = paymentUrl;
+                        response.Message = "Order created successfully. Redirecting to VNPay for payment...";
                     }
                     catch (Exception ex)
                     {
-                        // If VNPay URL generation fails, still return success but with error message
-                        response.Message = $"Order created but VNPay payment URL generation failed: {ex.Message}";
+                        // If VNPay fails, ROLLBACK the order and return error
+                        await _orderRepository.DeleteOrderAsync(order.Id);
+                        
+                        response.Succeeded = false;
+                        response.Message = $"VNPay payment setup failed: {ex.Message}";
+                        response.Data = null;
+                        
+                        return response;
                     }
-                }
-                else
-                {
+            }
+            else
+            {
                     // For COD, redirect to order confirmation
-                    response.Data.RedirectUrl = $"/order-confirmation/{orderNumber}";
+                    response.Data.RedirectUrl = $"/html/user/order-confirmation.html?orderNumber={orderNumber}";
                 }
 
                 return response;
