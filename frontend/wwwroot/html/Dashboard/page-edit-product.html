@@ -59,106 +59,56 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between">
                                 <div class="header-title">
-                                    <h4 class="card-title">Add Product</h4>
+                                    <h4 class="card-title">Edit Product</h4>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <form action="page-list-product.html" data-toggle="validator">
                                     <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Product Type *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Standard</option>
-                                                    <option>Combo</option>
-                                                    <option>Digital</option>
-                                                    <option>Service</option>
-                                                </select>
-                                            </div>
-                                        </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Name *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Name" data-errors="Please Enter Name." required>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Code *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Code" data-errors="Please Enter Code." required>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Barcode Symbology *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>CREM01</option>
-                                                    <option>UM01</option>
-                                                    <option>SEM01</option>
-                                                    <option>COF01</option>
-                                                    <option>FUN01</option>
-                                                    <option>DIS01</option>
-                                                    <option>NIS01</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Category *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Beauty</option>
-                                                    <option>Grocery</option>
-                                                    <option>Food</option>
-                                                    <option>Furniture</option>
-                                                    <option>Shoes</option>
-                                                    <option>Frames</option>
-                                                    <option>Jewellery</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Cost *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Cost" data-errors="Please Enter Cost." required>
+                                                <input type="text" name="name" class="form-control" placeholder="Enter Product Name" data-errors="Please Enter Name." required>
                                                 <div class="help-block with-errors"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Price *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Price" data-errors="Please Enter Price." required>
+                                                <input type="number" name="price" class="form-control" placeholder="Enter Price" step="0.01" min="0.01" data-errors="Please Enter Price." required>
                                                 <div class="help-block with-errors"></div>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Tax Method *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Exclusive</option>
-                                                    <option>Inclusive</option>
+                                                <label>Stock *</label>
+                                                <input type="number" name="stock" class="form-control" placeholder="Enter Stock Quantity" min="0" data-errors="Please Enter Stock." required>
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Category *</label>
+                                                <select id="categorySelect" name="categoryId" class="selectpicker form-control" data-style="py-0" required>
+                                                    <option value="">Select Category</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Quantity *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Quantity" required>
-                                                <div class="help-block with-errors"></div>
+                                                <label>Description</label>
+                                                <textarea name="description" class="form-control" rows="4" placeholder="Enter product description..."></textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Image</label>
-                                                <input type="file" class="form-control image-file" name="pic" accept="image/*">
+                                            <div style="margin-bottom: 15px;" class="form-group">
+                                                <label style="display:block; font-weight:bold; margin-bottom:5px;">Product Images</label>
+                                                <input type="file" id="productPhotos" name="productPhotos" accept="image/*" multiple style="padding:5px; border:1px solid #ccc; border-radius:4px;">
+                                                <small style="display:block; margin-top:5px; color:#666;">Select multiple images. First image will be primary.</small>
                                             </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Description / Product Details</label>
-                                                <textarea class="form-control" rows="4"></textarea>
-                                            </div>
+
+                                            <!-- Khu vực hiển thị preview -->
+                                            <div id="preview-container" style="display:flex; flex-wrap:wrap; gap:10px; margin:15px 0;"></div>
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary mr-2">Add Product</button>
@@ -202,5 +152,152 @@
     <script src="../../js/admin/customizer.js"></script> <!-- Chart Custom JavaScript -->
     <script async src="../../js/admin/chart-custom.js"></script> <!-- app JavaScript -->
     <script src="../../js/admin/app.js"></script>
+
+    <script>
+        (() => {
+            const API_BASE = "https://localhost:7062";
+            const form = document.querySelector('form[data-toggle="validator"]');
+            const catSelect = document.getElementById("categorySelect");
+            const fileInput = document.getElementById("productPhotos");
+            const preview = document.getElementById("preview-container");
+
+            async function safeParse(res) {
+                const text = await res.text().catch(() => "");
+                try { return text ? JSON.parse(text) : null; } catch { return null; }
+            }
+
+            async function fetchJson(url, options = {}) {
+                const res = await fetch(url, options);
+                const json = await safeParse(res);
+                if (!res.ok) throw new Error(json?.message || res.statusText);
+                return json;
+            }
+
+            function getProductIdFromQuery() {
+                const params = new URLSearchParams(location.search);
+                return Number(params.get("id") || params.get("productId") || 0) || null;
+            }
+
+            async function loadCategories() {
+                const res = await fetchJson(`${API_BASE}/api/ProductCategory`);
+                const list = res?.data ?? res;
+                if (!Array.isArray(list)) return;
+                if (catSelect) catSelect.innerHTML = ['<option value="">Select Category</option>']
+                    .concat(list.map(c => `<option value="${c.id}">${c.name}</option>`)).join("");
+            }
+
+            function renderPreviewFiles(files) {
+                if (!preview) return;
+                preview.innerHTML = "";
+                files.forEach(f => {
+                    const img = document.createElement("img");
+                    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid #ddd;border-radius:6px;";
+                    img.title = f.name;
+                    const reader = new FileReader();
+                    reader.onload = e => img.src = e.target.result;
+                    reader.readAsDataURL(f);
+                    preview.appendChild(img);
+                });
+            }
+
+            function renderExistingImages(productPhotos = []) {
+                if (!preview) return;
+                productPhotos.forEach(p => {
+                    const img = document.createElement("img");
+                    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid #ddd;border-radius:6px;";
+                    img.title = p.url;
+                    img.src = p.url.startsWith("/") ? p.url : p.url;
+                    preview.appendChild(img);
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener("change", () => renderPreviewFiles(Array.from(fileInput.files || [])));
+            }
+
+            async function fetchProduct(productId) {
+                const res = await fetchJson(`${API_BASE}/api/Product/${productId}`);
+                return res?.data ?? res;
+            }
+
+            async function uploadImagesUpdate(productId, files) {
+                if (!files || !files.length) return [];
+                const fd = new FormData();
+                files.forEach(f => fd.append("files", f, f.name));
+                const resp = await fetchJson(`${API_BASE}/api/Image/products/${productId}`, { method: "PUT", body: fd });
+                return resp?.data ?? resp;
+            }
+
+            async function updateProduct(productId, body) {
+                return await fetchJson(`${API_BASE}/api/Product/${productId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+            }
+
+            function fillFormWithProduct(product) {
+                if (!product) return;
+                const byName = n => form.querySelector(`[name="${n}"]`);
+                if (byName("name")) byName("name").value = product.name ?? "";
+                if (byName("price")) byName("price").value = product.price ?? "";
+                if (byName("stock")) byName("stock").value = product.stock ?? "";
+                if (byName("categoryId")) byName("categoryId").value = product.categoryId ?? "";
+                if (byName("description")) byName("description").value = product.description ?? "";
+                if (product.productPhotos) {
+                    preview.innerHTML = "";
+                    renderExistingImages(product.productPhotos);
+                }
+            }
+
+            function buildProductPhotosFromPaths(paths = []) {
+                return paths.map((p, idx) => ({ url: p, isPrimary: idx === 0 }));
+            }
+
+            (async function init() {
+                await loadCategories();
+                const productId = getProductIdFromQuery();
+                if (!productId) return;
+                const product = await fetchProduct(productId);
+                fillFormWithProduct(product);
+                form.__existingProductPhotos = product.productPhotos ?? [];
+                form.__productId = productId;
+            })();
+
+            if (form) {
+                form.addEventListener("submit", async ev => {
+                    ev.preventDefault();
+                    const productId = form.__productId ?? getProductIdFromQuery();
+                    if (!productId) return alert("Missing productId");
+                    const f = new FormData(form);
+                    const name = (f.get("name") || "").toString().trim();
+                    const description = (f.get("description") || "").toString().trim();
+                    const price = parseFloat(f.get("price"));
+                    const stock = parseInt(f.get("stock"), 10);
+                    const categoryId = parseInt(f.get("categoryId"), 10);
+                    const selectedFiles = Array.from(fileInput?.files || []);
+
+                    if (!name || isNaN(price) || price < 0.01 || isNaN(stock) || isNaN(categoryId))
+                        return alert("Please fill Name, Price(>=0.01), Stock, Category.");
+
+                    let uploadedPaths = [];
+                    if (selectedFiles.length) uploadedPaths = await uploadImagesUpdate(productId, selectedFiles);
+
+                    const productPhotosToSend = uploadedPaths.length
+                        ? buildProductPhotosFromPaths(uploadedPaths)
+                        : form.__existingProductPhotos;
+
+                    const primaryUrl = productPhotosToSend.length ? productPhotosToSend[0].url : `/images/products/${productId}/primary.jpg`;
+
+                    const updateDto = { name, description, price, url: primaryUrl, stock, categoryId, productPhotos: productPhotosToSend };
+
+                    await updateProduct(productId, updateDto);
+                    alert("Cập nhật sản phẩm thành công.");
+                });
+            }
+        })();
+    </script>
+
+
 </body>
 </html>
