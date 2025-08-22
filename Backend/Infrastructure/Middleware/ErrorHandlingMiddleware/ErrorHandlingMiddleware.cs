@@ -19,36 +19,37 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
         {
             try
             {
-                // Chỉ call next - không xử lý success response
                 await _next(context);
             }
             catch (NotFoundException notFoundException)
             {
                 _logger.LogWarning(notFoundException, "Not found exception: {Message}", notFoundException.Message);
-
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
                 context.Response.ContentType = "application/json";
-
                 var errorResponse = ApiResponse<object>.Fail(notFoundException.Message);
                 await WriteJsonResponse(context, errorResponse);
             }
-            catch (ValidationException validationException)
+            catch (System.ComponentModel.DataAnnotations.ValidationException dataAnnotationException)
             {
-                _logger.LogWarning(validationException, "Validation exception: {Message}", validationException.Message);
-
+                _logger.LogWarning(dataAnnotationException, "Data annotation validation exception: {Message}", dataAnnotationException.Message);
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 context.Response.ContentType = "application/json";
-
+                var errorResponse = ApiResponse<object>.Fail(dataAnnotationException.Message);
+                await WriteJsonResponse(context, errorResponse);
+            }
+            catch (FlowerSellingWebsite.Exceptions.ValidationException validationException)
+            {
+                _logger.LogWarning(validationException, "Custom validation exception: {Message}", validationException.Message);
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                context.Response.ContentType = "application/json";
                 var errorResponse = ApiResponse<object>.Fail(validationException.Message);
                 await WriteJsonResponse(context, errorResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
-
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
-
                 var errorResponse = ApiResponse<object>.Fail("Internal server error");
                 await WriteJsonResponse(context, errorResponse);
             }
@@ -60,7 +61,6 @@ namespace FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
-
             await context.Response.WriteAsync(json);
         }
     }

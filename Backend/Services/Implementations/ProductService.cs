@@ -4,16 +4,23 @@ using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
     public class ProductService : IProductService
     {
-        public readonly IProductRepository _productRepository;
-        public readonly IMapper _mapper;
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        private readonly IProductRepository _productRepository;
+        private readonly IProductPhotoRepository _productPhotoRepository;
+        private readonly IMapper _mapper;
+
+        public ProductService(
+            IProductRepository productRepository,
+            IProductPhotoRepository productPhotoRepository,
+            IMapper mapper)
         {
             _productRepository = productRepository;
+            _productPhotoRepository = productPhotoRepository;
             _mapper = mapper;
         }
 
@@ -25,76 +32,140 @@ namespace FlowerSellingWebsite.Services.Implementations
             int max,
             string? search,
             string? sortBy,
-            bool asc = true,
-            CancellationToken cancellationToken = default)
+            bool asc = true)
         {
             // Validation 
-            if (pageNumber < 0) pageNumber = 1;
-            if (pageSize < 0 || pageSize > 30) pageSize = 10;
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize <= 0 || pageSize > 30 ? 10 : pageSize;
 
             // Get Data
-            var (items, totalPages, totalCount, Min, Max, DbMax) = await _productRepository.GetPagedProductsAsync(
-            pageNumber,
-            pageSize,
-            categoryId,
-            min,
-            max,
-            search,
-            sortBy,
-            asc,
-            cancellationToken);
+            var result = await _productRepository.GetPagedProductsAsync(
+                pageNumber,
+                pageSize,
+                categoryId,
+                min,
+                max,
+                search,
+                sortBy,
+                asc);
 
             // Map DTO
-            var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(items);
+            var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
 
-            return (dtoItems, totalPages, totalCount, Min, Max, DbMax);
+            return (dtoItems, result.TotalPages, result.TotalCount, result.Min, result.Max, result.DbMax);
         }
 
         public async Task<ProductDTO?> GetProductByIdAsync(int id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
-            return _mapper.Map<ProductDTO>(product);
+            return product != null ? _mapper.Map<ProductDTO>(product) : null;
         }
 
-        public async Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto, CancellationToken cancellationToken = default)
+        public async Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto)
         {
-            var existing = await _productRepository.GetProductByIdAsync(id);
+            try
+            {
+                if (dto == null)
+                    throw new ArgumentNullException(nameof(dto));
 
-            // Validation
-            if (existing == null)
-                throw new NotFoundException("Product not found.");
-            if (dto.Name != null && string.IsNullOrWhiteSpace(dto.Name))
-                throw new ValidationException("Product name cannot be empty.");
-            if (dto.Price.HasValue && dto.Price < 0)
-                throw new ValidationException("Price cannot be negative.");
-            if (dto.CategoryId.HasValue && dto.CategoryId <= 0)
-                throw new ValidationException("CategoryId must be positive.");
+                ValidateDataAnnotations(dto);
+                ValidateProductPhotos(dto.ProductPhotos);
 
-            _mapper.Map(dto, existing);
-            var updated = await _productRepository.UpdateProductAsync(existing, cancellationToken);
-            return _mapper.Map<UpdateProductDTO?>(updated);
+                var existing = await _productRepository.GetProductByIdAsync(id);
+                if (existing == null)
+                    throw new NotFoundException("Product not found.");
+
+                _mapper.Map(dto, existing);
+
+                if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
+                {
+                    await HandleProductPhotos(dto.ProductPhotos, id);
+                }
+
+                var updated = await _productRepository.UpdateProductAsync(existing);
+                return _mapper.Map<UpdateProductDTO?>(updated);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"UpdateProduct Error - ID {id}: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
         }
-        public async Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default)
+
+        public async Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto)
         {
-            // Validation
-            if (string.IsNullOrWhiteSpace(dto.Name))
-                throw new ValidationException("Product name is required.");
-            if (dto.Price.HasValue && dto.Price < 0)
-                throw new ValidationException("Price cannot be negative.");
-            if (dto.CategoryId <= 0)
-                throw new ValidationException("CategoryId must be positive.");
+            if (dto == null)
+                return null;
+
+            ValidateDataAnnotations(dto);
+            ValidateProductPhotos(dto.ProductPhotos);
 
             var product = _mapper.Map<Products>(dto);
-            var created = await _productRepository.CreateProductAsync(product, cancellationToken);
-            return _mapper.Map<CreateProductDTO?>(created);
+            var createdProduct = await _productRepository.CreateProductAsync(product);
+
+            if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
+            {
+                await HandleProductPhotos(dto.ProductPhotos, createdProduct.Id);
+            }
+
+            // Map Entity back to DTO
+            var result = _mapper.Map<CreateProductDTO>(createdProduct);
+            result.ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>();
+
+            return result;
         }
 
-        public async Task<bool> DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteProductAsync(int id)
         {
             var existing = await _productRepository.GetProductByIdAsync(id);
-            if (existing == null) return false;
+            if (existing == null)
+                return false;
 
-            return await _productRepository.DeleteProductAsync(id, cancellationToken);
+            return await _productRepository.DeleteProductAsync(id);
+        }
+
+        // Private Helper Methods
+        private static void ValidateDataAnnotations<T>(T dto) where T : class
+        {
+            var context = new ValidationContext(dto);
+            var results = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(dto, context, results, true))
+            {
+                var errorMessage = string.Join("; ", results.Select(r => r.ErrorMessage));
+                throw new System.ComponentModel.DataAnnotations.ValidationException(errorMessage);
+            }
+        }
+
+        private static void ValidateProductPhotos(List<ProductPhotos>? photos)
+        {
+            if (photos == null || !photos.Any())
+                return;
+
+            var primaryCount = photos.Count(p => p.IsPrimary);
+
+            if (primaryCount > 1)
+                throw new FlowerSellingWebsite.Exceptions.ValidationException("Only one photo can be set as primary.");
+
+            if (primaryCount == 0)
+                throw new FlowerSellingWebsite.Exceptions.ValidationException("At least one photo must be set as primary.");
+
+            foreach (var photo in photos)
+            {
+                ValidateDataAnnotations(photo);
+            }
+        }
+
+        private async Task HandleProductPhotos(List<ProductPhotos> photos, int productId)
+        {
+            foreach (var photo in photos)
+            {
+                photo.ProductId = productId;
+                photo.Id = 0; // Reset ID for new entity
+                ValidateDataAnnotations(photo);
+                await _productPhotoRepository.createAsync(photo);
+            }
         }
     }
 }

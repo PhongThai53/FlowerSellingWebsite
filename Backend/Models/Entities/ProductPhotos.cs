@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FlowerSellingWebsite.Models.Entities
 {
@@ -15,6 +16,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public bool IsPrimary { get; set; }
 
         // Navigation properties
+        [JsonIgnore]
         public virtual Products? Product { get; set; }
     }
 }
