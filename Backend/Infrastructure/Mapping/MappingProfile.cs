@@ -1,12 +1,11 @@
-using AutoMapper;
+﻿using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Cart;
+using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Models.DTOs.ProductCategory;
 using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
-using FlowerSellingWebsite.Models.DTOs.Cart;
 using FlowerSellingWebsite.Models.Entities;
-using System.Diagnostics;
-using FlowerSellingWebsite.Models.DTOs.Order;
 
 namespace FlowerSellingWebsite.Infrastructure.Mapping
 {
@@ -26,9 +25,37 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                         ? src.ProductPhotos.First(pp => !pp.IsDeleted).Url
                         : "/images/product/default-product.jpg"));
 
-            CreateMap<CreateProductDTO, Products>();
+            // ------------------ Update Product DTO ------------------
             CreateMap<UpdateProductDTO, Products>()
+                .ForMember(dest => dest.ProductPhotos, opt => opt.Ignore()) // Handle manually
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Products, UpdateProductDTO>()
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
+
+            // Create Product - DTO to Entity (ignore ProductPhotos to handle manually)
+            CreateMap<ProductPhotos, ProductPhotoDTO>();
+
+            CreateMap<ProductPhotoDTO, ProductPhotos>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.Product, opt => opt.Ignore());
+
+            CreateMap<CreateProductPhotoDTO, ProductPhotos>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.Product, opt => opt.Ignore());
+
+            CreateMap<UpdateProductPhotoDTO, ProductPhotos>()
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<DeleteProductPhotoDTO, ProductPhotos>();
 
             // ------------------ ProductPhotos ------------------
             CreateMap<ProductPhotos, ProductPhotoDTO>();
@@ -50,6 +77,15 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : string.Empty))
                 .ReverseMap();
 
+            // ------------------ Create Product DTO ------------------
+            CreateMap<CreateProductDTO, Products>()
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+            CreateMap<Products, CreateProductDTO>()
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
+
             // ------------------ Cart ------------------
             CreateMap<Cart, CartDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : string.Empty));
@@ -61,6 +97,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                     src.Product != null && src.Product.ProductPhotos.Any(pp => !pp.IsDeleted)
                         ? src.Product.ProductPhotos.First(pp => !pp.IsDeleted).Url
                         : "/images/product/default-product.jpg"));
+
+
 
 
             CreateMap<AddToCartDTO, CartItem>();

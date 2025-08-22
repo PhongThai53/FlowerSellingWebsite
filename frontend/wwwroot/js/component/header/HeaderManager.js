@@ -77,9 +77,9 @@ export class HeaderManager {
     // Listen for HTMX load events
     document.addEventListener("htmx:load", (event) => {
       if (
-        event.detail.target.id === "header-placeholder" ||
-        event.detail.target.closest("header") ||
-        event.detail.target.querySelector("header")
+        ////event.detail.target.id === "header-placeholder" ||
+        //event.detail.target.closest("header") ||
+        //event.detail.target.querySelector("header")
       ) {
         console.log("Header loaded via HTMX load. Setting up user menu...");
         setTimeout(() => {
