@@ -53,6 +53,31 @@ class UserManager {
             newSearchInput.addEventListener('input', debouncedSearch);
         }
 
+        // Wire filter and sort dropdowns for auto-submit
+        const roleFilter = document.getElementById('role-filter');
+        if (roleFilter) {
+            roleFilter.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
+        const sortBy = document.getElementById('sort-by');
+        if (sortBy) {
+            sortBy.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
+        const sortDirection = document.getElementById('sort-direction');
+        if (sortDirection) {
+            sortDirection.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
         // Prepare pagination container for new UI
         const paginationContainer = document.querySelector('ul.pagination');
         if (paginationContainer) {
@@ -332,6 +357,18 @@ class UserManager {
             console.warn('roleName element not found (expected on detail page)');
         }
 
+        // Populate role select in add user modal
+        const addRoleSelect = document.getElementById('add-roleName');
+        if (addRoleSelect) {
+            console.log('Populating add-roleName dropdown...');
+            addRoleSelect.innerHTML = '<option value="">Chọn vai trò</option>';
+            this.availableRoles.forEach(role => {
+                addRoleSelect.innerHTML += `<option value="${role.value}">${role.label}</option>`;
+            });
+            console.log('Add role select populated with', this.availableRoles.length, 'roles');
+            populated = true;
+        }
+
         // If no elements found and we haven't exceeded retry limit, try again
         if (!populated && retryCount < maxRetries) {
             console.log(`Dropdown elements not ready, retrying in ${retryDelay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
@@ -428,7 +465,7 @@ class UserManager {
                 || document.getElementById('search-input')?.value
                 || ''),
             role: document.getElementById('role-filter')?.value || '',
-            sortBy: document.getElementById('sort-by')?.value || 'createdat',
+            sortBy: document.getElementById('sort-by')?.value || 'fullName',
             sortDirection: document.getElementById('sort-direction')?.value || 'Desc'
         };
     }
@@ -488,15 +525,15 @@ class UserManager {
                 <td>${user.fullName || '-'}</td>
                 <td>${phone}</td>
                 <td>${user.email || '-'}</td>
-                <td>-</td>
+                <td>${user.address || '-'}</td>
                 <td><span class="badge bg-primary">Active</span></td>
                 <td>${roleOrCompany}</td>
                 <td>${createdDate}</td>
                 <td>
                     <div class="flex align-items-center list-user-action">
-                        <a class="btn btn-sm bg-primary" title="Add" href="javascript:void(0)" onclick="userManager.viewUser('${user.publicId}')"><i class="ri-user-add-line mr-0"></i></a>
-                        <a class="btn btn-sm bg-primary" title="Edit" href="javascript:void(0)" onclick="userManager.editUser('${user.publicId}')"><i class="ri-pencil-line mr-0"></i></a>
-                        <a class="btn btn-sm bg-primary" title="Delete" href="javascript:void(0)" onclick="userManager.openDeleteModal('${user.publicId}', '${(user.fullName || '').replace(/"/g, '\\"')}')"><i class="ri-delete-bin-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Xem chi tiết" href="javascript:void(0)" onclick="userManager.viewUser('${user.publicId}')"><i class="ri-eye-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Chỉnh sửa" href="javascript:void(0)" onclick="userManager.editUser('${user.publicId}')"><i class="ri-pencil-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Xóa" href="javascript:void(0)" onclick="userManager.openDeleteModal('${user.publicId}', '${(user.fullName || '').replace(/"/g, '\\"')}')"><i class="ri-delete-bin-line mr-0"></i></a>
                     </div>
                 </td>
             </tr>
@@ -616,16 +653,25 @@ class UserManager {
 
     // Populate user form with data
     populateUserForm(user) {
+        // Basic information
         document.getElementById('fullName').value = user.fullName || '';
         document.getElementById('email').value = user.email || '';
         document.getElementById('phoneNumber').value = user.phoneNumber || '';
         document.getElementById('address').value = user.address || '';
         document.getElementById('roleName').value = user.roleName || '';
         
+        // Additional information
         if (user.createdAt) {
             const createdDate = new Date(user.createdAt).toLocaleString('vi-VN');
             document.getElementById('createdAt').value = createdDate;
         }
+        
+        // Status (default to Active if not provided)
+        document.getElementById('status').value = user.status || 'Active';
+        
+        // User IDs
+        document.getElementById('publicId').value = user.publicId || '';
+        document.getElementById('id').value = user.id || '';
 
         // Update avatar
         const avatar = document.getElementById('user-avatar');
@@ -633,8 +679,9 @@ class UserManager {
             avatar.innerHTML = this.getInitials(user.fullName);
         }
 
-        // Update card title
+        // Update card title and breadcrumb
         document.getElementById('card-title').textContent = `Chi tiết: ${user.fullName}`;
+        this.updateBreadcrumb(user.fullName);
     }
 
     // Update breadcrumb
@@ -691,22 +738,26 @@ class UserManager {
             form.classList.remove('view-mode');
             form.classList.add('edit-mode');
             
+            // Only allow editing of specific fields
             inputs.forEach(input => {
-                if (input.id !== 'email' && input.id !== 'createdAt') { // Email is usually not editable
+                if (['fullName', 'phoneNumber', 'address', 'roleName'].includes(input.id)) {
                     input.removeAttribute('readonly');
                     input.removeAttribute('disabled');
+                    input.classList.remove('form-control-readonly');
                 }
             });
         } else {
             form.classList.remove('edit-mode');
             form.classList.add('view-mode');
             
+            // Make all fields read-only
             inputs.forEach(input => {
                 if (input.tagName === 'SELECT') {
                     input.setAttribute('disabled', '');
                 } else {
                     input.setAttribute('readonly', '');
                 }
+                input.classList.add('form-control-readonly');
             });
         }
     }
@@ -739,8 +790,16 @@ class UserManager {
 
         try {
             const formData = this.getFormData();
-            delete formData.email; // Don't send email in update
-            delete formData.password; // Don't send password in update
+            
+            // Only send editable fields
+            const updateData = {
+                fullName: formData.fullName,
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                roleName: formData.roleName
+            };
+
+            console.log('Updating user with data:', updateData);
 
             const response = await this.makeAuthenticatedRequest(
                 `${this.apiBaseUrl}/user/${this.currentUserId}`,
@@ -749,7 +808,7 @@ class UserManager {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(updateData)
                 }
             );
 
@@ -770,7 +829,54 @@ class UserManager {
         }
     }
 
-    // Create user
+    // Create user from modal
+    async createUserFromModal() {
+        if (!this.validateAddUserForm()) return;
+
+        this.showLoading();
+
+        try {
+            const formData = this.getAddUserFormData();
+            console.log('Creating user with data:', formData);
+
+            const response = await this.makeAuthenticatedRequest(
+                `${this.apiBaseUrl}/user`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                }
+            );
+
+            if (response && response.ok) {
+                this.showSuccess('Tạo người dùng thành công');
+                
+                // Close modal using jQuery
+                const modal = document.getElementById('addUserModal');
+                if (modal) {
+                    $(modal).modal('hide');
+                }
+                
+                // Reload page after a short delay to show the success message
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.message || 'Không thể tạo người dùng';
+                this.showError(errorMessage);
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+            this.showError('Lỗi khi tạo người dùng');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    // Create user (legacy method)
     async createUser() {
         if (!this.validateForm()) return;
 
@@ -808,43 +914,123 @@ class UserManager {
         }
     }
 
+    // Get add user form data
+    getAddUserFormData() {
+        const formData = {};
+        const form = document.getElementById('add-user-form');
+        if (!form) return formData;
+
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            if (input.name && input.value.trim()) {
+                if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked;
+                } else {
+                    formData[input.name] = input.value.trim();
+                }
+            }
+        });
+
+        // Ensure required fields are always included (even if empty)
+        const requiredFields = ['fullName', 'username', 'email', 'password', 'roleName'];
+        requiredFields.forEach(field => {
+            if (!formData[field]) {
+                formData[field] = '';
+            }
+        });
+
+        return formData;
+    }
+
     // Get form data
     getFormData() {
         const formData = {};
         const form = document.getElementById('user-form');
         const inputs = form.querySelectorAll('input, select, textarea');
         
-                    inputs.forEach(input => {
-                if (input.name && input.value !== '') {
-                    if (input.type === 'checkbox') {
-                        formData[input.name] = input.checked;
-                    } else {
-                        formData[input.name] = input.value;
-                    }
+        // Only get data from editable fields
+        inputs.forEach(input => {
+            if (input.name && ['fullName', 'phoneNumber', 'address', 'roleName'].includes(input.id)) {
+                if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked;
+                } else {
+                    formData[input.name] = input.value.trim();
                 }
-            });
+            }
+        });
 
         return formData;
+    }
+
+    // Validate add user form
+    validateAddUserForm() {
+        const form = document.getElementById('add-user-form');
+        if (!form) return false;
+
+        const requiredFields = [
+            { id: 'add-fullName', name: 'Họ và tên' },
+            { id: 'add-username', name: 'Username' },
+            { id: 'add-email', name: 'Email' },
+            { id: 'add-password', name: 'Mật khẩu' },
+            { id: 'add-roleName', name: 'Vai trò' }
+        ];
+
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            const input = document.getElementById(field.id);
+            if (input) {
+                this.clearValidation(input);
+                
+                if (!input.value.trim()) {
+                    this.showValidationError(input, `${field.name} là bắt buộc`);
+                    isValid = false;
+                } else if (field.id === 'add-username' && !this.isValidUsername(input.value.trim())) {
+                    this.showValidationError(input, 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới');
+                    isValid = false;
+                } else if (field.id === 'add-email' && !this.isValidEmail(input.value.trim())) {
+                    this.showValidationError(input, 'Email không hợp lệ');
+                    isValid = false;
+                } else if (field.id === 'add-password' && input.value.trim().length < 6) {
+                    this.showValidationError(input, 'Mật khẩu phải có ít nhất 6 ký tự');
+                    isValid = false;
+                }
+            }
+        });
+
+        // Validate phone number if provided
+        const phoneInput = document.getElementById('add-phoneNumber');
+        if (phoneInput && phoneInput.value.trim() && !this.isValidPhone(phoneInput.value.trim())) {
+            this.showValidationError(phoneInput, 'Số điện thoại không hợp lệ');
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     // Validate form
     validateForm() {
         const form = document.getElementById('user-form');
-        const inputs = form.querySelectorAll('input[required], select[required]');
+        // Only validate editable fields
+        const editableFields = ['fullName', 'phoneNumber', 'address', 'roleName'];
         let isValid = true;
 
-        inputs.forEach(input => {
-            this.clearValidation(input);
-            
-            if (!input.value.trim()) {
-                this.showValidationError(input, 'Trường này là bắt buộc');
-                isValid = false;
-            } else if (input.type === 'email' && !this.isValidEmail(input.value)) {
-                this.showValidationError(input, 'Email không hợp lệ');
-                isValid = false;
-            } else if (input.name === 'password' && input.value.length < 6) {
-                this.showValidationError(input, 'Mật khẩu phải có ít nhất 6 ký tự');
-                isValid = false;
+        editableFields.forEach(fieldId => {
+            const input = document.getElementById(fieldId);
+            if (input) {
+                this.clearValidation(input);
+                
+                if (fieldId === 'fullName' && !input.value.trim()) {
+                    this.showValidationError(input, 'Họ và tên là bắt buộc');
+                    isValid = false;
+                } else if (fieldId === 'phoneNumber' && input.value.trim() && !this.isValidPhone(input.value.trim())) {
+                    this.showValidationError(input, 'Số điện thoại không hợp lệ');
+                    isValid = false;
+                } else if (fieldId === 'roleName' && !input.value.trim()) {
+                    this.showValidationError(input, 'Vai trò là bắt buộc');
+                    isValid = false;
+                }
             }
         });
 
@@ -873,6 +1059,20 @@ class UserManager {
     isValidEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
+    }
+    
+    // Validate username
+    isValidUsername(username) {
+        // Username: 3-20 characters, alphanumeric and underscore only
+        const re = /^[a-zA-Z0-9_]{3,20}$/;
+        return re.test(username);
+    }
+    
+    // Validate phone number
+    isValidPhone(phone) {
+        // Allow Vietnamese phone numbers: +84, 84, 0 followed by 9-10 digits
+        const re = /^(\+84|84|0)?[0-9]{9,10}$/;
+        return re.test(phone);
     }
 
     // Delete user
@@ -916,48 +1116,93 @@ class UserManager {
         window.location.href = 'user-detail.html';
     }
 
+    // Add User Modal methods
+    openAddUserModal() {
+        const modal = document.getElementById('addUserModal');
+        if (modal) {
+            // Reset form
+            this.resetAddUserForm();
+            
+            // Show modal using Bootstrap 4/jQuery
+            $(modal).modal('show');
+        }
+    }
+
+    resetAddUserForm() {
+        const form = document.getElementById('add-user-form');
+        if (form) {
+            form.reset();
+            // Clear validation states
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.classList.remove('is-invalid', 'is-valid');
+                const feedback = input.parentElement.querySelector('.invalid-feedback');
+                if (feedback) feedback.textContent = '';
+            });
+        }
+    }
+
     // Delete modal methods
     openDeleteModal(userId, userName) {
         this.userToDelete = { id: userId, name: userName };
         const modal = document.getElementById('deleteModal');
         if (modal) {
-            modal.querySelector('p').textContent = `Bạn có chắc chắn muốn xóa người dùng "${userName}" không?`;
-            modal.style.display = 'block';
+            // Update modal content
+            const modalBody = modal.querySelector('.modal-body p');
+            if (modalBody) {
+                modalBody.textContent = `Bạn có chắc chắn muốn xóa người dùng "${userName}" không?`;
+            }
+            
+            // Show modal using Bootstrap 5
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
         }
     }
 
     closeDeleteModal() {
-        this.userToDelete = null;
         const modal = document.getElementById('deleteModal');
         if (modal) {
-            modal.style.display = 'none';
+            // Hide modal using Bootstrap 5
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (bootstrapModal) {
+                bootstrapModal.hide();
+            }
         }
     }
 
     async confirmDelete() {
-        if (!this.userToDelete) return;
+        if (!this.userToDelete) {
+            console.error('No user to delete');
+            return;
+        }
 
+        // Store user info before closing modal
+        const userToDelete = { ...this.userToDelete };
+        
         this.closeDeleteModal();
         this.showLoading();
 
         try {
+            console.log('Deleting user with publicId:', userToDelete.id);
+            
             const response = await this.makeAuthenticatedRequest(
-                `${this.apiBaseUrl}/user/${this.userToDelete.id}`,
+                `${this.apiBaseUrl}/user/${userToDelete.id}`,
                 { method: 'DELETE' }
             );
 
             if (response && response.ok) {
-                this.showSuccess(`Đã xóa người dùng "${this.userToDelete.name}"`);
+                this.showSuccess(`Đã xóa người dùng "${userToDelete.name}"`);
                 this.loadUsers(); // Reload the list
             } else {
-                this.showError('Không thể xóa người dùng');
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.message || 'Không thể xóa người dùng';
+                this.showError(errorMessage);
             }
         } catch (error) {
             console.error('Error deleting user:', error);
             this.showError('Lỗi khi xóa người dùng');
         } finally {
             this.hideLoading();
-            this.userToDelete = null;
         }
     }
 
@@ -977,9 +1222,15 @@ class UserManager {
         if (oldSearch) oldSearch.value = '';
         const newSearch = document.getElementById('exampleInputSearch');
         if (newSearch) newSearch.value = '';
-        document.getElementById('role-filter').value = '';
-        document.getElementById('sort-by').value = 'createdat';
-        document.getElementById('sort-direction').value = 'Desc';
+        
+        const roleFilter = document.getElementById('role-filter');
+        if (roleFilter) roleFilter.value = '';
+        
+        const sortBy = document.getElementById('sort-by');
+        if (sortBy) sortBy.value = 'fullName';
+        
+        const sortDirection = document.getElementById('sort-direction');
+        if (sortDirection) sortDirection.value = 'Desc';
         
         this.currentPage = 1;
         this.loadUsers();
@@ -1008,7 +1259,7 @@ class UserManager {
             if (this.totalItems && this.totalItems > 0) {
                 const start = (this.currentPage - 1) * this.pageSize + 1;
                 const end = Math.min(this.currentPage * this.pageSize, this.totalItems);
-                infoSpan.textContent = `Showing ${start} to ${end} of ${this.totalItems} entries`;
+                infoSpan.textContent = `Hiển thị ${start} đến ${end} trong tổng số ${this.totalItems} người dùng`;
             } else {
                 infoSpan.textContent = `Trang ${this.currentPage} của ${this.totalPages}`;
             }
@@ -1053,11 +1304,11 @@ class UserManager {
 
         return `
             <li class="page-item ${prevClass}">
-                <a class="page-link" href="javascript:void(0)" onclick="userManager.previousPage()">Previous</a>
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.previousPage()">Trước</a>
             </li>
             ${pages.join('')}
             <li class="page-item ${nextClass}">
-                <a class="page-link" href="javascript:void(0)" onclick="userManager.nextPage()">Next</a>
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.nextPage()">Tiếp</a>
             </li>
         `;
     }
