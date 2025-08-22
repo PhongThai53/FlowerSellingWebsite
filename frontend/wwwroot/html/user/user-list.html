@@ -265,21 +265,27 @@
     </div>
     
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Xác nhận xóa</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="las la-exclamation-triangle text-warning me-2"></i>
+                        Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+                    <p class="mb-0">Bạn có chắc chắn muốn xóa người dùng này không?</p>
+                    <small class="text-muted">Hành động này không thể hoàn tác.</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-danger" onclick="userManager.confirmDelete()">Xóa</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="las la-times me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="userManager.confirmDelete()">
+                        <i class="las la-trash me-1"></i>Xóa
+                    </button>
                 </div>
             </div>
         </div>
@@ -303,6 +309,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (window.userManager) {
                 window.userManager.initializeUserList();
+            }
+            
+            // Handle modal events
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                // Reset modal when hidden
+                deleteModal.addEventListener('hidden.bs.modal', function () {
+                    if (window.userManager) {
+                        window.userManager.userToDelete = null;
+                    }
+                });
             }
         });
     </script>
@@ -381,6 +398,36 @@
             .col-sm-6.col-md-2 {
                 margin-bottom: 15px;
             }
+        }
+        
+        /* Modal Styles */
+        .modal-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .modal-header .close:hover {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
         }
     </style>
 </body>

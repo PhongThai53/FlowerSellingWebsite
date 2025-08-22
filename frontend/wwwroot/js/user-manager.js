@@ -980,43 +980,62 @@ class UserManager {
         this.userToDelete = { id: userId, name: userName };
         const modal = document.getElementById('deleteModal');
         if (modal) {
-            modal.querySelector('p').textContent = `Bạn có chắc chắn muốn xóa người dùng "${userName}" không?`;
-            modal.style.display = 'block';
+            // Update modal content
+            const modalBody = modal.querySelector('.modal-body p');
+            if (modalBody) {
+                modalBody.textContent = `Bạn có chắc chắn muốn xóa người dùng "${userName}" không?`;
+            }
+            
+            // Show modal using Bootstrap 5
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
         }
     }
 
     closeDeleteModal() {
-        this.userToDelete = null;
         const modal = document.getElementById('deleteModal');
         if (modal) {
-            modal.style.display = 'none';
+            // Hide modal using Bootstrap 5
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (bootstrapModal) {
+                bootstrapModal.hide();
+            }
         }
     }
 
     async confirmDelete() {
-        if (!this.userToDelete) return;
+        if (!this.userToDelete) {
+            console.error('No user to delete');
+            return;
+        }
 
+        // Store user info before closing modal
+        const userToDelete = { ...this.userToDelete };
+        
         this.closeDeleteModal();
         this.showLoading();
 
         try {
+            console.log('Deleting user with publicId:', userToDelete.id);
+            
             const response = await this.makeAuthenticatedRequest(
-                `${this.apiBaseUrl}/user/${this.userToDelete.id}`,
+                `${this.apiBaseUrl}/user/${userToDelete.id}`,
                 { method: 'DELETE' }
             );
 
             if (response && response.ok) {
-                this.showSuccess(`Đã xóa người dùng "${this.userToDelete.name}"`);
+                this.showSuccess(`Đã xóa người dùng "${userToDelete.name}"`);
                 this.loadUsers(); // Reload the list
             } else {
-                this.showError('Không thể xóa người dùng');
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.message || 'Không thể xóa người dùng';
+                this.showError(errorMessage);
             }
         } catch (error) {
             console.error('Error deleting user:', error);
             this.showError('Lỗi khi xóa người dùng');
         } finally {
             this.hideLoading();
-            this.userToDelete = null;
         }
     }
 
