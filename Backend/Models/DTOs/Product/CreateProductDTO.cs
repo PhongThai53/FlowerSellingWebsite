@@ -5,6 +5,8 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
 {
     public class CreateProductDTO
     {
+        public int id { get; set; }
+
         [Required(ErrorMessage = "Product name is required")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Product name must be between 2 and 100 characters")]
         public string Name { get; set; } = null!;
@@ -16,7 +18,6 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal? Price { get; set; }
 
-        [Required(ErrorMessage = "URL is required")]
         [StringLength(500, ErrorMessage = "URL cannot exceed 500 characters")]
         public string Url { get; set; } = null!;
 
