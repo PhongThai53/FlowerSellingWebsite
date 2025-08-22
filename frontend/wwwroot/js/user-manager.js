@@ -53,6 +53,31 @@ class UserManager {
             newSearchInput.addEventListener('input', debouncedSearch);
         }
 
+        // Wire filter and sort dropdowns for auto-submit
+        const roleFilter = document.getElementById('role-filter');
+        if (roleFilter) {
+            roleFilter.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
+        const sortBy = document.getElementById('sort-by');
+        if (sortBy) {
+            sortBy.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
+        const sortDirection = document.getElementById('sort-direction');
+        if (sortDirection) {
+            sortDirection.addEventListener('change', () => {
+                this.currentPage = 1;
+                this.loadUsers();
+            });
+        }
+
         // Prepare pagination container for new UI
         const paginationContainer = document.querySelector('ul.pagination');
         if (paginationContainer) {
@@ -428,7 +453,7 @@ class UserManager {
                 || document.getElementById('search-input')?.value
                 || ''),
             role: document.getElementById('role-filter')?.value || '',
-            sortBy: document.getElementById('sort-by')?.value || 'createdat',
+            sortBy: document.getElementById('sort-by')?.value || 'fullName',
             sortDirection: document.getElementById('sort-direction')?.value || 'Desc'
         };
     }
@@ -488,15 +513,15 @@ class UserManager {
                 <td>${user.fullName || '-'}</td>
                 <td>${phone}</td>
                 <td>${user.email || '-'}</td>
-                <td>-</td>
+                <td>${user.address || '-'}</td>
                 <td><span class="badge bg-primary">Active</span></td>
                 <td>${roleOrCompany}</td>
                 <td>${createdDate}</td>
                 <td>
                     <div class="flex align-items-center list-user-action">
-                        <a class="btn btn-sm bg-primary" title="Add" href="javascript:void(0)" onclick="userManager.viewUser('${user.publicId}')"><i class="ri-user-add-line mr-0"></i></a>
-                        <a class="btn btn-sm bg-primary" title="Edit" href="javascript:void(0)" onclick="userManager.editUser('${user.publicId}')"><i class="ri-pencil-line mr-0"></i></a>
-                        <a class="btn btn-sm bg-primary" title="Delete" href="javascript:void(0)" onclick="userManager.openDeleteModal('${user.publicId}', '${(user.fullName || '').replace(/"/g, '\\"')}')"><i class="ri-delete-bin-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Xem chi tiết" href="javascript:void(0)" onclick="userManager.viewUser('${user.publicId}')"><i class="ri-eye-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Chỉnh sửa" href="javascript:void(0)" onclick="userManager.editUser('${user.publicId}')"><i class="ri-pencil-line mr-0"></i></a>
+                        <a class="btn btn-sm bg-primary" title="Xóa" href="javascript:void(0)" onclick="userManager.openDeleteModal('${user.publicId}', '${(user.fullName || '').replace(/"/g, '\\"')}')"><i class="ri-delete-bin-line mr-0"></i></a>
                     </div>
                 </td>
             </tr>
@@ -977,9 +1002,15 @@ class UserManager {
         if (oldSearch) oldSearch.value = '';
         const newSearch = document.getElementById('exampleInputSearch');
         if (newSearch) newSearch.value = '';
-        document.getElementById('role-filter').value = '';
-        document.getElementById('sort-by').value = 'createdat';
-        document.getElementById('sort-direction').value = 'Desc';
+        
+        const roleFilter = document.getElementById('role-filter');
+        if (roleFilter) roleFilter.value = '';
+        
+        const sortBy = document.getElementById('sort-by');
+        if (sortBy) sortBy.value = 'fullName';
+        
+        const sortDirection = document.getElementById('sort-direction');
+        if (sortDirection) sortDirection.value = 'Desc';
         
         this.currentPage = 1;
         this.loadUsers();
@@ -1008,7 +1039,7 @@ class UserManager {
             if (this.totalItems && this.totalItems > 0) {
                 const start = (this.currentPage - 1) * this.pageSize + 1;
                 const end = Math.min(this.currentPage * this.pageSize, this.totalItems);
-                infoSpan.textContent = `Showing ${start} to ${end} of ${this.totalItems} entries`;
+                infoSpan.textContent = `Hiển thị ${start} đến ${end} trong tổng số ${this.totalItems} người dùng`;
             } else {
                 infoSpan.textContent = `Trang ${this.currentPage} của ${this.totalPages}`;
             }
@@ -1053,11 +1084,11 @@ class UserManager {
 
         return `
             <li class="page-item ${prevClass}">
-                <a class="page-link" href="javascript:void(0)" onclick="userManager.previousPage()">Previous</a>
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.previousPage()">Trước</a>
             </li>
             ${pages.join('')}
             <li class="page-item ${nextClass}">
-                <a class="page-link" href="javascript:void(0)" onclick="userManager.nextPage()">Next</a>
+                <a class="page-link" href="javascript:void(0)" onclick="userManager.nextPage()">Tiếp</a>
             </li>
         `;
     }
