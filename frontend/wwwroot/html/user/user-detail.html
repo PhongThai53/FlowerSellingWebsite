@@ -1,503 +1,401 @@
-<!DOCTYPE html>
-<html class="no-js" lang="zxx">
+<!doctype html>
+<html lang="vi">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="User Detail Management" />
-    <title>User Detail - Floda</title>
-
-    <!--=== Favicon ===-->
-    <link rel="shortcut icon" href="../../images/favicon.ico" type="image/x-icon" />
-
-    <!-- Google fonts include -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear" rel="stylesheet" />
-
-    <!-- All Vendor & plugins CSS include -->
-    <link href="../../css/vendor.css" rel="stylesheet" />
-    <!-- Main Style CSS -->
-    <link href="../../css/style.css" rel="stylesheet" />
-    <!-- Custom CSS for auth pages -->
-    <link href="../../css/auth.css" rel="stylesheet" />
-    <!-- Custom CSS for user pages -->
-    <link href="../../css/user.css" rel="stylesheet" />
-
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <!-- Linearicons -->
-    <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css" />
-
-    <!-- Custom User Detail CSS -->
-    <style>
-        .user-detail-container {
-            min-height: 70vh;
-        }
-        .user-detail-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            position: relative;
-        }
-        .card-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .mode-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        .card-body {
-            padding: 30px;
-        }
-        .user-avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 36px;
-            font-weight: bold;
-            margin: 0 auto 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            outline: none;
-        }
-        .form-control:read-only {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-        .user-status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-        .status-active {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .role-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-right: 10px;
-        }
-        .role-admin {
-            background: #dc3545;
-            color: white;
-        }
-        .role-user {
-            background: #28a745;
-            color: white;
-        }
-        .role-moderator {
-            background: #ffc107;
-            color: #212529;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5a6fd8;
-        }
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #218838;
-        }
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #667eea;
-            color: #667eea;
-        }
-        .btn-outline:hover {
-            background: #667eea;
-            color: white;
-        }
-        .view-mode .form-control {
-            border: none;
-            background: transparent;
-            padding-left: 0;
-            font-weight: 500;
-        }
-        .view-mode .form-label::after {
-            content: ':';
-        }
-        .edit-mode .user-avatar-large {
-            border: 3px dashed #667eea;
-            cursor: pointer;
-            position: relative;
-        }
-        .edit-mode .user-avatar-large:hover {
-            opacity: 0.8;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            position: relative;
-        }
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        .alert-warning {
-            color: #856404;
-            background-color: #fff3cd;
-            border-color: #ffeaa7;
-        }
-        .alert-dismissible {
-            padding-right: 50px;
-        }
-        .alert-dismissible .close {
-            position: absolute;
-            top: 8px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.5;
-        }
-        .alert-dismissible .close:hover {
-            opacity: 1;
-        }
-        .breadcrumb {
-            background: transparent;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-        .breadcrumb-item {
-            color: #6c757d;
-        }
-        .breadcrumb-item.active {
-            color: #495057;
-            font-weight: 600;
-        }
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: "/";
-            color: #6c757d;
-            margin: 0 8px;
-        }
-        .password-field {
-            position: relative;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #6c757d;
-            cursor: pointer;
-        }
-        .validation-feedback {
-            display: block;
-            width: 100%;
-            margin-top: 5px;
-            font-size: 12px;
-        }
-        .invalid-feedback {
-            color: #dc3545;
-        }
-        .valid-feedback {
-            color: #28a745;
-        }
-        .is-invalid {
-            border-color: #dc3545;
-        }
-        .is-valid {
-            border-color: #28a745;
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chi tiết người dùng | Flower Selling Website</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="../PoshDashTemplate/assets/images/favicon.ico" />
+    <link rel="stylesheet" href="../PoshDashTemplate/assets/css/backend-plugin.min.css">
+    <link rel="stylesheet" href="../PoshDashTemplate/assets/css/backend.css?v=1.0.0">
+    <link rel="stylesheet" href="../PoshDashTemplate/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../PoshDashTemplate/assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css">
+    <link rel="stylesheet" href="../PoshDashTemplate/assets/vendor/remixicon/fonts/remixicon.css">
 </head>
-
 <body>
-    <!-- Load Header Component -->
-    <div hx-get="../components/header.html" hx-trigger="load" hx-swap="outerHTML"></div>
-
-    <!-- Main Content -->
-    <main class="main-wrapper">
-        <div class="container">
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="../common/homepage.html">Trang chủ</a></li>
-                    <li class="breadcrumb-item"><a href="user-list.html">Quản lý người dùng</a></li>
-                    <li class="breadcrumb-item active" id="breadcrumb-current">Chi tiết người dùng</li>
-                </ol>
-            </nav>
-
-            <!-- Alert Container -->
-            <div id="alert-container"></div>
-
-            <!-- User Detail Card -->
-            <div class="user-detail-card">
-                <!-- Card Header -->
-                <div class="card-header">
-                    <h2 id="card-title">Chi tiết người dùng</h2>
-                    <div class="mode-toggle">
-                        <button id="edit-toggle-btn" class="btn btn-outline" onclick="userManager.toggleEditMode()">
-                            <i class="fa fa-edit"></i> Chỉnh sửa
-                        </button>
-                    </div>
+    <!-- Loader -->
+    <div id="loading">
+        <div id="loading-center"></div>
+    </div>
+    
+    <!-- Wrapper Start -->
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="iq-sidebar sidebar-default">
+            <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
+                <a href="../backend/index.html" class="header-logo">
+                    <img src="../assets/images/logo.png" class="img-fluid rounded-normal light-logo" alt="logo">
+                    <h5 class="logo-title light-logo ml-3">FlowerShop</h5>
+                </a>
+                <div class="iq-menu-bt-sidebar ml-0">
+                    <i class="las la-bars wrapper-menu"></i>
                 </div>
-
-                <!-- Card Body -->
-                <div class="card-body" id="user-detail-content">
-                    <!-- User Avatar -->
-                    <div class="text-center mb-4">
-                        <div id="user-avatar" class="user-avatar-large">
-                            <i class="fa fa-user"></i>
+            </div>
+            
+            <div class="data-scrollbar" data-scroll="1">
+                <nav class="iq-sidebar-menu">
+                    <ul id="iq-sidebar-toggle" class="iq-menu">
+                        <li class="">
+                            <a href="../backend/index.html" class="svg-icon">
+                                <svg class="svg-icon" id="p-dash1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg>
+                                <span class="ml-4">Dashboard</span>
+                            </a>
+                        </li>
+                        
+                        <li class="">
+                            <a href="#user" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                                <svg class="svg-icon" id="p-dash8" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <span class="ml-4">Quản lý người dùng</span>
+                                <svg class="svg-icon iq-arrow-right arrow-active" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="10 15 15 20 20 15"></polyline>
+                                    <path d="M4 4h7a4 4 0 0 1 4 4v12"></path>
+                                </svg>
+                            </a>
+                            <ul id="user" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                <li class="">
+                                    <a href="user-list.html">
+                                        <i class="las la-minus"></i><span>Danh sách người dùng</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <li class="">
+                            <a href="../backend/page-list-product.html" class="">
+                                <svg class="svg-icon" id="p-dash2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <span class="ml-4">Sản phẩm</span>
+                            </a>
+                        </li>
+                        
+                        <li class="">
+                            <a href="../backend/page-list-category.html" class="">
+                                <svg class="svg-icon" id="p-dash3" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span class="ml-4">Danh mục</span>
+                            </a>
+                        </li>
+                        
+                        <li class="">
+                            <a href="../backend/page-list-order.html" class="">
+                                <svg class="svg-icon" id="p-dash4" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                                </svg>
+                                <span class="ml-4">Đơn hàng</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Top Navbar -->
+        <div class="iq-top-navbar">
+            <div class="iq-navbar-custom">
+                <nav class="navbar navbar-expand-lg navbar-light p-0">
+                    <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
+                        <i class="ri-menu-line wrapper-menu"></i>
+                        <a href="../backend/index.html" class="header-logo">
+                            <img src="../assets/images/logo.png" class="img-fluid rounded-normal" alt="logo">
+                            <h5 class="logo-title ml-3">FlowerShop</h5>
+                        </a>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ml-auto navbar-list align-items-center">
+                                <li class="nav-item nav-icon dropdown caption-content">
+                                    <a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <img src="../assets/images/user/1.png" class="img-fluid rounded" alt="user">
+                                    </a>
+                                    <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton4">
+                                        <div class="card shadow-none m-0">
+                                            <div class="card-body p-0 text-center">
+                                                <div class="media-body profile-detail text-center">
+                                                    <img src="../assets/images/page-img/profile-bg.jpg" alt="profile-bg" class="rounded-top img-fluid mb-4">
+                                                    <img src="../assets/images/user/1.png" alt="profile-img" class="rounded profile-img img-fluid avatar-70">
+                                                </div>
+                                                <div class="p-3">
+                                                    <h5 class="mb-1" id="current-user-email">admin@flowershop.com</h5>
+                                                    <p class="mb-0">Quản trị viên</p>
+                                                    <div class="d-flex align-items-center justify-content-center mt-3">
+                                                        <a href="user-detail.html" class="btn border mr-2">Hồ sơ</a>
+                                                        <a href="../auth/login-register.html" class="btn border">Đăng xuất</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-
-                    <!-- User Form -->
-                    <form id="user-form" class="view-mode">
-                        <div class="info-grid">
-                            <!-- Basic Information -->
-                            <div>
-                                <h4 class="mb-3">Thông tin cơ bản</h4>
-                                
-                                <div class="form-group">
-                                    <label for="fullName" class="form-label">Họ và tên</label>
-                                    <input type="text" id="fullName" name="fullName" class="form-control" readonly>
-                                    <div class="invalid-feedback"></div>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Content Page -->
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!-- Breadcrumb -->
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="user-list.html">Danh sách người dùng</a></li>
+                                <li class="breadcrumb-item active" id="breadcrumb-current">Chi tiết người dùng</li>
+                            </ol>
+                        </nav>
+                        
+                        <!-- Alert Container -->
+                        <div id="alert-container"></div>
+                        
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="header-title">
+                                    <h4 class="card-title" id="card-title">Chi tiết người dùng</h4>
                                 </div>
-
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" id="email" name="email" class="form-control" readonly>
-                                    <div class="invalid-feedback"></div>
+                                <div class="header-action" id="view-mode-buttons">
+                                    <button class="btn btn-primary" onclick="userManager.toggleEditMode()">
+                                        <i class="las la-edit mr-2"></i>Cập nhật
+                                    </button>
+                                    <a href="user-list.html" class="btn btn-secondary ml-2">
+                                        <i class="las la-arrow-left mr-2"></i>Quay lại
+                                    </a>
                                 </div>
-
-                                <div class="form-group">
-                                    <label for="phoneNumber" class="form-label">Số điện thoại</label>
-                                    <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" readonly>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="address" class="form-label">Địa chỉ</label>
-                                    <textarea id="address" name="address" class="form-control" rows="3" readonly></textarea>
-                                    <div class="invalid-feedback"></div>
+                                <div class="header-action" id="edit-mode-buttons" style="display: none;">
+                                    <button class="btn btn-success" onclick="userManager.saveUser()">
+                                        <i class="las la-save mr-2"></i>Lưu
+                                    </button>
+                                    <button class="btn btn-warning ml-2" onclick="userManager.cancelEdit()">
+                                        <i class="las la-times mr-2"></i>Hủy
+                                    </button>
                                 </div>
                             </div>
-
-                            <!-- Account Information -->
-                            <div>
-                                <h4 class="mb-3">Thông tin tài khoản</h4>
-
-                                <div class="form-group">
-                                    <label for="roleName" class="form-label">Vai trò</label>
-                                    <select id="roleName" name="roleName" class="form-control" disabled>
-                                        <option value="">Chọn vai trò</option>
-                                    </select>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="createdAt" class="form-label">Ngày tạo</label>
-                                    <input type="text" id="createdAt" class="form-control" readonly>
-                                </div>
-
-                                <!-- Password field - only for create mode -->
-                                <div class="form-group" id="password-group" style="display: none;">
-                                    <label for="password" class="form-label">Mật khẩu</label>
-                                    <div class="password-field">
-                                        <input type="password" id="password" name="password" class="form-control">
-                                        <button type="button" class="password-toggle" onclick="userManager.togglePassword('password')">
-                                            <i class="fa fa-eye"></i>
-                                        </button>
+                            
+                            <div class="card-body">
+                                <form id="user-form">
+                                    <div class="row">
+                                        <!-- User Avatar -->
+                                        <div class="col-md-12 text-center mb-4">
+                                            <div id="user-avatar" class="rounded d-inline-flex align-items-center justify-content-center avatar-100 bg-primary text-white mx-auto">
+                                                <span class="h2 mb-0">U</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Basic Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="fullName" name="fullName" required readonly>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" name="email" readonly>
+                                                <small class="form-text text-muted">Email không thể thay đổi</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Vai trò</label>
+                                                <select class="form-control" id="roleName" name="roleName" disabled>
+                                                    <option value="">Chọn vai trò</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Địa chỉ</label>
+                                                <textarea class="form-control" id="address" name="address" rows="3" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Additional Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Ngày tạo</label>
+                                                <input type="text" class="form-control" id="createdAt" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Trạng thái</label>
+                                                <input type="text" class="form-control" id="status" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- User ID Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">ID người dùng</label>
+                                                <input type="text" class="form-control" id="publicId" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">ID nội bộ</label>
+                                                <input type="text" class="form-control" id="id" readonly>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="invalid-feedback"></div>
-                                    <small class="text-muted">Mật khẩu phải có ít nhất 6 ký tự</small>
-                                </div>
+                                </form>
                             </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="btn-group justify-content-center">
-                            <!-- View Mode Buttons -->
-                            <div id="view-mode-buttons">
-                                <button type="button" class="btn btn-primary" onclick="userManager.toggleEditMode()">
-                                    <i class="fa fa-edit"></i> Chỉnh sửa
-                                </button>
-                                <a href="user-list.html" class="btn btn-secondary">
-                                    <i class="fa fa-arrow-left"></i> Quay lại
-                                </a>
-                                <button type="button" class="btn btn-danger" onclick="userManager.deleteUser()">
-                                    <i class="fa fa-trash"></i> Xóa
-                                </button>
-                            </div>
-
-                            <!-- Edit Mode Buttons -->
-                            <div id="edit-mode-buttons" style="display: none;">
-                                <button type="button" class="btn btn-success" onclick="userManager.saveUser()">
-                                    <i class="fa fa-save"></i> Lưu
-                                </button>
-                                <button type="button" class="btn btn-secondary" onclick="userManager.cancelEdit()">
-                                    <i class="fa fa-times"></i> Hủy
-                                </button>
-                            </div>
-
-                            <!-- Create Mode Buttons -->
-                            <div id="create-mode-buttons" style="display: none;">
-                                <button type="button" class="btn btn-success" onclick="userManager.createUser()">
-                                    <i class="fa fa-save"></i> Tạo người dùng
-                                </button>
-                                <a href="user-list.html" class="btn btn-secondary">
-                                    <i class="fa fa-times"></i> Hủy
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
     </div>
-
-    <!-- Load Footer Component -->
-    <div hx-get="../components/footer.html" hx-trigger="load" hx-swap="outerHTML"></div>
-
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-light" role="status">
+            <span class="sr-only">Đang tải...</span>
+        </div>
+    </div>
+    
     <!-- Scripts -->
-    <script src="../../js/vendor.js"></script>
-    <script src="../../js/active.js"></script>
+    <script src="../PoshDashTemplate/assets/js/backend-bundle.min.js"></script>
+    <script src="../PoshDashTemplate/assets/js/app.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/user-manager.js"></script>
-
+    
     <script>
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             if (window.userManager) {
-                userManager.initializeUserDetail();
-            } else {
-                console.error('UserManager not found. Please ensure user-manager.js is loaded.');
+                window.userManager.initializeUserDetail();
             }
         });
     </script>
+    
+    <style>
+        .avatar-100 {
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
+            font-weight: bold;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+            color: #6c757d;
+        }
+        
+        .form-control:disabled {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:hover {
+            border-color: #667eea;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .form-control.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+    </style>
 </body>
 </html>
