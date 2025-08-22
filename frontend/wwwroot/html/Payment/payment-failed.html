@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Failed - Floda Flower Shop</title>
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/payment.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="header-placeholder"></div>
+
+    <main class="payment-failed-container">
+      <div class="payment-failed-card">
+        <div class="failed-icon">
+          <i class="fas fa-times-circle"></i>
+        </div>
+
+        <h1>Payment Failed</h1>
+        <p class="failed-message">
+          Unfortunately, your payment could not be processed.
+        </p>
+
+        <div class="payment-details">
+          <div class="detail-row">
+            <span class="label">Order Number:</span>
+            <span class="value" id="orderNumber">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Error Message:</span>
+            <span class="value" id="errorMessage">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">VNPay</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="../Payment/checkout.html" class="btn btn-primary">
+            <i class="fas fa-redo"></i> Try Again
+          </a>
+          <a href="../shop.html" class="btn btn-secondary">
+            <i class="fas fa-shopping-cart"></i> Continue Shopping
+          </a>
+          <a href="../user/orders.html" class="btn btn-outline">
+            <i class="fas fa-list"></i> View Orders
+          </a>
+        </div>
+
+        <div class="help-section">
+          <h3>Need Help?</h3>
+          <p>
+            If you continue to experience issues, please contact our support
+            team:
+          </p>
+          <ul>
+            <li><i class="fas fa-phone"></i> +84 123 456 789</li>
+            <li><i class="fas fa-envelope"></i> support@floda.com</li>
+            <li><i class="fas fa-clock"></i> Mon-Fri: 8:00 AM - 6:00 PM</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script
+      src="../../js/component/header/HeaderManager.js"
+      type="module"
+    ></script>
+    <script
+      src="../../js/component/footer/FooterManager.js"
+      type="module"
+    ></script>
+    <script>
+      // Extract URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderNumber = urlParams.get("orderNumber");
+      const message = urlParams.get("message");
+
+      // Update the page with payment details
+      if (orderNumber) {
+        document.getElementById("orderNumber").textContent = orderNumber;
+      }
+      if (message) {
+        document.getElementById("errorMessage").textContent =
+          decodeURIComponent(message);
+      }
+    </script>
+  </body>
+</html>
+
+

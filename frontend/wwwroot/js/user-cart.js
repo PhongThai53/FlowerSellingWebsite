@@ -321,9 +321,9 @@ class CartPageManager {
     updateButtonContainer.innerHTML = `
       <td colspan="6" class="text-center">
         <div class="update-cart-section">
-          <button type="button" class="btn btn-primary update-cart-btn" id="update-cart-btn">
-            <i class="fa fa-refresh"></i> Cập nhật giỏ hàng
-          </button>
+<button type="button" class="btn btn-primary update-cart-btn" id="update-cart-btn" style="background-color: #007bff; color: #ffffff;">
+    <i class="fa fa-refresh"></i> Cập nhật giỏ hàng
+</button>
           <div class="update-cart-info">
             <small class="text-muted">Thay đổi số lượng và nhấn "Cập nhật giỏ hàng" để áp dụng</small>
           </div>
