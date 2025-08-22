@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Success - Floda Flower Shop</title>
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/payment.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="header-placeholder"></div>
+
+    <main class="payment-success-container">
+      <div class="payment-success-card">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+
+        <h1>Payment Successful!</h1>
+        <p class="success-message">
+          Your payment has been processed successfully.
+        </p>
+
+        <div class="payment-details">
+          <div class="detail-row">
+            <span class="label">Order Number:</span>
+            <span class="value" id="orderNumber">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Transaction ID:</span>
+            <span class="value" id="transactionId">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Amount:</span>
+            <span class="value" id="amount">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">VNPay</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="../user/order-confirmation.html" class="btn btn-primary">
+            <i class="fas fa-eye"></i> View Order Details
+          </a>
+          <a href="../common/shop.html" class="btn btn-secondary">
+            <i class="fas fa-shopping-cart"></i> Continue Shopping
+          </a>
+        </div>
+
+        <div class="next-steps">
+          <h3>What happens next?</h3>
+          <ul>
+            <li>You will receive an email confirmation shortly</li>
+            <li>Your order will be processed and prepared for shipping</li>
+            <li>You can track your order status in your account</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script
+      src="../../js/component/header/HeaderManager.js"
+      type="module"
+    ></script>
+    <script
+      src="../../js/component/footer/FooterManager.js"
+      type="module"
+    ></script>
+    <script>
+      // Extract URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderNumber = urlParams.get("orderNumber");
+      const transactionId = urlParams.get("transactionId");
+      const amount = urlParams.get("amount");
+
+      // Update the page with payment details
+      if (orderNumber) {
+        document.getElementById("orderNumber").textContent = orderNumber;
+      }
+      if (transactionId) {
+        document.getElementById("transactionId").textContent = transactionId;
+      }
+      if (amount) {
+        document.getElementById("amount").textContent = new Intl.NumberFormat(
+          "vi-VN",
+          {
+            style: "currency",
+            currency: "VND",
+          }
+        ).format(parseFloat(amount));
+      }
+
+      // Update order confirmation link
+      if (orderNumber) {
+        const orderLink = document.querySelector(
+          'a[href="../user/order-confirmation.html"]'
+        );
+        orderLink.href = `../user/order-confirmation.html?orderNumber=${orderNumber}`;
+      }
+    </script>
+  </body>
+</html>
+
+

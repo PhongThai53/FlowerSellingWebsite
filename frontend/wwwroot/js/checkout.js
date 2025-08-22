@@ -461,11 +461,20 @@ class CheckoutManager {
         if (orderData.paymentMethod === "vnpay") {
           // Redirect to VNPay
           console.log("Redirecting to VNPay...");
-          window.location.href = result.data.paymentUrl;
+          if (result.data.paymentUrl) {
+            window.location.href = result.data.paymentUrl;
+          } else {
+            console.error("VNPay payment URL not received");
+            this.showToast("VNPay payment URL not received", "error");
+          }
         } else {
           // Redirect to order confirmation for COD
           console.log("Redirecting to order confirmation...");
-          window.location.href = `../user/order-confirmation.html?orderId=${result.data.orderId}&orderNumber=${result.data.orderNumber}`;
+          if (result.data.redirectUrl) {
+            window.location.href = result.data.redirectUrl;
+          } else {
+            window.location.href = `../user/order-confirmation.html?orderId=${result.data.orderId}&orderNumber=${result.data.orderNumber}`;
+          }
         }
       } else {
         console.log("Order placement failed:", result.message);
