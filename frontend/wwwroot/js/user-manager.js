@@ -357,6 +357,18 @@ class UserManager {
             console.warn('roleName element not found (expected on detail page)');
         }
 
+        // Populate role select in add user modal
+        const addRoleSelect = document.getElementById('add-roleName');
+        if (addRoleSelect) {
+            console.log('Populating add-roleName dropdown...');
+            addRoleSelect.innerHTML = '<option value="">Chọn vai trò</option>';
+            this.availableRoles.forEach(role => {
+                addRoleSelect.innerHTML += `<option value="${role.value}">${role.label}</option>`;
+            });
+            console.log('Add role select populated with', this.availableRoles.length, 'roles');
+            populated = true;
+        }
+
         // If no elements found and we haven't exceeded retry limit, try again
         if (!populated && retryCount < maxRetries) {
             console.log(`Dropdown elements not ready, retrying in ${retryDelay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
@@ -817,7 +829,54 @@ class UserManager {
         }
     }
 
-    // Create user
+    // Create user from modal
+    async createUserFromModal() {
+        if (!this.validateAddUserForm()) return;
+
+        this.showLoading();
+
+        try {
+            const formData = this.getAddUserFormData();
+            console.log('Creating user with data:', formData);
+
+            const response = await this.makeAuthenticatedRequest(
+                `${this.apiBaseUrl}/user`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                }
+            );
+
+            if (response && response.ok) {
+                this.showSuccess('Tạo người dùng thành công');
+                
+                // Close modal using jQuery
+                const modal = document.getElementById('addUserModal');
+                if (modal) {
+                    $(modal).modal('hide');
+                }
+                
+                // Reload page after a short delay to show the success message
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.message || 'Không thể tạo người dùng';
+                this.showError(errorMessage);
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+            this.showError('Lỗi khi tạo người dùng');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    // Create user (legacy method)
     async createUser() {
         if (!this.validateForm()) return;
 
@@ -855,6 +914,35 @@ class UserManager {
         }
     }
 
+    // Get add user form data
+    getAddUserFormData() {
+        const formData = {};
+        const form = document.getElementById('add-user-form');
+        if (!form) return formData;
+
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            if (input.name && input.value.trim()) {
+                if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked;
+                } else {
+                    formData[input.name] = input.value.trim();
+                }
+            }
+        });
+
+        // Ensure required fields are always included (even if empty)
+        const requiredFields = ['fullName', 'username', 'email', 'password', 'roleName'];
+        requiredFields.forEach(field => {
+            if (!formData[field]) {
+                formData[field] = '';
+            }
+        });
+
+        return formData;
+    }
+
     // Get form data
     getFormData() {
         const formData = {};
@@ -873,6 +961,52 @@ class UserManager {
         });
 
         return formData;
+    }
+
+    // Validate add user form
+    validateAddUserForm() {
+        const form = document.getElementById('add-user-form');
+        if (!form) return false;
+
+        const requiredFields = [
+            { id: 'add-fullName', name: 'Họ và tên' },
+            { id: 'add-username', name: 'Username' },
+            { id: 'add-email', name: 'Email' },
+            { id: 'add-password', name: 'Mật khẩu' },
+            { id: 'add-roleName', name: 'Vai trò' }
+        ];
+
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            const input = document.getElementById(field.id);
+            if (input) {
+                this.clearValidation(input);
+                
+                if (!input.value.trim()) {
+                    this.showValidationError(input, `${field.name} là bắt buộc`);
+                    isValid = false;
+                } else if (field.id === 'add-username' && !this.isValidUsername(input.value.trim())) {
+                    this.showValidationError(input, 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới');
+                    isValid = false;
+                } else if (field.id === 'add-email' && !this.isValidEmail(input.value.trim())) {
+                    this.showValidationError(input, 'Email không hợp lệ');
+                    isValid = false;
+                } else if (field.id === 'add-password' && input.value.trim().length < 6) {
+                    this.showValidationError(input, 'Mật khẩu phải có ít nhất 6 ký tự');
+                    isValid = false;
+                }
+            }
+        });
+
+        // Validate phone number if provided
+        const phoneInput = document.getElementById('add-phoneNumber');
+        if (phoneInput && phoneInput.value.trim() && !this.isValidPhone(phoneInput.value.trim())) {
+            this.showValidationError(phoneInput, 'Số điện thoại không hợp lệ');
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     // Validate form
@@ -927,6 +1061,13 @@ class UserManager {
         return re.test(email);
     }
     
+    // Validate username
+    isValidUsername(username) {
+        // Username: 3-20 characters, alphanumeric and underscore only
+        const re = /^[a-zA-Z0-9_]{3,20}$/;
+        return re.test(username);
+    }
+    
     // Validate phone number
     isValidPhone(phone) {
         // Allow Vietnamese phone numbers: +84, 84, 0 followed by 9-10 digits
@@ -973,6 +1114,32 @@ class UserManager {
 
     openCreateUserModal() {
         window.location.href = 'user-detail.html';
+    }
+
+    // Add User Modal methods
+    openAddUserModal() {
+        const modal = document.getElementById('addUserModal');
+        if (modal) {
+            // Reset form
+            this.resetAddUserForm();
+            
+            // Show modal using Bootstrap 4/jQuery
+            $(modal).modal('show');
+        }
+    }
+
+    resetAddUserForm() {
+        const form = document.getElementById('add-user-form');
+        if (form) {
+            form.reset();
+            // Clear validation states
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.classList.remove('is-invalid', 'is-valid');
+                const feedback = input.parentElement.querySelector('.invalid-feedback');
+                if (feedback) feedback.textContent = '';
+            });
+        }
     }
 
     // Delete modal methods

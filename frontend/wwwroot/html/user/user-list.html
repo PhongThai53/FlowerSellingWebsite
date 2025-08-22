@@ -67,11 +67,7 @@
                                         <i class="las la-minus"></i><span>Danh sách người dùng</span>
                                     </a>
                                 </li>
-                                <li class="">
-                                    <a href="user-detail.html">
-                                        <i class="las la-minus"></i><span>Thêm người dùng</span>
-                                    </a>
-                                </li>
+                                
                             </ul>
                         </li>
                         
@@ -166,9 +162,9 @@
                                     <h4 class="card-title">Quản lý người dùng</h4>
                                 </div>
                                 <div class="header-action">
-                                    <a href="user-detail.html" class="btn btn-primary">
-                                        <i class="las la-plus mr-2"></i>Thêm người dùng
-                                    </a>
+                                    <button type="button" class="btn btn-primary" onclick="userManager.openAddUserModal()">
+                                        <i class="las la-plus me-2"></i>Thêm người dùng
+                                    </button>
                                 </div>
                             </div>
                             
@@ -264,6 +260,100 @@
         </div>
     </div>
     
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">
+                        <i class="las la-user-plus text-primary me-2"></i>
+                        Thêm người dùng mới
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-user-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-fullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="add-fullName" name="fullName" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-username" class="form-label">Username<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="add-username" name="username" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="add-email" name="email" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="add-password" name="password" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="userManager.togglePassword('add-password')">
+                                            <i class="las la-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-phoneNumber" class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" id="add-phoneNumber" name="phoneNumber">
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="add-roleName" class="form-label">Vai trò <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="add-roleName" name="roleName" required>
+                                        <option value="">Chọn vai trò</option>
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="add-address" class="form-label">Địa chỉ</label>
+                                    <textarea class="form-control" id="add-address" name="address" rows="2"></textarea>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="las la-times me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="userManager.createUserFromModal()">
+                        <i class="las la-save me-1"></i>Thêm người dùng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -318,6 +408,17 @@
                 deleteModal.addEventListener('hidden.bs.modal', function () {
                     if (window.userManager) {
                         window.userManager.userToDelete = null;
+                    }
+                });
+            }
+
+            // Handle add user modal events
+            const addUserModal = document.getElementById('addUserModal');
+            if (addUserModal) {
+                // Reset form when modal is hidden
+                $(addUserModal).on('hidden.bs.modal', function () {
+                    if (window.userManager) {
+                        window.userManager.resetAddUserForm();
                     }
                 });
             }
@@ -405,6 +506,34 @@
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
             border-bottom: none;
+        }
+        
+        /* Add User Modal Styles */
+        #addUserModal .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        #addUserModal .modal-content {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        #addUserModal .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        #addUserModal .form-control {
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+        
+        #addUserModal .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
         
         .modal-header .close {
