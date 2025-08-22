@@ -7,7 +7,10 @@ namespace FlowerSellingWebsite.Services.Interfaces
     {
         Task<PagedResult<OrderDTO>> GetOrderHistoryAsync(UrlQueryParams urlQueryParams, int? customerId = null);
 
-
         Task<OrderDTO?> GetOrderByIdAsync(int orderId);
+
+        Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId);
+        
+        Task<UserDTO?> GetUserByPublicIdAsync(Guid publicId);
     }
 }
