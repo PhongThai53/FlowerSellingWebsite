@@ -39,6 +39,8 @@ namespace FlowerSelling.Data
 
             public DbSet<Payments> Payments { get; set; }
             public DbSet<PaymentMethods> PaymentMethods { get; set; }
+            public DbSet<Invoices> Invoices { get; set; }
+            public DbSet<VNPayConfig> VNPayConfigs { get; set; }
             public DbSet<Deliveries> Deliveries { get; set; }
 
             public DbSet<Suppliers> Suppliers { get; set; }
@@ -56,6 +58,30 @@ namespace FlowerSelling.Data
                 base.OnModelCreating(modelBuilder);
 
                 // ===== CONFIGURE DATA TYPES =====
+                // Configure relationships
+                modelBuilder.Entity<Orders>()
+                    .HasOne(o => o.Customer)
+                    .WithMany()
+                    .HasForeignKey(o => o.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Payments>()
+                    .HasOne(p => p.Order)
+                    .WithMany(o => o.Payments)
+                    .HasForeignKey(p => p.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<Payments>()
+                    .HasOne(p => p.PaymentMethod)
+                    .WithMany(pm => pm.Payments)
+                    .HasForeignKey(p => p.PaymentMethodId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Invoices>()
+                    .HasOne(i => i.Order)
+                    .WithMany(o => o.Invoices)
+                    .HasForeignKey(i => i.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 // BaseEntity properties for all entities
                 ConfigureBaseEntityProperties<Users>(modelBuilder);

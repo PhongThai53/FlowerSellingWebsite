@@ -6,6 +6,7 @@ using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -142,11 +143,31 @@ namespace FlowerSellingWebsite.Services.Implementations
                 {
                     Page = page,
                     PageSize = pageSize,
+                    TotalItems = 0,
+                    TotalPages = 0,
+                    CartItems = new List<CartItemDTO>(),
+                    CartSummary = new CartSummaryDTO()
                 };
             }
 
             var pagedResult = await _cartRepository.GetPagedCartItemsAsync(cart.Id, page, pageSize);
             var cartSummary = await GetCartSummaryAsync(userId);
+
+            // Map cart items with proper product information
+            var cartItemDTOs = pagedResult.Items.Select(item => new CartItemDTO
+            {
+                Id = item.Id,
+                CartId = item.CartId,
+                ProductId = item.ProductId,
+                ProductName = item.Product?.Name ?? "Unknown Product",
+                ProductUrl = item.Product?.Url ?? "",
+                ProductImage = item.Product?.ProductPhotos?.FirstOrDefault(pp => !pp.IsDeleted)?.Url,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                LineTotal = item.LineTotal,
+                CreatedAt = item.CreatedAt,
+                UpdatedAt = item.UpdatedAt
+            }).ToList();
 
             return new PagedCartResultDTO
             {
@@ -154,7 +175,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 PageSize = pagedResult.PageSize,
                 TotalItems = pagedResult.TotalItems,
                 TotalPages = pagedResult.TotalPages,
-                CartItems = pagedResult.Items.Select(MapCartItemToDTO).ToList(),
+                CartItems = cartItemDTOs,
                 CartSummary = cartSummary
             };
         }
