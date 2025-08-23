@@ -10,10 +10,11 @@ namespace FlowerSellingWebsite.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
-
-        public ProductController(IProductService productService)
+        private readonly IWebHostEnvironment _env;
+        public ProductController(IProductService productService, IWebHostEnvironment env)
         {
             _productService = productService;
+            _env = env;
         }
 
         [HttpGet]
@@ -25,12 +26,11 @@ namespace FlowerSellingWebsite.Controllers
             [FromQuery] int max = 500000,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
-            [FromQuery] bool asc = true,
-            CancellationToken cancellationToken = default)
+            [FromQuery] bool asc = true)
         {
 
             var result = await _productService.GetPagedProductsAsync(
-                pageNumber, pageSize, categoryId, min, max, search, sortBy, asc, cancellationToken);
+                pageNumber, pageSize, categoryId, min, max, search, sortBy, asc);
 
             var data = new
             {
@@ -62,17 +62,50 @@ namespace FlowerSellingWebsite.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateProductDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update(int id, UpdateProductDTO dto)
         {
-            var updated = await _productService.UpdateProductAsync(id, dto, cancellationToken);
+            var updated = await _productService.UpdateProductAsync(id, dto);
             return Ok(ApiResponse<UpdateProductDTO>.Ok(updated!));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _productService.DeleteProductAsync(id, cancellationToken);
+            var deleted = await _productService.DeleteProductAsync(id);
             return Ok(ApiResponse<bool>.Ok(deleted));
+        }
+
+
+        [HttpPost("{id}/upload-image")]
+        public async Task<IActionResult> UploadImage(int id, List<IFormFile> productPhotos)
+        {
+            if (productPhotos == null || productPhotos.Count == 0)
+            {
+                return BadRequest("No files uploaded.");
+            }
+
+            var uploadPath = Path.Combine(_env.WebRootPath, "Image", "products", id.ToString());
+
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            for (int i = 0; i < productPhotos.Count; i++)
+            {
+                var file = productPhotos[i];
+
+                var fileName = i == 0 ? "primary.jpg" : file.FileName;
+
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+            }
+
+            return Ok(ApiResponse<string>.Ok("Images uploaded successfully"));
         }
     }
 }

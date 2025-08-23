@@ -65,100 +65,50 @@
                             <div class="card-body">
                                 <form action="page-list-product.html" data-toggle="validator">
                                     <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Product Type *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Standard</option>
-                                                    <option>Combo</option>
-                                                    <option>Digital</option>
-                                                    <option>Service</option>
-                                                </select>
-                                            </div>
-                                        </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Name *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Name" data-errors="Please Enter Name." required>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Code *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Code" data-errors="Please Enter Code." required>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Barcode Symbology *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>CREM01</option>
-                                                    <option>UM01</option>
-                                                    <option>SEM01</option>
-                                                    <option>COF01</option>
-                                                    <option>FUN01</option>
-                                                    <option>DIS01</option>
-                                                    <option>NIS01</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Category *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Beauty</option>
-                                                    <option>Grocery</option>
-                                                    <option>Food</option>
-                                                    <option>Furniture</option>
-                                                    <option>Shoes</option>
-                                                    <option>Frames</option>
-                                                    <option>Jewellery</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Cost *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Cost" data-errors="Please Enter Cost." required>
+                                                <input type="text" name="name" class="form-control" placeholder="Enter Product Name" data-errors="Please Enter Name." required>
                                                 <div class="help-block with-errors"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Price *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Price" data-errors="Please Enter Price." required>
+                                                <input type="number" name="price" class="form-control" placeholder="Enter Price" step="0.01" min="0.01" data-errors="Please Enter Price." required>
                                                 <div class="help-block with-errors"></div>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Tax Method *</label>
-                                                <select name="type" class="selectpicker form-control" data-style="py-0">
-                                                    <option>Exclusive</option>
-                                                    <option>Inclusive</option>
+                                                <label>Stock *</label>
+                                                <input type="number" name="stock" class="form-control" placeholder="Enter Stock Quantity" min="0" data-errors="Please Enter Stock." required>
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Category *</label>
+                                                <select id="categorySelect" name="categoryId" class="selectpicker form-control" data-style="py-0" required>
+                                                    <option value="">Select Category</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Quantity *</label>
-                                                <input type="text" class="form-control" placeholder="Enter Quantity" required>
-                                                <div class="help-block with-errors"></div>
+                                                <label>Description</label>
+                                                <textarea name="description" class="form-control" rows="4" placeholder="Enter product description..."></textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Image</label>
-                                                <input type="file" class="form-control image-file" name="pic" accept="image/*">
+                                            <div style="margin-bottom: 15px;" class="form-group">
+                                                <label style="display:block; font-weight:bold; margin-bottom:5px;">Product Images</label>
+                                                <input type="file" id="productPhotos" name="productPhotos" accept="image/*" multiple style="padding:5px; border:1px solid #ccc; border-radius:4px;">
+                                                <small style="display:block; margin-top:5px; color:#666;">Select multiple images. First image will be primary.</small>
                                             </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Description / Product Details</label>
-                                                <textarea class="form-control" rows="4"></textarea>
-                                            </div>
+
+                                            <!-- Khu vực hiển thị preview -->
+                                            <div id="preview-container" style="display:flex; flex-wrap:wrap; gap:10px; margin:15px 0;"></div>
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary mr-2">Add Product</button>
@@ -202,5 +152,281 @@
     <script src="../../js/admin/customizer.js"></script> <!-- Chart Custom JavaScript -->
     <script async src="../../js/admin/chart-custom.js"></script> <!-- app JavaScript -->
     <script src="../../js/admin/app.js"></script>
+
+
+    <script>
+        const API_BASE = "https://localhost:7062"; // sửa nếu api khác
+
+        // DOM refs (theo HTML bạn đã dán)
+        const form = document.querySelector('form[data-toggle="validator"]'); // or '#productForm' nếu bạn đặt id
+        const catSelect = document.getElementById("categorySelect");
+        const fileInput = document.getElementById("productPhotos");
+        const preview = document.getElementById("preview-container");
+
+        // ---------------- helpers ----------------
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, options);
+            const text = await res.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch (e) { json = null; }
+            if (!res.ok) {
+                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
+                throw new Error(msg);
+            }
+            return json ?? text;
+        }
+
+        function escapeHtml(s = "") {
+            return String(s).replace(/[&<>"']/g, m =>
+                ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])
+            );
+        }
+
+        function readIdFromLocation(loc) {
+            if (!loc) return 0;
+            const m = loc.match(/\/(\d+)(\/?|$|\?|#)/);
+            return m ? Number(m[1]) : 0;
+        }
+
+        function extractProductId(resp, location) {
+            // try common shapes
+            if (!resp && location) return readIdFromLocation(location);
+            try {
+                if (typeof resp === "number") return resp;
+                if (typeof resp === "string" && /^\d+$/.test(resp)) return Number(resp);
+                if (resp?.data && !Array.isArray(resp.data)) return resp.data.id ?? resp.data.productId ?? 0;
+                if (resp?.id) return resp.id;
+                return readIdFromLocation(location) || 0;
+            } catch (e) {
+                console.warn("extractProductId error", e, resp, location);
+                return readIdFromLocation(location) || 0;
+            }
+        }
+
+        // ---------------- load categories ----------------
+        async function loadCategories() {
+            if (!catSelect) return;
+            catSelect.disabled = true;
+            catSelect.innerHTML = `<option value="">Loading...</option>`;
+            try {
+                const raw = await fetchJSON(`${API_BASE}/api/ProductCategory`);
+                // expected shape: { succeeded: true, message: "...", data: [ ... ] }
+                const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+                if (!list.length) {
+                    catSelect.innerHTML = `<option value="">No categories</option>`;
+                    return;
+                }
+                catSelect.innerHTML = `<option value="">Select Category</option>` +
+                    list.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join("");
+            } catch (err) {
+                console.error("loadCategories failed:", err);
+                catSelect.innerHTML = `<option value="">Error loading</option>`;
+                // small visual hint
+                const existing = document.getElementById("cat-error-msg");
+                if (!existing && catSelect.parentElement) {
+                    const p = document.createElement("div");
+                    p.id = "cat-error-msg";
+                    p.style.color = "red";
+                    p.style.fontSize = "0.9em";
+                    p.style.marginTop = "6px";
+                    p.textContent = "Không tải được danh mục. Kiểm tra console/network.";
+                    catSelect.parentElement.appendChild(p);
+                }
+            } finally {
+                catSelect.disabled = false;
+                // if using bootstrap-select, refresh
+                try {
+                    if (window.jQuery && typeof jQuery('.selectpicker').selectpicker === 'function') {
+                        jQuery('.selectpicker').selectpicker('refresh');
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+
+        // ---------------- preview images (with remove) ----------------
+        function initPreviewHandler() {
+            if (!fileInput || !preview) return;
+            fileInput.addEventListener("change", () => {
+                // rebuild preview from current FileList
+                preview.innerHTML = "";
+                const files = Array.from(fileInput.files || []);
+                files.forEach((file, idx) => {
+                    const wrapper = document.createElement("div");
+                    wrapper.style.position = "relative";
+                    wrapper.style.display = "inline-block";
+                    wrapper.style.marginRight = "8px";
+
+                    const img = document.createElement("img");
+                    img.alt = file.name;
+                    img.title = file.name;
+                    Object.assign(img.style, {
+                        width: "90px", height: "90px", objectFit: "cover",
+                        border: "1px solid #ddd", borderRadius: "6px"
+                    });
+
+                    const reader = new FileReader();
+                    reader.onload = e => { img.src = e.target.result; };
+                    reader.readAsDataURL(file);
+
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.innerText = "×";
+                    Object.assign(btn.style, {
+                        position: "absolute", top: "2px", right: "2px",
+                        width: "20px", height: "20px", borderRadius: "50%",
+                        border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", cursor: "pointer"
+                    });
+                    btn.title = "Remove this image";
+                    btn.addEventListener("click", () => {
+                        // remove file at idx and rebuild FileList
+                        const arr = Array.from(fileInput.files || []);
+                        arr.splice(idx, 1);
+                        const dt = new DataTransfer();
+                        arr.forEach(f => dt.items.add(f));
+                        fileInput.files = dt.files;
+                        fileInput.dispatchEvent(new Event("change"));
+                    });
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    preview.appendChild(wrapper);
+                });
+            });
+        }
+
+        // ---------------- upload images ----------------
+        async function uploadImages(productId, files) {
+            if (!files || !files.length) return [];
+            const fd = new FormData();
+            files.forEach(f => fd.append("files", f, f.name));
+            const res = await fetch(`${API_BASE}/api/Image/products/${productId}`, { method: "POST", body: fd });
+            const text = await res.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
+            if (!res.ok) {
+                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
+                throw new Error(msg);
+            }
+            // normalize: server may return array or { data: [...] }
+            if (Array.isArray(json)) return json;
+            if (Array.isArray(json?.data)) return json.data;
+            if (typeof json === "string") return [json];
+            if (json && typeof json === "object") return [json];
+            return [];
+        }
+
+        // ---------------- create & update product ----------------
+        async function createProduct(payload) {
+            const res = await fetch(`${API_BASE}/api/Product`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const location = res.headers.get("location");
+            const text = await res.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
+            if (!res.ok) {
+                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
+                throw new Error(msg);
+            }
+            const id = extractProductId(json, location);
+            return { id, raw: json, location };
+        }
+
+        async function updateProduct(id, body) {
+            const res = await fetch(`${API_BASE}/api/Product/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            const text = await res.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
+            if (!res.ok) {
+                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
+                throw new Error(msg);
+            }
+            return json;
+        }
+
+        // ---------------- submit handler ----------------
+        async function handleSubmit(e) {
+            e.preventDefault();
+            try {
+                // Read fields from your form (names as in your HTML)
+                const fd = new FormData(e.target);
+                const name = (fd.get("name") || "").toString().trim();
+                const description = (fd.get("description") || "").toString().trim();
+                const price = parseFloat(fd.get("price"));
+                const stock = parseInt(fd.get("stock"), 10);
+                const categoryId = parseInt(fd.get("categoryId"), 10);
+                const files = Array.from(fileInput?.files || []);
+
+                if (!name || isNaN(price) || price < 0.01 || isNaN(stock) || isNaN(categoryId)) {
+                    return alert("Vui lòng nhập Name, Price(>=0.01), Stock và Category hợp lệ.");
+                }
+
+                // 1) Create product with placeholder url
+                const createPayload = {
+                    name, description, price,
+                    url: "/images/products/placeholder.jpg",
+                    stock, categoryId
+                };
+                const { id: productId, raw, location } = await createProduct(createPayload);
+                if (!productId) {
+                    console.warn("created product but no id found", { raw, location });
+                    return alert("Tạo sản phẩm xong nhưng không lấy được productId. Kiểm tra response API.");
+                }
+
+                // 2) Upload images if any
+                const uploaded = files.length ? await uploadImages(productId, files) : [];
+                // normalize urls: if uploaded elements are objects, try to read .url or .path
+                const urls = uploaded.map(u => (typeof u === "string" ? u : (u.url || u.path || JSON.stringify(u))));
+                const primaryUrl = urls[0] || `/images/products/${productId}/primary.jpg`;
+                const productPhotos = urls.map((u, i) => ({ url: u, isPrimary: i === 0 }));
+
+                // 3) Update product with photos & primary url
+                const updateBody = {
+                    id: productId,
+                    name, description, price,
+                    url: primaryUrl,
+                    stock, categoryId,
+                    productPhotos
+                };
+                await updateProduct(productId, updateBody);
+
+                alert("Tạo sản phẩm hoàn tất.");
+                e.target.reset();
+                if (preview) preview.innerHTML = "";
+                // refresh bootstrap-select if used
+                try {
+                    if (window.jQuery && typeof jQuery('.selectpicker').selectpicker === 'function') {
+                        jQuery('.selectpicker').selectpicker('refresh');
+                    }
+                } catch (err) { /* ignore */ }
+            } catch (err) {
+                console.error("submit error:", err);
+                alert("Lỗi: " + (err.message || err));
+            }
+        }
+
+        // ---------------- init ----------------
+        function init() {
+            if (!form) {
+                console.warn("Form element not found (selector: form[data-toggle=\"validator\"])");
+                return;
+            }
+            loadCategories().catch(e => console.error(e));
+            initPreviewHandler();
+            form.addEventListener("submit", handleSubmit);
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", init);
+        } else {
+            init();
+        }
+    </script>
 </body>
 </html>
