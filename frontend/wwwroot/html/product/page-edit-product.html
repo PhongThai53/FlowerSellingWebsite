@@ -220,13 +220,27 @@
                 return res?.data ?? res;
             }
 
+            // ============ UPDATED: Upload images with primary rename ============
             async function uploadImagesUpdate(productId, files) {
                 if (!files || !files.length) return [];
                 const fd = new FormData();
-                files.forEach(f => fd.append("files", f, f.name));
+
+                // Đổi tên ảnh đầu tiên thành primary, giữ nguyên các ảnh còn lại
+                files.forEach((f, idx) => {
+                    if (idx === 0) {
+                        // Lấy extension của file đầu tiên
+                        const ext = f.name.substring(f.name.lastIndexOf('.'));
+                        const primaryName = `primary${ext}`; // primary.jpg, primary.png, etc.
+                        fd.append("files", f, primaryName);
+                    } else {
+                        fd.append("files", f, f.name); // Giữ nguyên tên các file còn lại
+                    }
+                });
+
                 const resp = await fetchJson(`${API_BASE}/api/Image/products/${productId}`, { method: "PUT", body: fd });
                 return resp?.data ?? resp;
             }
+            // ================================================================
 
             async function updateProduct(productId, body) {
                 return await fetchJson(`${API_BASE}/api/Product/${productId}`, {
