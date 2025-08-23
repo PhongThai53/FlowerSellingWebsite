@@ -18,6 +18,7 @@ using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using VNPAY.NET;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +84,8 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IVnpay, Vnpay>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+
 // Application Services
 // Background Services
 builder.Services.AddHostedService<EmailVerificationCleanupService>();
