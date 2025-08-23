@@ -41,6 +41,9 @@ class MyAccountManager {
       );
     }
 
+    // Enhanced validation for form fields
+    this.setupFieldValidation();
+
     // Password form submission
     const passwordForm = document.getElementById("password-form");
     if (passwordForm) {
@@ -91,7 +94,7 @@ class MyAccountManager {
       if (response.succeeded && response.data) {
         this.currentUser = response.data;
         this.populateUserData();
-        this.loadAddressData(); // This can run after populating the main form
+        // Address functionality removed - no longer needed
       } else {
         throw new Error(response.message || "Failed to load profile data.");
       }
@@ -122,62 +125,16 @@ class MyAccountManager {
     // Populate account form
     const fullnameField = document.getElementById("fullname");
     const usernameField = document.getElementById("username");
-    const emailField = document.getElementById("email");
     const phoneField = document.getElementById("phone");
     const addressField = document.getElementById("address");
 
     if (fullnameField) fullnameField.value = this.currentUser.fullName || "";
     if (usernameField) usernameField.value = this.currentUser.userName || "";
-    if (emailField) emailField.value = this.currentUser.email || "";
     if (phoneField) phoneField.value = this.currentUser.phoneNumber || "";
     if (addressField) addressField.value = this.currentUser.address || "";
   }
 
-  async loadAddressData() {
-    try {
-      const response = await this.makeAuthenticatedRequest(
-        "/MyAccount/address",
-        "GET"
-      );
-
-      if (response.succeeded && response.data) {
-        this.populateAddressContent(response.data);
-      } else {
-        throw new Error(response.message || "Failed to load address");
-      }
-    } catch (error) {
-      console.error("Error loading address:", error);
-      this.populateAddressContent(null);
-    }
-  }
-
-  populateAddressContent(addressData) {
-    const addressContent = document.getElementById("address-content");
-    if (!addressContent) return;
-
-    if (
-      addressData &&
-      (addressData.address || addressData.fullName || addressData.phone)
-    ) {
-      addressContent.innerHTML = `
-                <address>
-                    <p><strong>${addressData.fullName || "N/A"}</strong></p>
-                    <p>${addressData.address || "No address provided"}</p>
-                    <p>Phone: ${addressData.phone || "N/A"}</p>
-                </address>
-                <button class="btn btn__bg" onclick="myAccountManager.switchToTab('account-info')">
-                    <i class="fa fa-edit"></i> Edit Address
-                </button>
-            `;
-    } else {
-      addressContent.innerHTML = `
-                <p>No address information available.</p>
-                <button class="btn btn__bg" onclick="myAccountManager.switchToTab('account-info')">
-                    <i class="fa fa-plus"></i> Add Address
-                </button>
-            `;
-    }
-  }
+  // Address functionality removed - no longer needed
 
   switchToTab(tabId) {
     // Remove active class from all tabs
@@ -207,7 +164,6 @@ class MyAccountManager {
     const updateData = {
       fullName: formData.get("fullname"),
       userName: formData.get("username"),
-      email: formData.get("email"),
       phone: formData.get("phone"),
       address: formData.get("address"),
     };
@@ -228,7 +184,7 @@ class MyAccountManager {
       if (response.succeeded) {
         this.currentUser = response.data;
         this.showAlert("Success", "Account updated successfully!", "success");
-        this.loadAddressData(); // Refresh address data
+        // Address functionality removed - no longer needed
       } else {
         throw new Error(response.message || "Failed to update account");
       }
@@ -329,9 +285,7 @@ class MyAccountManager {
     const targetTab = e.target.getAttribute("href");
 
     // Load specific data when switching to certain tabs
-    if (targetTab === "#address-edit" && this.currentUser) {
-      this.loadAddressData();
-    }
+    // Address functionality removed - no longer needed
   }
 
   validateAccountData(data) {
@@ -353,16 +307,7 @@ class MyAccountManager {
       return false;
     }
 
-    if (!data.email || !this.isValidEmail(data.email)) {
-      this.showAlert(
-        "Validation Error",
-        "Please enter a valid email address.",
-        "warning"
-      );
-      return false;
-    }
-
-    if (data.phone && !this.isValidPhone(data.phone)) {
+    if (!data.phone || !this.isValidPhone(data.phone)) {
       this.showAlert(
         "Validation Error",
         "Please enter a valid phone number.",
@@ -441,11 +386,6 @@ class MyAccountManager {
       field.setCustomValidity("");
       field.classList.remove("is-invalid");
     }
-  }
-
-  isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 
   isValidPhone(phone) {
@@ -590,6 +530,139 @@ class MyAccountManager {
     } else {
       // Fallback to browser alert
       alert(`${title}: ${message}`);
+    }
+  }
+
+  // Enhanced validation methods
+  setupFieldValidation() {
+    // Setup real-time validation for all form fields
+    this.setupRequiredFieldValidation();
+    this.setupLengthValidation();
+    this.setupFormatValidation();
+  }
+
+  setupRequiredFieldValidation() {
+    // Required field validation - check for blank and space-only input
+    const requiredFields = document.querySelectorAll(
+      "input[required], textarea[required]"
+    );
+
+    requiredFields.forEach((field) => {
+      field.addEventListener("blur", () => this.validateRequiredField(field));
+      field.addEventListener("input", () => this.clearFieldError(field));
+    });
+  }
+
+  setupLengthValidation() {
+    // Length validation - check for maximum length to prevent DB overflow
+    const textFields = document.querySelectorAll(
+      'input[type="text"], input[type="tel"], textarea'
+    );
+
+    textFields.forEach((field) => {
+      field.addEventListener("input", () => this.validateFieldLength(field));
+    });
+  }
+
+  setupFormatValidation() {
+    // Format validation for specific field types
+    const phoneField = document.getElementById("phone");
+    if (phoneField) {
+      phoneField.addEventListener("blur", () =>
+        this.validatePhoneFormat(phoneField)
+      );
+      phoneField.addEventListener("input", () =>
+        this.clearFieldError(phoneField)
+      );
+    }
+  }
+
+  validateRequiredField(field) {
+    const value = field.value.trim();
+
+    if (!value || value.length === 0) {
+      this.showFieldError(field, "This field is required and cannot be blank");
+      return false;
+    }
+
+    if (value.replace(/\s/g, "").length === 0) {
+      this.showFieldError(field, "This field cannot contain only spaces");
+      return false;
+    }
+
+    this.clearFieldError(field);
+    return true;
+  }
+
+  validateFieldLength(field) {
+    const value = field.value;
+    const maxLength = this.getMaxLengthForField(field);
+
+    if (maxLength && value.length > maxLength) {
+      this.showFieldError(field, `Maximum length is ${maxLength} characters`);
+      return false;
+    }
+
+    this.clearFieldError(field);
+    return true;
+  }
+
+  validatePhoneFormat(field) {
+    const value = field.value.trim();
+
+    if (!value) return true; // Required validation will handle empty
+
+    // Remove all non-digit characters for validation
+    const cleanPhone = value.replace(/[\s\-\(\)\+]/g, "");
+
+    // Check if it's a valid phone number (10-15 digits)
+    if (!/^[0-9]{10,15}$/.test(cleanPhone)) {
+      this.showFieldError(
+        field,
+        "Please enter a valid phone number (10-15 digits)"
+      );
+      return false;
+    }
+
+    this.clearFieldError(field);
+    return true;
+  }
+
+  getMaxLengthForField(field) {
+    // Define maximum lengths based on field type/name to prevent DB overflow
+    const maxLengths = {
+      fullname: 100, // Full name max length
+      username: 50, // Username max length
+      phone: 20, // Phone max length (including formatting)
+      address: 500, // Address max length
+    };
+
+    return maxLengths[field.name] || 255; // Default max length
+  }
+
+  showFieldError(field, message) {
+    // Remove existing error
+    this.clearFieldError(field);
+
+    // Add error styling
+    field.classList.add("is-invalid");
+
+    // Create error message element
+    const errorDiv = document.createElement("div");
+    errorDiv.className = "invalid-feedback";
+    errorDiv.textContent = message;
+    errorDiv.id = `${field.id}-error`;
+
+    // Insert error message after the field
+    field.parentNode.appendChild(errorDiv);
+  }
+
+  clearFieldError(field) {
+    field.classList.remove("is-invalid");
+
+    const errorDiv = field.parentNode.querySelector(`#${field.id}-error`);
+    if (errorDiv) {
+      errorDiv.remove();
     }
   }
 }

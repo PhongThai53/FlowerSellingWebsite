@@ -12,8 +12,11 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<PagedCartResultDTO> GetPagedCartItemsAsync(int userId, int page = 1, int pageSize = 10);
         Task<CartSummaryDTO> GetCartSummaryAsync(int userId);
         Task<int> GetCartItemsCountAsync(int userId);
+        Task<CartDTO> EnsureActiveCartAsync(int userId);
     }
 }
+
+
 
 
 
