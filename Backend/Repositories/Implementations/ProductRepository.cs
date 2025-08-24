@@ -125,5 +125,34 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             await _context.SaveChangesAsync();
             return existing;
         }
+
+        public async Task<bool> ReduceProductStockAsync(int productId, int quantity, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var product = await _context.Products.FindAsync(productId);
+                if (product == null)
+                {
+                    return false;
+                }
+
+                // Check if we have enough stock
+                if (product.Stock < quantity)
+                {
+                    return false;
+                }
+
+                // Reduce stock
+                product.Stock -= quantity;
+                product.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

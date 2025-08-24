@@ -25,5 +25,8 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<bool> ResendVerificationEmailAsync(string email);
         Task SendPasswordResetLinkAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
+        
+        // Email existence check
+        Task<bool> EmailExistsAsync(string email);
     }
 }

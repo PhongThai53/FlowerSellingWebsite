@@ -266,6 +266,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                 // Update user properties
                 user.FullName = request.FullName ?? user.FullName;
+                user.UserName = request.UserName ?? user.UserName;
                 user.Phone = request.PhoneNumber ?? user.Phone;
                 user.Address = request.Address ?? user.Address;
 
@@ -612,6 +613,23 @@ namespace FlowerSellingWebsite.Services.Implementations
                 _logger.LogWarning("Token validation failed for token: {Token}", token);
             }
             return false;
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            _logger.LogInformation("Checking if email exists: {Email}", email);
+            
+            try
+            {
+                var exists = await _userRepository.EmailExistsAsync(email);
+                _logger.LogInformation("Email existence check result for {Email}: {Exists}", email, exists);
+                return exists;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking email existence for: {Email}", email);
+                return false;
+            }
         }
     }
 }

@@ -51,6 +51,13 @@ export class CartManager {
         e.preventDefault();
         this.clearCart();
       }
+
+      // Checkout button
+      const checkoutButton = e.target.closest(".checkout-btn");
+      if (checkoutButton) {
+        e.preventDefault();
+        this.handleCheckoutClick();
+      }
     });
   }
 
@@ -461,5 +468,103 @@ export class CartManager {
       });
       document.dispatchEvent(event);
     }
+  }
+
+  // Validate cart items before checkout
+  async validateCartForCheckout() {
+    if (!this.cartItems || this.cartItems.length === 0) {
+      this.showErrorNotification(
+        "Giỏ hàng trống, không thể tiến hành thanh toán"
+      );
+      return false;
+    }
+
+    const validationErrors = [];
+    let hasStockIssues = false;
+
+    // Check each cart item against current stock
+    for (const cartItem of this.cartItems) {
+      try {
+        const stockResult = await ApiService.getProductStock(
+          cartItem.productId
+        );
+        if (stockResult && stockResult.succeeded) {
+          const currentStock = stockResult.data.stock || 0;
+          const cartQuantity = cartItem.quantity || 0;
+
+          if (cartQuantity > currentStock) {
+            hasStockIssues = true;
+            validationErrors.push({
+              productName: cartItem.productName || "Sản phẩm",
+              requestedQuantity: cartQuantity,
+              currentStock: currentStock,
+              message: `${cartItem.productName}: Yêu cầu ${cartQuantity} nhưng chỉ còn ${currentStock} trong kho`,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn(
+          `Could not validate stock for product ${cartItem.productId}:`,
+          error
+        );
+        // Continue validation for other items
+      }
+    }
+
+    // If there are stock issues, show detailed error message
+    if (hasStockIssues) {
+      const errorMessage = validationErrors
+        .map((error) => error.message)
+        .join("\n");
+
+      this.showErrorNotification(
+        `Không thể tiến hành thanh toán vì một số sản phẩm vượt quá tồn kho:\n${errorMessage}`
+      );
+
+      // Also show a more detailed alert for better visibility
+      alert(
+        `Không thể tiến hành thanh toán vì một số sản phẩm vượt quá tồn kho:\n\n${errorMessage}\n\nVui lòng cập nhật số lượng trong giỏ hàng.`
+      );
+
+      return false;
+    }
+
+    // All validations passed
+    return true;
+  }
+
+  // Handle checkout button click
+  handleCheckoutClick() {
+    const checkoutBtn = document.querySelector(".checkout-btn");
+    if (checkoutBtn) {
+      // Show loading state
+      checkoutBtn.disabled = true;
+      checkoutBtn.innerHTML =
+        '<i class="fa fa-spinner fa-spin"></i> Đang kiểm tra...';
+    }
+
+    // Validate cart before proceeding to checkout
+    this.validateCartForCheckout()
+      .then((isValid) => {
+        if (isValid) {
+          // Proceed to checkout
+          window.location.href = "/html/Payment/checkout.html";
+        } else {
+          // Reset button state if validation failed
+          if (checkoutBtn) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = "Proceed To Checkout";
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Checkout validation error:", error);
+        this.showErrorNotification("Có lỗi xảy ra khi kiểm tra giỏ hàng");
+        // Reset button state on error
+        if (checkoutBtn) {
+          checkoutBtn.disabled = false;
+          checkoutBtn.innerHTML = "Proceed To Checkout";
+        }
+      });
   }
 }

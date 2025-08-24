@@ -12,6 +12,15 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
         }
 
+        public async Task<Orders?> GetOrderByIdAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.Payments)
+                .Include(o => o.Customer)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
         public async Task<Orders?> GetOrderWithDetailsAsync(int orderId)
         {
             return await _context.Orders
@@ -102,6 +111,29 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return true;
         }
 
+        public async Task<bool> UpdatePaymentEntityStatusAsync(int orderId, string paymentStatus)
+        {
+            var payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.OrderId == orderId);
+            
+            if (payment == null) return false;
+
+            // Map payment status values
+            var mappedStatus = paymentStatus switch
+            {
+                "Paid" => "Completed",
+                "Pending" => "Pending", 
+                "Failed" => "Failed",
+                "Refunded" => "Refunded",
+                _ => paymentStatus
+            };
+
+            payment.Status = mappedStatus;
+            payment.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<PaymentMethods?> GetPaymentMethodByNameAsync(string methodName)
         {
             return await _context.PaymentMethods
@@ -148,6 +180,13 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 Console.WriteLine($"Error deleting order {orderId}: {ex.Message}");
                 return false;
             }
+        }
+
+        public async Task<IEnumerable<OrderDetails>?> GetOrderDetailsByOrderIdAsync(int orderId)
+        {
+            return await _context.OrderDetails
+                .Where(od => od.OrderId == orderId)
+                .ToListAsync();
         }
     }
 }

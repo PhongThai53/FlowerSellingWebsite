@@ -74,5 +74,46 @@ namespace FlowerSellingWebsite.Controllers
                 });
             }
         }
+
+        [HttpPost("confirm-cod/{orderId}")]
+        public async Task<IActionResult> ConfirmCODOrder(int orderId)
+        {
+            try
+            {
+                // Get customer ID from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userPublicId))
+                {
+                    return Unauthorized("Invalid user token");
+                }
+
+                // Get the actual user ID from the public ID
+                var user = await _orderService.GetUserByPublicIdAsync(userPublicId);
+                if (user == null)
+                {
+                    return Unauthorized("User not found");
+                }
+
+                // Confirm COD order and reduce stock
+                var result = await _orderService.ConfirmCODOrderAsync(orderId, user.Id);
+                
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CheckoutResponseDTO
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization;
 using VNPAY.NET;
+using VNPAY.NET;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +85,9 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IVnpay, Vnpay>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
+                .AddScoped<IOrderService, OrderService>();
+                .AddScoped<IOrderService, OrderService>();
+                .AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
 // Application Services

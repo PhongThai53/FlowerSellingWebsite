@@ -4,7 +4,7 @@ namespace FlowerSellingWebsite.Services.Interfaces
 {
     public interface IVNPayService
     {
-        Task<string> CreatePaymentUrlAsync(string orderNumber, decimal amount, string returnUrl, string cancelUrl, string clientIpAddress = null);
+        Task<string> CreatePaymentUrlAsync(int id, string orderNumber, decimal amount, string returnUrl, string cancelUrl, string clientIpAddress = null);
         Task<bool> ValidatePaymentResponseAsync(Dictionary<string, string> responseData);
         Task<VNPayPaymentResultDTO> ProcessPaymentResponseAsync(Dictionary<string, string> responseData);
     }

@@ -97,9 +97,10 @@ namespace FlowerSellingWebsite.Services.Implementations
                 }
 
                 // Generate order number
+                // Generate order number
                 var orderNumber = await _orderRepository.GenerateOrderNumberAsync();
 
-                // Create order
+                // Create order (for both COD and VNPay, but VNPay will be updated when payment succeeds)
                 var order = new Orders
                 {
                     OrderNumber = orderNumber,
@@ -169,8 +170,39 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                 await _orderRepository.CreatePaymentAsync(payment);
 
+                // For COD orders: reduce stock immediately
+                // For VNPay orders: reduce stock only after payment confirmation
+                if (checkoutRequest.PaymentMethod == "cash")
+                {
+                    var orderItems = checkoutRequest.CartItems.Select(item => (item.ProductId, item.Quantity)).ToList();
+                    
+                    // Reduce stock for each product in the order
+                    foreach (var (productId, quantity) in orderItems)
+                    {
+                        var stockReductionSuccess = await _productRepository.ReduceProductStockAsync(productId, quantity);
+                        if (!stockReductionSuccess)
+                        {
+                            // If stock reduction fails, rollback the order
+                            await _orderRepository.DeleteOrderAsync(order.Id);
+                            return new CheckoutResponseDTO
+                            {
+                                Succeeded = false,
+                                Message = $"Failed to update stock for product {productId}. Please try again."
+                            };
+                        }
+                    }
+
+                    // Log successful stock reduction for COD
+                    Console.WriteLine($"Successfully reduced stock for COD order {orderNumber}: {orderItems.Count} products updated");
+                }
+                else
+                {
+                    // For VNPay orders, stock will be reduced after payment confirmation
+                    Console.WriteLine($"VNPay order {orderNumber} created. Stock will be reduced after payment confirmation.");
+                }
+
                 // Clear cart after successful order
-                await _cartRepository.ClearCartAsync(customerId);
+                await _cartRepository.ClearCartByUserIdAsync(customerId);
 
                 // Prepare response
                 var response = new CheckoutResponseDTO
@@ -200,6 +232,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                         var ipAddress = clientIpAddress ?? VNPayService.GetClientIpAddress();
                         
                         var paymentUrl = await _vnPayService.CreatePaymentUrlAsync(
+                            savedOrder.Id, // Use the actual order ID
                             orderNumber, 
                             checkoutRequest.TotalAmount, 
                             returnUrl, 
@@ -232,9 +265,9 @@ namespace FlowerSellingWebsite.Services.Implementations
                         
                         return response;
                     }
-            }
-            else
-            {
+                }
+                else
+                {
                     // For COD, redirect to order confirmation
                     response.Data.RedirectUrl = $"/html/user/order-confirmation.html?orderNumber={orderNumber}";
                 }
@@ -315,6 +348,107 @@ namespace FlowerSellingWebsite.Services.Implementations
                     IsActive = true,
                     DisplayName = "Cash on Delivery",
                     CreatedAt = DateTime.UtcNow
+                };
+            }
+        }
+
+        public async Task<CheckoutResponseDTO> ConfirmCODOrderAsync(int orderId, int customerId)
+        {
+            try
+            {
+                // Get the order
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Order not found"
+                    };
+                }
+
+                // Verify the order belongs to the customer
+                if (order.CustomerId != customerId)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Order does not belong to this customer"
+                    };
+                }
+
+                // Check if order is already confirmed
+                if (order.Status == "Confirmed" || order.PaymentStatus == "Paid")
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Order is already confirmed"
+                    };
+                }
+
+                // Get order details to reduce stock
+                var orderDetails = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId);
+                if (orderDetails == null || !orderDetails.Any())
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "No order details found"
+                    };
+                }
+
+                // Reduce stock for all products in the order
+                foreach (var detail in orderDetails)
+                {
+                    var stockReductionSuccess = await _productRepository.ReduceProductStockAsync(detail.ProductId, detail.Quantity);
+                    if (!stockReductionSuccess)
+                    {
+                        return new CheckoutResponseDTO
+                        {
+                            Succeeded = false,
+                            Message = $"Failed to update stock for product {detail.ProductId}. Please try again."
+                        };
+                    }
+                }
+
+                // Update order status to confirmed
+                var statusUpdated = await _orderRepository.UpdateOrderStatusAsync(orderId, "Confirmed");
+                var paymentStatusUpdated = await _orderRepository.UpdatePaymentStatusAsync(orderId, "Paid");
+
+                if (!statusUpdated || !paymentStatusUpdated)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Failed to update order status"
+                    };
+                }
+
+                // Log successful confirmation
+                Console.WriteLine($"COD order {orderId} confirmed successfully. Stock reduced for {orderDetails.Count()} products.");
+
+                return new CheckoutResponseDTO
+                {
+                    Succeeded = true,
+                    Message = "Order confirmed successfully",
+                    Data = new CheckoutResponseDataDTO
+                    {
+                        OrderId = orderId,
+                        OrderNumber = order.OrderNumber,
+                        PaymentStatus = "Paid",
+                        OrderStatus = "Confirmed",
+                        TotalAmount = order.TotalAmount
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error confirming COD order {orderId}: {ex.Message}");
+                return new CheckoutResponseDTO
+                {
+                    Succeeded = false,
+                    Message = $"Error confirming order: {ex.Message}"
                 };
             }
         }
