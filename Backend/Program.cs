@@ -75,12 +75,16 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+builder.Services.AddScoped<ICartService, CartService>()
+                .AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IVnpay, Vnpay>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
-builder.Services.AddScoped<ICartService, CartService>()
-                .AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 builder.Services.AddScoped<IImageService, ImageService>();
 
 // Application Services
