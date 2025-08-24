@@ -9,6 +9,10 @@ export class HeaderManager {
   }
 
   async init() {
+    console.log(
+      "HeaderManager init() called on page:",
+      window.location.pathname
+    );
     // Wait for DOM to be ready
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => this.setupHeader());
@@ -21,9 +25,13 @@ export class HeaderManager {
 
     // Listen for HTMX events to handle dynamically loaded headers
     this.setupHtmxEventListeners();
+
+    // Add fallback polling mechanism
+    this.setupFallbackPolling();
   }
 
   async setupHeader() {
+    console.log("setupHeader() called on page:", window.location.pathname);
     await this.updateCartCount();
     this.setupUserMenu();
   }
@@ -31,7 +39,6 @@ export class HeaderManager {
   setupCartEventListeners() {
     // Listen for cart updates from any page
     document.addEventListener("cartUpdated", async (event) => {
-      console.log("Cart updated event received:", event.detail);
       await this.updateCartCount();
     });
 
@@ -42,7 +49,6 @@ export class HeaderManager {
 
     // Listen for authentication changes to update user menu
     document.addEventListener("authChanged", () => {
-      console.log("Auth changed event received, updating user menu");
       this.setupUserMenu();
       this.updateCartCount(); // Also update cart count after auth change
     });
@@ -50,7 +56,6 @@ export class HeaderManager {
     // Listen for storage changes (for when user logs in/out in another tab)
     window.addEventListener("storage", (e) => {
       if (e.key === "auth_token" || e.key === "user_data") {
-        console.log("Auth data changed in another tab, updating user menu");
         this.setupUserMenu();
         this.updateCartCount();
       }
@@ -63,7 +68,6 @@ export class HeaderManager {
       try {
         // Check if event and target exist
         if (!event || !event.detail || !event.detail.target) {
-          console.log("HTMX afterSwap event missing target, skipping...");
           return;
         }
 
@@ -75,9 +79,6 @@ export class HeaderManager {
           target.closest("header") ||
           target.querySelector("header")
         ) {
-          console.log(
-            "Header loaded via HTMX afterSwap. Setting up user menu..."
-          );
           setTimeout(() => {
             this.setupUserMenu();
             this.updateCartCount();
@@ -93,7 +94,6 @@ export class HeaderManager {
       try {
         // Check if event and target exist
         if (!event || !event.detail || !event.detail.target) {
-          console.log("HTMX load event missing target, skipping...");
           return;
         }
 
@@ -105,7 +105,6 @@ export class HeaderManager {
           eventTarget.closest("header") ||
           eventTarget.querySelector("header")
         ) {
-          console.log("Header loaded via HTMX load. Setting up user menu...");
           setTimeout(() => {
             this.setupUserMenu();
             this.updateCartCount();
@@ -115,6 +114,64 @@ export class HeaderManager {
         console.error("Error in HTMX load event handler:", error);
       }
     });
+
+    // Add MutationObserver to watch for header elements being added
+    this.setupMutationObserver();
+  }
+
+  setupMutationObserver() {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              // Check if the added node is a header or contains header elements
+              if (
+                node.tagName === "HEADER" ||
+                (node.querySelector && node.querySelector("header")) ||
+                (node.querySelector && node.querySelector("#user-menu"))
+              ) {
+                setTimeout(() => {
+                  this.setupUserMenu();
+                  this.updateCartCount();
+                }, 100);
+              }
+            }
+          });
+        }
+      });
+    });
+
+    // Start observing the document body for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  setupFallbackPolling() {
+    let attempts = 0;
+    const maxAttempts = 20; // Try for 20 seconds
+
+    const pollForHeader = () => {
+      attempts++;
+
+      const userMenu = document.getElementById("user-menu");
+      const userDropdown = document.getElementById("user-dropdown");
+
+      if (userMenu && userDropdown) {
+        this.setupUserMenu();
+        this.updateCartCount();
+        return; // Stop polling
+      }
+
+      if (attempts < maxAttempts) {
+        setTimeout(pollForHeader, 500); // Try again in 0.5 seconds
+      }
+    };
+
+    // Start polling after a longer delay to ensure HTMX has loaded the header
+    setTimeout(pollForHeader, 2000);
   }
 
   async updateCartCount() {
@@ -127,14 +184,12 @@ export class HeaderManager {
 
       // Get cart summary from API
       const result = await ApiService.getCartSummary();
-      console.log("Cart summary API response:", result);
 
       if (result && result.succeeded && result.data) {
         const totalItems =
           result.data.total_items || result.data.totalItems || 0;
         this.setCartCount(totalItems);
       } else {
-        console.log("Cart summary not available, setting count to 0");
         this.setCartCount(0);
       }
     } catch (error) {
@@ -175,18 +230,26 @@ export class HeaderManager {
     document.querySelectorAll("[data-cart-count]").forEach((element) => {
       element.setAttribute("data-cart-count", count || 0);
     });
-
-    console.log(`Cart count updated to: ${count}`);
   }
 
   setupUserMenu() {
+    console.log("setupUserMenu() called on page:", window.location.pathname);
     const userMenu = document.getElementById("user-menu");
     const userDropdown = document.getElementById("user-dropdown");
     const adminUserManagement = document.getElementById(
       "admin-user-management"
     );
 
-    if (!userMenu || !userDropdown) return;
+    console.log("User menu elements found:", {
+      userMenu: !!userMenu,
+      userDropdown: !!userDropdown,
+      adminUserManagement: !!adminUserManagement,
+    });
+
+    if (!userMenu || !userDropdown) {
+      console.error("User menu or dropdown not found!");
+      return;
+    }
 
     // Get authentication data from localStorage (same as homepage-manager.js)
     const token = localStorage.getItem("auth_token");
@@ -236,10 +299,11 @@ export class HeaderManager {
   }
 
   showGuestUserMenu(dropdown) {
-    dropdown.innerHTML = `
+    const guestMenuItems = `
       <li><a href="/html/auth/login-register.html">Login</a></li>
       <li><a href="/html/auth/login-register.html">Register</a></li>
     `;
+    dropdown.innerHTML = guestMenuItems;
   }
 
   async handleLogout() {
@@ -336,8 +400,6 @@ let headerManagerInstance = null;
 document.addEventListener("DOMContentLoaded", () => {
   if (!headerManagerInstance) {
     headerManagerInstance = new HeaderManager();
-
-    // Make it globally accessible
     window.HeaderManager = headerManagerInstance;
   }
 });
@@ -352,17 +414,35 @@ window.addEventListener("load", () => {
 
 // Initialize when HTMX content is loaded
 document.addEventListener("htmx:afterSwap", (event) => {
-  if (!headerManagerInstance) {
-    headerManagerInstance = new HeaderManager();
-    window.HeaderManager = headerManagerInstance;
+  if (
+    event.detail &&
+    event.detail.target &&
+    event.detail.target.id === "header-placeholder"
+  ) {
+    if (!headerManagerInstance) {
+      headerManagerInstance = new HeaderManager();
+      window.HeaderManager = headerManagerInstance;
+    } else {
+      // Force re-initialization of the header
+      headerManagerInstance.setupHeader();
+    }
   }
 });
 
 // Initialize when HTMX content is loaded (load event)
 document.addEventListener("htmx:load", (event) => {
-  if (!headerManagerInstance) {
-    headerManagerInstance = new HeaderManager();
-    window.HeaderManager = headerManagerInstance;
+  if (
+    event.detail &&
+    event.detail.target &&
+    event.detail.target.id === "header-placeholder"
+  ) {
+    if (!headerManagerInstance) {
+      headerManagerInstance = new HeaderManager();
+      window.HeaderManager = headerManagerInstance;
+    } else {
+      // Force re-initialization of the header
+      headerManagerInstance.setupHeader();
+    }
   }
 });
 

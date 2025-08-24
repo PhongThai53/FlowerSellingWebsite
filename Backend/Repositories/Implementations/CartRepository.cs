@@ -60,7 +60,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task UpdateCartItemAsync(CartItem cartItem)
         {
             cartItem.UpdatedAt = DateTime.UtcNow;
-            cartItem.LineTotal = cartItem.Quantity * cartItem.UnitPrice;
+            // LineTotal is computed by the database, don't set it manually
             _context.CartItem.Update(cartItem);
             await _context.SaveChangesAsync();
         }
@@ -126,6 +126,69 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task ClearCartByUserIdAsync(int userId)
+        {
+            try
+            {
+                // Get the active cart for the user
+                var activeCart = await GetActiveCartByUserIdAsync(userId);
+                if (activeCart == null)
+                {
+                    Console.WriteLine($"No active cart found for user {userId}");
+                    return;
+                }
+
+                // Clear all cart items
+                var cartItems = await _context.CartItem
+                    .Where(ci => ci.CartId == activeCart.Id && !ci.IsDeleted)
+                    .ToListAsync();
+
+                foreach (var item in cartItems)
+                {
+                    item.IsDeleted = true;
+                    item.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Mark the cart as checked out
+                activeCart.IsCheckedOut = true;
+                activeCart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"Successfully cleared cart for user {userId}. {cartItems.Count} items removed.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error clearing cart for user {userId}: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Cart> CreateNewCartForUserAsync(int userId)
+        {
+            try
+            {
+                var newCart = new Cart
+                {
+                    UserId = userId,
+                    IsCheckedOut = false,
+                    IsDeleted = false,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Cart.Add(newCart);
+                await _context.SaveChangesAsync();
+                
+                Console.WriteLine($"Created new cart {newCart.Id} for user {userId}");
+                return newCart;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating new cart for user {userId}: {ex.Message}");
+                throw;
+            }
         }
     }
 }

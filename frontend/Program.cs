@@ -1,3 +1,5 @@
+using Microsoft.Extensions.FileProviders;
+
 namespace FlowerSellingWebsite_FE
 {
     public class Program
@@ -6,9 +8,24 @@ namespace FlowerSellingWebsite_FE
         {
             var builder = WebApplication.CreateBuilder(args);
             var app = builder.Build();
-            app.UseStaticFiles();
-
-            app.MapGet("/", () => "Hello World!");
+            
+            // Configure static files to serve HTML files with correct content type
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = context =>
+                {
+                    if (context.File.Name.EndsWith(".html"))
+                    {
+                        context.Context.Response.Headers.Append("Content-Type", "text/html");
+                    }
+                }
+            });
+            
+            // Add routing
+            app.UseRouting();
+            
+            // Default route - redirect to login page
+            app.MapGet("/", () => Results.Redirect("/html/auth/login-register.html"));
 
             app.Run();
         }

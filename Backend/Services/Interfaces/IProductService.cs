@@ -12,14 +12,15 @@ namespace FlowerSellingWebsite.Services.Interfaces
             int max,
             string? search,
             string? sortBy,
-            bool asc = true,
-            CancellationToken cancellationToken = default);
+            bool asc = true);
         Task<ProductDTO?> GetProductByIdAsync(int id);
 
-        Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default);
+        Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto);
 
-        Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto, CancellationToken cancellationToken = default);
+        Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto);
 
         Task<bool> DeleteProductAsync(int id, CancellationToken cancellationToken = default);
+
+        Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default);
     }
 }

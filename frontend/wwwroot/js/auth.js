@@ -13,7 +13,6 @@ class AuthManager {
     const setupUI = () => {
       this.setupFormHandlers();
       this.setupPasswordValidation();
-      this.setupForgotPasswordFormToggle();
     };
 
     // Run on initial page load
@@ -47,7 +46,6 @@ class AuthManager {
       if (
         event.target.id === "login-form" ||
         event.target.id === "register-form" ||
-        event.target.id === "forgot-password-form" ||
         event.target.id === "reset-password-form"
       ) {
         this.hideLoadingState(event.target);
@@ -71,12 +69,24 @@ class AuthManager {
           let errorMessage = "An error occurred. Please check your input.";
           if (response && response.errors) {
             errorMessage = "<ul>";
-            // response.errors is an object like {"Email": ["error1"], "Password": ["error2"]}
-            for (const key in response.errors) {
-              if (response.errors.hasOwnProperty(key)) {
-                response.errors[key].forEach((error) => {
-                  errorMessage += `<li>${error}</li>`;
-                });
+            // response.errors can be either an object {"Email": ["error1"]} or a List<string> ["error1", "error2"]
+            if (Array.isArray(response.errors)) {
+              // Handle List<string> format
+              response.errors.forEach((error) => {
+                errorMessage += `<li>${error}</li>`;
+              });
+            } else {
+              // Handle object format {"Email": ["error1"]}
+              for (const key in response.errors) {
+                if (response.errors.hasOwnProperty(key)) {
+                  if (Array.isArray(response.errors[key])) {
+                    response.errors[key].forEach((error) => {
+                      errorMessage += `<li>${error}</li>`;
+                    });
+                  } else {
+                    errorMessage += `<li>${response.errors[key]}</li>`;
+                  }
+                }
               }
             }
             errorMessage += "</ul>";
@@ -114,11 +124,26 @@ class AuthManager {
         } else {
           // This handles cases where Succeeded is false but not a 4xx/5xx error
           let errorMessage = response.message || "Authentication failed.";
-          if (response.errors && response.errors.length > 0) {
+          if (response.errors) {
             errorMessage += "<ul>";
-            response.errors.forEach((error) => {
-              errorMessage += `<li>${error}</li>`;
-            });
+            if (Array.isArray(response.errors)) {
+              response.errors.forEach((error) => {
+                errorMessage += `<li>${error}</li>`;
+              });
+            } else {
+              // Handle object format if needed
+              for (const key in response.errors) {
+                if (response.errors.hasOwnProperty(key)) {
+                  if (Array.isArray(response.errors[key])) {
+                    response.errors[key].forEach((error) => {
+                      errorMessage += `<li>${error}</li>`;
+                    });
+                  } else {
+                    errorMessage += `<li>${response.errors[key]}</li>`;
+                  }
+                }
+              }
+            }
             errorMessage += "</ul>";
           }
           this.showErrorMessage(responseContainer, errorMessage);
@@ -136,31 +161,18 @@ class AuthManager {
     }
   }
 
-  setupForgotPasswordFormToggle() {
-    const forgotPasswordLink = document.getElementById("forgot-password-link");
-    const backToLoginLink = document.getElementById("back-to-login-link");
-    const loginFormContainer = document.getElementById("login-form-container");
-    const forgotPasswordContainer = document.getElementById(
-      "forgot-password-container"
-    );
+  // Show register form (for email not found scenario)
+  showRegisterForm() {
+    // Scroll to register form
+    const registerForm = document.getElementById("register-form");
+    if (registerForm) {
+      registerForm.scrollIntoView({ behavior: "smooth" });
 
-    if (
-      forgotPasswordLink &&
-      backToLoginLink &&
-      loginFormContainer &&
-      forgotPasswordContainer
-    ) {
-      forgotPasswordLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        loginFormContainer.style.display = "none";
-        forgotPasswordContainer.style.display = "block";
-      });
-
-      backToLoginLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        loginFormContainer.style.display = "block";
-        forgotPasswordContainer.style.display = "none";
-      });
+      // Highlight the register form briefly
+      registerForm.style.boxShadow = "0 0 0 0.2rem rgba(0, 123, 255, 0.25)";
+      setTimeout(() => {
+        registerForm.style.boxShadow = "";
+      }, 2000);
     }
   }
 
@@ -216,6 +228,166 @@ class AuthManager {
         }
       });
     }
+
+    // Real-time validation for all form fields
+    this.setupRealTimeValidation();
+  }
+
+  // Setup real-time validation for form fields
+  setupRealTimeValidation() {
+    const forms = ["login-form", "register-form"];
+
+    forms.forEach((formId) => {
+      const form = document.getElementById(formId);
+      if (form) {
+        const inputs = form.querySelectorAll("input, textarea");
+
+        inputs.forEach((input) => {
+          // Validate on input change
+          input.addEventListener("input", () => {
+            this.validateField(input);
+          });
+
+          // Validate on blur (when user leaves the field)
+          input.addEventListener("blur", () => {
+            this.validateField(input);
+          });
+
+          // Clear validation on focus
+          input.addEventListener("focus", () => {
+            this.clearFieldValidation(input);
+          });
+        });
+      }
+    });
+  }
+
+  // Validate individual field
+  validateField(field) {
+    const value = field.value.trim();
+    const fieldName = field.name;
+
+    // Clear previous validation
+    this.clearFieldValidation(field);
+
+    // Skip validation for empty optional fields
+    if (!field.hasAttribute("required") && !value) {
+      return;
+    }
+
+    let isValid = true;
+    let errorMessage = "";
+
+    // Required field validation
+    if (field.hasAttribute("required") && (!value || value.length === 0)) {
+      isValid = false;
+      errorMessage = `${field.placeholder || fieldName} is required.`;
+    }
+    // Whitespace validation
+    else if (value && /^\s+$/.test(field.value)) {
+      isValid = false;
+      errorMessage = `${
+        field.placeholder || fieldName
+      } cannot contain only spaces.`;
+    }
+    // Leading/trailing spaces validation
+    else if (value && field.value !== field.value.trim()) {
+      isValid = false;
+      errorMessage = `${
+        field.placeholder || fieldName
+      } cannot have leading or trailing spaces.`;
+    }
+    // Field-specific validation
+    else if (value) {
+      switch (fieldName) {
+        case "email":
+          const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+          if (!emailRegex.test(value)) {
+            isValid = false;
+            errorMessage = "Please enter a valid email address.";
+          } else if (value.length > 200) {
+            isValid = false;
+            errorMessage = "Email cannot exceed 200 characters.";
+          }
+          break;
+
+        case "password":
+          if (value.length < 6) {
+            isValid = false;
+            errorMessage = "Password must be at least 6 characters long.";
+          } else if (value.length > 100) {
+            isValid = false;
+            errorMessage = "Password cannot exceed 100 characters.";
+          } else {
+            const hasLower = /[a-z]/.test(value);
+            const hasUpper = /[A-Z]/.test(value);
+            const hasNumber = /\d/.test(value);
+
+            if (!hasLower || !hasUpper || !hasNumber) {
+              isValid = false;
+              errorMessage =
+                "Password must contain at least one uppercase letter, one lowercase letter, and one number.";
+            }
+          }
+          break;
+
+        case "userName":
+          const usernameRegex = /^[a-zA-Z0-9_]+$/;
+          if (!usernameRegex.test(value)) {
+            isValid = false;
+            errorMessage =
+              "Username can only contain letters, numbers, and underscores.";
+          } else if (value.length > 100) {
+            isValid = false;
+            errorMessage = "Username cannot exceed 100 characters.";
+          }
+          break;
+
+        case "fullName":
+          if (value.length > 200) {
+            isValid = false;
+            errorMessage = "Full name cannot exceed 200 characters.";
+          }
+          break;
+
+        case "phoneNumber":
+          if (value) {
+            // Vietnamese phone number validation
+            const phoneRegex =
+              /^(0|\+84)(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/;
+            if (!phoneRegex.test(value.replace(/\s/g, ""))) {
+              isValid = false;
+              errorMessage =
+                "Please enter a valid Vietnamese phone number (e.g., 0964901308, +84964901308)";
+            } else if (value.length > 20) {
+              isValid = false;
+              errorMessage = "Phone number cannot exceed 20 characters.";
+            }
+          }
+          break;
+
+        case "address":
+          if (value && value.length > 500) {
+            isValid = false;
+            errorMessage = "Address cannot exceed 500 characters.";
+          }
+          break;
+      }
+    }
+
+    // Apply validation result
+    if (!isValid) {
+      this.showFieldError(field, errorMessage);
+      field.classList.add("invalid");
+    } else if (value) {
+      field.classList.add("valid");
+    }
+  }
+
+  // Clear field validation
+  clearFieldValidation(field) {
+    field.classList.remove("invalid", "valid");
+    this.hideFieldError(field);
   }
 
   // Setup password strength validation
@@ -309,6 +481,7 @@ class AuthManager {
 
   validateForm(form) {
     let isValid = true;
+    const errorMessages = [];
     const responseContainerId = `#${form.id.replace("form", "response")}`;
     const responseContainer = form.querySelector(responseContainerId);
 
@@ -333,12 +506,37 @@ class AuthManager {
         errorMessages.push("Passwords do not match.");
       }
     } else {
-      const inputs = form.querySelectorAll("input[required]");
+      const inputs = form.querySelectorAll(
+        "input[required], textarea[required]"
+      );
       inputs.forEach((input) => {
         const value = input.value.trim();
-        if (!value) {
+
+        // Check for blank/whitespace-only inputs
+        if (!value || value.length === 0) {
           isValid = false;
-          errorMessages.push(`${input.placeholder} is required.`);
+          errorMessages.push(`${input.placeholder || input.name} is required.`);
+          return;
+        }
+
+        // Check for whitespace-only inputs
+        if (/^\s+$/.test(input.value)) {
+          isValid = false;
+          errorMessages.push(
+            `${input.placeholder || input.name} cannot contain only spaces.`
+          );
+          return;
+        }
+
+        // Check for leading/trailing spaces
+        if (input.value !== input.value.trim()) {
+          isValid = false;
+          errorMessages.push(
+            `${
+              input.placeholder || input.name
+            } cannot have leading or trailing spaces.`
+          );
+          return;
         }
 
         // Specific validations for login/register
@@ -348,12 +546,87 @@ class AuthManager {
             isValid = false;
             errorMessages.push("Please enter a valid email address.");
           }
+
+          // Check email length against database constraint
+          if (value.length > 200) {
+            isValid = false;
+            errorMessages.push("Email cannot exceed 200 characters.");
+          }
         }
 
         if (input.name === "password" && value) {
           if (value.length < 6) {
             isValid = false;
             errorMessages.push("Password must be at least 6 characters long.");
+          }
+
+          // Check password length against database constraint
+          if (value.length > 100) {
+            isValid = false;
+            errorMessages.push("Password cannot exceed 100 characters.");
+          }
+
+          // Check password complexity
+          const hasLower = /[a-z]/.test(value);
+          const hasUpper = /[A-Z]/.test(value);
+          const hasNumber = /\d/.test(value);
+
+          if (!hasLower || !hasUpper || !hasNumber) {
+            isValid = false;
+            errorMessages.push(
+              "Password must contain at least one uppercase letter, one lowercase letter, and one number."
+            );
+          }
+        }
+
+        if (input.name === "userName" && value) {
+          // Check username format
+          const usernameRegex = /^[a-zA-Z0-9_]+$/;
+          if (!usernameRegex.test(value)) {
+            isValid = false;
+            errorMessages.push(
+              "Username can only contain letters, numbers, and underscores."
+            );
+          }
+
+          // Check username length against database constraint
+          if (value.length > 100) {
+            isValid = false;
+            errorMessages.push("Username cannot exceed 100 characters.");
+          }
+        }
+
+        if (input.name === "fullName" && value) {
+          // Check full name length against database constraint
+          if (value.length > 200) {
+            isValid = false;
+            errorMessages.push("Full name cannot exceed 200 characters.");
+          }
+        }
+
+        if (input.name === "phoneNumber" && value) {
+          // Check phone number format for Vietnamese numbers
+          const phoneRegex =
+            /^(0|\+84)(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/;
+          if (!phoneRegex.test(value.replace(/\s/g, ""))) {
+            isValid = false;
+            errorMessages.push(
+              "Please enter a valid phone number (e.g., 0964901308, +84964901308)"
+            );
+          }
+
+          // Check phone number length against database constraint
+          if (value.length > 20) {
+            isValid = false;
+            errorMessages.push("Phone number cannot exceed 20 characters.");
+          }
+        }
+
+        if (input.name === "address" && value) {
+          // Check address length against database constraint
+          if (value.length > 500) {
+            isValid = false;
+            errorMessages.push("Address cannot exceed 500 characters.");
           }
         }
       });
@@ -480,6 +753,11 @@ class AuthManager {
 // Initialize authentication manager when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
   window.authManager = new AuthManager();
+
+  // Make helper functions globally accessible
+  window.showRegisterForm = function () {
+    window.authManager.showRegisterForm();
+  };
 });
 
 // Export for use in other modules

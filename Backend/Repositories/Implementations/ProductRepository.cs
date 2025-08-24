@@ -13,14 +13,14 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<Products> CreateProductAsync(Products product, CancellationToken cancellationToken = default)
+        public async Task<Products> CreateProductAsync(Products product)
         {
             _context.Products.Add(product);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync();
             return product;
         }
 
-        public async Task<bool> DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteProductAsync(int id)
         {
             var existing = await GetProductByIdAsync(id);
             if (existing == null)
@@ -28,7 +28,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 return false;
             }
             _context.Products.Remove(existing);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -40,8 +40,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             int max,
             string? search,
             string? sortBy,
-            bool asc = true,
-            CancellationToken cancellationToken = default)
+            bool asc = true)
         {
             var query = _context.Products
                                 .Where(p => !p.IsDeleted)
@@ -61,12 +60,12 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 query = query.Where(p => p.CategoryId == categoryId);
             }
 
-            int DbMax = Convert.ToInt32(await query.AnyAsync(cancellationToken) ? await query.MaxAsync(p => p.Price, cancellationToken) ?? 0 : 0);
+            int DbMax = Convert.ToInt32(await query.AnyAsync() ? await query.MaxAsync(p => p.Price) ?? 0 : 0);
 
             query = query.Where(p => p.Price >= min && p.Price <= max);
 
 
-            var totalCount = await query.CountAsync(cancellationToken);
+            var totalCount = await query.CountAsync();
 
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -87,7 +86,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
 
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -102,14 +101,58 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<Products?> UpdateProductAsync(Products product, CancellationToken cancellationToken = default)
+        public async Task<Products?> UpdateProductAsync(Products product)
         {
-            var existing = await GetProductByIdAsync(product.Id);
+            var existing = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == product.Id);
+
             if (existing == null) return null;
 
             _context.Entry(existing).CurrentValues.SetValues(product);
-            await _context.SaveChangesAsync(cancellationToken);
+
+            var photos = await _context.ProductPhotos
+                .Where(pp => pp.ProductId == product.Id && pp.IsPrimary)
+                .ToListAsync();
+
+            if (photos.Any())
+            {
+                foreach (var photo in photos)
+                {
+                    photo.IsPrimary = false;
+                }
+            }
+
+            await _context.SaveChangesAsync();
             return existing;
+        }
+
+        public async Task<bool> ReduceProductStockAsync(int productId, int quantity, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var product = await _context.Products.FindAsync(productId);
+                if (product == null)
+                {
+                    return false;
+                }
+
+                // Check if we have enough stock
+                if (product.Stock < quantity)
+                {
+                    return false;
+                }
+
+                // Reduce stock
+                product.Stock -= quantity;
+                product.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

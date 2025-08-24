@@ -17,8 +17,12 @@ namespace FlowerSellingWebsite.Repositories.Interfaces
         Task<int> GetCartItemsCountAsync(int cartId);
         Task<decimal> GetCartTotalAsync(int cartId);
         Task ClearCartAsync(int cartId);
+        Task ClearCartByUserIdAsync(int userId);
+        Task<Cart> CreateNewCartForUserAsync(int userId);
     }
 }
+
+
 
 
 

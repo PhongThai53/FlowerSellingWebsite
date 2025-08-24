@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="My Account - Flower eCommerce" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>My Account - Flower eCommerce</title>
 
     <!--=== Favicon ===-->
@@ -48,6 +54,40 @@
       rel="stylesheet"
       href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css"
     />
+
+    <!-- Custom styles for readonly fields -->
+    <style>
+      .readonly-field {
+        background-color: #f8f9fa !important;
+        cursor: not-allowed !important;
+        opacity: 0.7;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        pointer-events: none !important;
+        color: #6c757d !important;
+      }
+      .readonly-field:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: #ced4da !important;
+      }
+      .readonly-field:hover {
+        cursor: not-allowed !important;
+      }
+      /* Override any other CSS that might interfere */
+      input.readonly-field[readonly] {
+        background-color: #f8f9fa !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+      }
+      /* Ensure readonly fields can display values */
+      input.readonly-field[readonly] {
+        color: #495057 !important;
+        background-color: #e9ecef !important;
+      }
+    </style>
   </head>
 
   <body>
@@ -105,9 +145,7 @@
                         >
                           <i class="fa fa-dashboard"></i> Dashboard
                         </a>
-                        <a href="#address-edit" data-bs-toggle="tab">
-                          <i class="fa fa-map-marker"></i> Address
-                        </a>
+
                         <a href="#account-info" data-bs-toggle="tab">
                           <i class="fa fa-user"></i> Account Details
                         </a>
@@ -142,31 +180,12 @@
                             </div>
                             <p class="mb-0">
                               From your account dashboard, you can easily check
-                              & view your recent orders, manage your shipping
-                              and billing addresses and edit your password and
+                              & view your recent orders, edit your password and
                               account details.
                             </p>
                           </div>
                         </div>
                         <!-- Dashboard Tab Content End -->
-
-                        <!-- Address Tab Content Start -->
-                        <div
-                          class="tab-pane fade"
-                          id="address-edit"
-                          role="tabpanel"
-                        >
-                          <div class="myaccount-content">
-                            <h3>Address</h3>
-                            <div id="address-content">
-                              <div class="address-loading">
-                                <i class="fa fa-spinner fa-spin"></i> Loading
-                                address...
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Address Tab Content End -->
 
                         <!-- Account Details Tab Content Start -->
                         <div
@@ -208,25 +227,17 @@
                                     </div>
                                   </div>
                                 </div>
+
                                 <div class="single-input-item">
-                                  <label for="email" class="required"
-                                    >Email Address</label
+                                  <label for="phone" class="required"
+                                    >Phone Number</label
                                   >
-                                  <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="Email Address"
-                                    required
-                                  />
-                                </div>
-                                <div class="single-input-item">
-                                  <label for="phone">Phone Number</label>
                                   <input
                                     type="tel"
                                     id="phone"
                                     name="phone"
                                     placeholder="Phone Number"
+                                    required
                                   />
                                 </div>
                                 <div class="single-input-item">

@@ -63,6 +63,35 @@ namespace FlowerSellingWebsite.Services.Implementations
 			}
 		}
 
+		public async Task<string> CreatePaymentUrlAsync(int orderId, string orderNumber, decimal amount, string returnUrl, string cancelUrl, string clientIpAddress = null)
+		{
+			try
+			{
+				var ip = string.IsNullOrWhiteSpace(clientIpAddress) ? "127.0.0.1" : clientIpAddress;
+				var request = new PaymentRequest
+				{
+					PaymentId = orderId, // Use the actual order ID instead of ticks
+					Money = (double)amount, // library handles unit conversion
+					Description = $"Payment for order {orderNumber}",
+					IpAddress = ip,
+					BankCode = BankCode.ANY,
+					CreatedDate = DateTime.Now,
+					Currency = Currency.VND,
+					Language = DisplayLanguage.Vietnamese,
+				};
+
+				var url = _vnpay.GetPaymentUrl(request);
+
+				Console.WriteLine($"VNPay URL (VNPAY.NET) generated:\nOrder ID: {orderId}\nOrder Number: {orderNumber}\nAmount: {amount}\nURL: {url}");
+				return await Task.FromResult(url);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error generating VNPay URL: {ex.Message}");
+				throw;
+			}
+		}
+
 		public async Task<bool> ValidatePaymentResponseAsync(Dictionary<string, string> responseData)
 		{
 			try
@@ -86,6 +115,9 @@ namespace FlowerSellingWebsite.Services.Implementations
 
 		public async Task<VNPayPaymentResultDTO> ProcessPaymentResponseAsync(Dictionary<string, string> responseData)
 		{
+			Console.WriteLine("=== VNPAY SERVICE: Processing Payment Response ===");
+			Console.WriteLine($"Input responseData: {string.Join(", ", responseData.Select(kv => $"{kv.Key}={kv.Value}"))}");
+			
 			var resultDto = new VNPayPaymentResultDTO();
 			try
 			{
@@ -95,31 +127,34 @@ namespace FlowerSellingWebsite.Services.Implementations
 					dict[kv.Key] = new StringValues(kv.Value);
 				}
 				var query = new QueryCollection(dict);
+				
+				Console.WriteLine("Calling _vnpay.GetPaymentResult...");
 				var paymentResult = _vnpay.GetPaymentResult(query);
+				Console.WriteLine($"Payment result received: IsSuccess={paymentResult.IsSuccess}");
 
 				resultDto.IsSuccess = paymentResult.IsSuccess;
 				resultDto.ResponseCode = paymentResult.PaymentResponse?.Code.ToString() ?? string.Empty;
 				resultDto.ResponseMessage = paymentResult.PaymentResponse?.Description ?? string.Empty;
 				resultDto.TransactionId = paymentResult.VnpayTransactionId.ToString();
 				resultDto.OrderNumber = responseData.GetValueOrDefault("vnp_TxnRef", string.Empty);
+				
+				Console.WriteLine($"Mapped result: IsSuccess={resultDto.IsSuccess}, OrderNumber={resultDto.OrderNumber}, ResponseCode={resultDto.ResponseCode}");
+				
 				// Amount: VNPay returns in smallest unit via vnp_Amount
 				if (decimal.TryParse(responseData.GetValueOrDefault("vnp_Amount", "0"), out var raw))
 				{
 					resultDto.Amount = raw / 100m;
+					Console.WriteLine($"Amount parsed: {raw} -> {resultDto.Amount}");
 				}
 
-				if (resultDto.IsSuccess && !string.IsNullOrEmpty(resultDto.OrderNumber))
-				{
-					var order = await _orderRepository.GetOrderByOrderNumberAsync(resultDto.OrderNumber);
-					if (order != null)
-					{
-						await _orderRepository.UpdatePaymentStatusAsync(order.Id, "Paid");
-						await _orderRepository.UpdateOrderStatusAsync(order.Id, "Processing");
-					}
-				}
+				Console.WriteLine("VNPay response processing completed successfully");
+				// Note: Status updates are handled in PaymentController
+				// This service only processes the VNPay response
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine($"Error in VNPay response processing: {ex.Message}");
+				Console.WriteLine($"Stack trace: {ex.StackTrace}");
 				resultDto.IsSuccess = false;
 				resultDto.ResponseMessage = ex.Message;
 			}

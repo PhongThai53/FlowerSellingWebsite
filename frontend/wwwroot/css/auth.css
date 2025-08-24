@@ -124,6 +124,535 @@
   width: 16px;
 }
 
+/* Form validation styles */
+.single-input-item input.invalid,
+.single-input-item textarea.invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
 
+.single-input-item input.valid,
+.single-input-item textarea.valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
 
+.field-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 500;
+}
 
+/* Password strength indicator */
+.password-strength {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.password-strength.weak {
+  color: #dc3545;
+}
+
+.password-strength.medium {
+  color: #ffc107;
+}
+
+.password-strength.strong {
+  color: #28a745;
+}
+
+/* Form validation feedback */
+.auth-response {
+  margin-bottom: 1rem;
+}
+
+.auth-response .alert {
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0;
+}
+
+.auth-response .alert-success {
+  background-color: #d1edff;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.auth-response .alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.auth-response .alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+/* Loading state styles */
+.btn-loading {
+  display: none;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Input focus states */
+.single-input-item input:focus,
+.single-input-item textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive validation messages */
+@media (max-width: 768px) {
+  .field-error {
+    font-size: 0.8rem;
+  }
+
+  .password-strength {
+    font-size: 0.8rem;
+  }
+}
+
+/* Resend Verification Form Styles */
+.resend-verification-form {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
+.resend-verification-form h5 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.resend-verification-form .single-input-item {
+  margin-bottom: 1rem;
+}
+
+.resend-verification-form input[type="email"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.resend-verification-form input[type="email"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.resend-verification-form input[type="email"].valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.resend-verification-form input[type="email"].invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.resend-verification-form .field-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 500;
+}
+
+.resend-verification-form .btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.15s ease-in-out;
+}
+
+.resend-verification-form .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Verification Actions */
+.verification-actions {
+  text-align: center;
+}
+
+.verification-actions .btn {
+  margin: 0.5rem;
+  min-width: 150px;
+}
+
+.verification-actions .btn-outline-primary {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.verification-actions .btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.verification-actions .btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.verification-actions .btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Forgot Password Form Styles */
+#forgot-password-container {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  margin-top: 1rem;
+}
+
+#forgot-password-container h4 {
+  color: #495057;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+#forgot-password-container .single-input-item {
+  margin-bottom: 1rem;
+}
+
+#forgot-password-container input[type="email"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#forgot-password-container input[type="email"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#forgot-password-container input[type="email"].valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+#forgot-password-container input[type="email"].invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+#forgot-password-container .field-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 500;
+}
+
+#forgot-password-container .btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.15s ease-in-out;
+}
+
+#forgot-password-container .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#back-to-login-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease-in-out;
+}
+
+#back-to-login-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Forget Password Link */
+.forget-pwd {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease-in-out;
+}
+
+.forget-pwd:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Forgot Password Response Messages */
+#forgot-password-response .alert {
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#forgot-password-response .alert-success {
+  background-color: #d4edda;
+  border-left: 4px solid #28a745;
+  color: #155724;
+}
+
+#forgot-password-response .alert-success h5 {
+  color: #155724;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+#forgot-password-response .alert-success p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+#forgot-password-response .alert-danger {
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+  color: #721c24;
+}
+
+#forgot-password-response .alert-danger h5 {
+  color: #721c24;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+#forgot-password-response .alert-danger p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+#forgot-password-response .btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+}
+
+#forgot-password-response .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+#forgot-password-response .btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+#forgot-password-response .btn-outline-secondary {
+  background-color: transparent;
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+#forgot-password-response .btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Register form highlight animation */
+#register-form {
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #forgot-password-response .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  #forgot-password-response .btn {
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+}
+
+/* Forgot Password Page Specific Styles */
+.auth-image-container {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.auth-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 107, 0.8),
+    rgba(255, 182, 193, 0.8)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.auth-image-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-image-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 80%;
+  margin: 0 auto;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.auth-form-container {
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.auth-logo {
+  display: inline-block;
+  margin-bottom: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.auth-logo:hover {
+  transform: scale(1.05);
+}
+
+/* Button styles for forgot password page */
+.btn__bg {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.btn__bg:hover {
+  background: linear-gradient(135deg, #ff5252, #ff7676);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  color: white;
+}
+
+.btn__bg:active {
+  transform: translateY(0);
+}
+
+.btn__bg:disabled {
+  background: #ccc;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Form input styles for forgot password page */
+.single-input-item {
+  margin-bottom: 1.5rem;
+}
+
+.single-input-item input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.single-input-item input:focus {
+  outline: none;
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.single-input-item input::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+/* Navigation link styles */
+.text-decoration-none {
+  color: #ff6b6b;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.text-decoration-none:hover {
+  color: #ff5252;
+  text-decoration: underline !important;
+}
+
+/* Responsive adjustments for forgot password page */
+@media (max-width: 991.98px) {
+  .auth-form-container {
+    padding: 1.5rem;
+  }
+
+  .auth-image-content h2 {
+    font-size: 2rem;
+  }
+
+  .auth-image-content p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .auth-form-container {
+    padding: 1rem;
+  }
+
+  .auth-image-content h2 {
+    font-size: 1.75rem;
+  }
+}

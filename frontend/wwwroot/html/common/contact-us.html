@@ -52,12 +52,12 @@
     />
   </head>
   <body>
-    <header
+    <div
       id="header-placeholder"
       hx-get="../components/header.html"
       hx-trigger="load"
       hx-swap="outerHTML"
-    ></header>
+    ></div>
 
     <main>
       <!-- breadcrumb area start -->
@@ -70,7 +70,7 @@
                   <h1>contact</h1>
                   <ul class="breadcrumb">
                     <li class="breadcrumb-item">
-                      <a href="/html/common/homepage.html"
+                      <a href="../../html/common/homepage.html"
                         ><i class="fa fa-home"></i
                       ></a>
                     </li>
@@ -186,7 +186,7 @@
 
     <footer
       id="footer-placeholder"
-      hx-get="/html/components/footer.html"
+      hx-get="../components/footer.html"
       hx-trigger="load"
       hx-swap="outerHTML"
     ></footer>
@@ -204,5 +204,12 @@
     <script src="../../js/active.js"></script>
     <!-- Auth Js -->
     <script src="../../js/auth.js"></script>
+    <!-- Services and Components -->
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <!-- Header Manager for User Dropdown -->
+    <script
+      type="module"
+      src="../../js/component/header/HeaderManager.js"
+    ></script>
   </body>
 </html>

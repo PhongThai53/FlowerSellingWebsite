@@ -62,7 +62,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             if (cartItem != null)
             {
                 cartItem.Quantity += addToCartDto.Quantity;
-                cartItem.LineTotal = cartItem.Quantity * cartItem.UnitPrice;
+                // LineTotal is computed by the database, don't set it manually
                 await _cartRepository.UpdateCartItemAsync(cartItem);
             }
             else
@@ -72,8 +72,8 @@ namespace FlowerSellingWebsite.Services.Implementations
                     CartId = cart.Id,
                     ProductId = addToCartDto.ProductId,
                     Quantity = addToCartDto.Quantity,
-                    UnitPrice = product.Price ?? 0,
-                    LineTotal = addToCartDto.Quantity * (product.Price ?? 0)
+                    UnitPrice = product.Price ?? 0
+                    // LineTotal is computed by the database automatically
                 };
                 await _cartRepository.AddCartItemAsync(cartItem);
             }
@@ -98,7 +98,7 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
 
             cartItem.Quantity = updateDto.Quantity;
-            cartItem.LineTotal = cartItem.Quantity * cartItem.UnitPrice;
+            // LineTotal is computed by the database, don't set it manually
             await _cartRepository.UpdateCartItemAsync(cartItem);
             
             return MapCartItemToDTO(cartItem);
@@ -136,9 +136,61 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<PagedCartResultDTO> GetPagedCartItemsAsync(int userId, int page = 1, int pageSize = 10)
         {
-            var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
-            if (cart == null)
+            try
             {
+                var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    // Return empty result when no active cart exists
+                    return new PagedCartResultDTO
+                    {
+                        Page = page,
+                        PageSize = pageSize,
+                        TotalItems = 0,
+                        TotalPages = 0,
+                        CartItems = new List<CartItemDTO>(),
+                        CartSummary = new CartSummaryDTO
+                        {
+                            CartId = 0,
+                            TotalItems = 0,
+                            TotalAmount = 0
+                        }
+                    };
+                }
+
+                var pagedResult = await _cartRepository.GetPagedCartItemsAsync(cart.Id, page, pageSize);
+                var cartSummary = await GetCartSummaryAsync(userId);
+
+                // Map cart items with proper product information
+                var cartItemDTOs = pagedResult.Items.Select(item => new CartItemDTO
+                {
+                    Id = item.Id,
+                    CartId = item.CartId,
+                    ProductId = item.ProductId,
+                    ProductName = item.Product?.Name ?? "Unknown Product",
+                    ProductUrl = item.Product?.Url ?? "",
+                    ProductImage = item.Product?.ProductPhotos?.FirstOrDefault(pp => !pp.IsDeleted)?.Url,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    LineTotal = item.LineTotal,
+                    CreatedAt = item.CreatedAt,
+                    UpdatedAt = item.UpdatedAt
+                }).ToList();
+
+                return new PagedCartResultDTO
+                {
+                    Page = pagedResult.Page,
+                    PageSize = pagedResult.PageSize,
+                    TotalItems = pagedResult.TotalItems,
+                    TotalPages = pagedResult.TotalPages,
+                    CartItems = cartItemDTOs,
+                    CartSummary = cartSummary
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting paged cart items for user {userId}: {ex.Message}");
+                // Return empty result on error
                 return new PagedCartResultDTO
                 {
                     Page = page,
@@ -146,60 +198,89 @@ namespace FlowerSellingWebsite.Services.Implementations
                     TotalItems = 0,
                     TotalPages = 0,
                     CartItems = new List<CartItemDTO>(),
-                    CartSummary = new CartSummaryDTO()
+                    CartSummary = new CartSummaryDTO
+                    {
+                        CartId = 0,
+                        TotalItems = 0,
+                        TotalAmount = 0
+                    }
                 };
             }
-
-            var pagedResult = await _cartRepository.GetPagedCartItemsAsync(cart.Id, page, pageSize);
-            var cartSummary = await GetCartSummaryAsync(userId);
-
-            // Map cart items with proper product information
-            var cartItemDTOs = pagedResult.Items.Select(item => new CartItemDTO
-            {
-                Id = item.Id,
-                CartId = item.CartId,
-                ProductId = item.ProductId,
-                ProductName = item.Product?.Name ?? "Unknown Product",
-                ProductUrl = item.Product?.Url ?? "",
-                ProductImage = item.Product?.ProductPhotos?.FirstOrDefault(pp => !pp.IsDeleted)?.Url,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice,
-                LineTotal = item.LineTotal,
-                CreatedAt = item.CreatedAt,
-                UpdatedAt = item.UpdatedAt
-            }).ToList();
-
-            return new PagedCartResultDTO
-            {
-                Page = pagedResult.Page,
-                PageSize = pagedResult.PageSize,
-                TotalItems = pagedResult.TotalItems,
-                TotalPages = pagedResult.TotalPages,
-                CartItems = cartItemDTOs,
-                CartSummary = cartSummary
-            };
         }
 
         public async Task<CartSummaryDTO> GetCartSummaryAsync(int userId)
         {
-            var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
-            if (cart == null)
+            try
             {
-                return new CartSummaryDTO();
-            }
+                var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    // Return empty cart summary when no active cart exists
+                    return new CartSummaryDTO
+                    {
+                        CartId = 0,
+                        TotalItems = 0,
+                        TotalAmount = 0
+                    };
+                }
 
-            return new CartSummaryDTO
+                return new CartSummaryDTO
+                {
+                    CartId = cart.Id,
+                    TotalItems = await _cartRepository.GetCartItemsCountAsync(cart.Id),
+                    TotalAmount = await _cartRepository.GetCartTotalAsync(cart.Id)
+                };
+            }
+            catch (Exception ex)
             {
-                CartId = cart.Id,
-                TotalItems = await _cartRepository.GetCartItemsCountAsync(cart.Id),
-                TotalAmount = await _cartRepository.GetCartTotalAsync(cart.Id)
-            };
+                Console.WriteLine($"Error getting cart summary for user {userId}: {ex.Message}");
+                // Return empty cart summary on error
+                return new CartSummaryDTO
+                {
+                    CartId = 0,
+                    TotalItems = 0,
+                    TotalAmount = 0
+                };
+            }
         }
 
         public async Task<int> GetCartItemsCountAsync(int userId)
         {
-            var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
-            return cart == null ? 0 : await _cartRepository.GetCartItemsCountAsync(cart.Id);
+            try
+            {
+                var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    return 0;
+                }
+                return await _cartRepository.GetCartItemsCountAsync(cart.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting cart items count for user {userId}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        public async Task<CartDTO> EnsureActiveCartAsync(int userId)
+        {
+            try
+            {
+                var cart = await _cartRepository.GetActiveCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    // Create a new cart for the user
+                    cart = await _cartRepository.CreateNewCartForUserAsync(userId);
+                    Console.WriteLine($"Created new cart {cart.Id} for user {userId}");
+                }
+
+                return MapCartToDTO(cart);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ensuring active cart for user {userId}: {ex.Message}");
+                throw;
+            }
         }
 
         private CartDTO MapCartToDTO(Cart cart)

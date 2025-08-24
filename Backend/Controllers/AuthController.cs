@@ -1,5 +1,6 @@
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Services.Interfaces;
+using FlowerSellingWebsite.Services.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +16,15 @@ namespace FlowerSellingWebsite.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IPasswordResetService _passwordResetService;
+        private readonly IEmailVerificationService _verificationService;
 
-        public AuthController(IUserService userService, ILogger<AuthController> logger, IConfiguration configuration, IPasswordResetService passwordResetService)
+        public AuthController(IUserService userService, ILogger<AuthController> logger, IConfiguration configuration, IPasswordResetService passwordResetService, IEmailVerificationService verificationService)
         {
             _userService = userService;
             _logger = logger;
             _configuration = configuration;
             _passwordResetService = passwordResetService;
+            _verificationService = verificationService;
         }
 
    
@@ -203,24 +206,36 @@ namespace FlowerSellingWebsite.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ApiResponse<string>.Fail("Invalid input data"));
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    return BadRequest(ApiResponse<string>.Fail("Invalid input data", errors));
+                }
+
+                // Check if email exists and is pending verification
+                var isPendingVerification = _verificationService.IsEmailPendingVerification(request.Email);
+                if (!isPendingVerification)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("This email is not pending verification. Please check if you've already verified your account or if you need to register first."));
                 }
 
                 var result = await _userService.ResendVerificationEmailAsync(request.Email);
 
                 if (result)
                 {
-                    return Ok(ApiResponse<string>.Ok("", "Verification email sent successfully"));
+                    return Ok(ApiResponse<string>.Ok("", "Verification email sent successfully. Please check your inbox."));
                 }
                 else
                 {
-                    return BadRequest(ApiResponse<string>.Fail("Failed to resend verification email. Please check if the email is valid and pending verification."));
+                    return BadRequest(ApiResponse<string>.Fail("Failed to resend verification email. Please try again later."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resending verification email for: {Email}", request.Email);
-                return StatusCode(500, ApiResponse<string>.Fail("An error occurred while resending verification email"));
+                return StatusCode(500, ApiResponse<string>.Fail("An error occurred while resending verification email. Please try again later."));
             }
         }
 
@@ -229,15 +244,32 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    return BadRequest(ApiResponse<string>.Fail("Validation failed", errors));
+                }
+
+                // Check if email exists in the system
+                var userExists = await _userService.EmailExistsAsync(forgotPasswordDto.Email);
+                if (!userExists)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("Email not found", new List<string> { "This email is not associated with any account. Please check your email address or register a new account." }));
+                }
+
+                // Send password reset link
                 await _userService.SendPasswordResetLinkAsync(forgotPasswordDto.Email);
-                var message = "<div class='alert alert-success'>If an account with that email exists, a password reset link has been sent.</div>";
-                return Content(message, "text/html");
+                
+                return Ok(ApiResponse<string>.Ok("Password reset link sent", "We've sent a password reset link to your email address. Please check your inbox and click the link to reset your password."));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending password reset link for email {Email}", forgotPasswordDto.Email);
-                var message = "<div class='alert alert-danger'>An unexpected error occurred. Please try again later.</div>";
-                return Content(message, "text/html");
+                return StatusCode(500, ApiResponse<string>.Fail("Server error", new List<string> { "An error occurred while sending the password reset link. Please try again later." }));
             }
         }
 
@@ -246,28 +278,37 @@ namespace FlowerSellingWebsite.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    return BadRequest(ApiResponse<string>.Fail("Validation failed", errors));
+                }
+
                 _logger.LogInformation("Reset password attempt with token: {Token}", resetPasswordDto.Token);
                 var success = await _userService.ResetPasswordAsync(resetPasswordDto.Token, resetPasswordDto.NewPassword);
+                
                 if (success)
                 {
                     _logger.LogInformation("Password reset successful for token: {Token}", resetPasswordDto.Token);
-                    var message = "<div class='alert alert-success'>Password has been reset successfully. <a href='/html/auth/login-register.html'>Click here to login</a>.</div>";
-                    return Content(message, "text/html");
+                    return Ok(ApiResponse<string>.Ok("Password reset successful", "Your password has been reset successfully. You can now login with your new password."));
                 }
+                
                 _logger.LogWarning("Password reset failed - invalid or expired token: {Token}", resetPasswordDto.Token);
-                var errorMessage = "<div class='alert alert-danger'>Invalid or expired token. Please try resetting your password again.</div>";
-                return Content(errorMessage, "text/html");
+                return BadRequest(ApiResponse<string>.Fail("Password reset failed", new List<string> { "Invalid or expired token. Please try resetting your password again." }));
             }
             catch (InvalidOperationException ex)
             {
-                var errorMessage = $"<div class='alert alert-danger'>{ex.Message}</div>";
-                return Content(errorMessage, "text/html");
+                _logger.LogWarning(ex, "Invalid operation during password reset for token: {Token}", resetPasswordDto.Token);
+                return BadRequest(ApiResponse<string>.Fail("Password reset failed", new List<string> { ex.Message }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error resetting password.");
-                var errorMessage = "<div class='alert alert-danger'>An unexpected error occurred. Please try again later.</div>";
-                return Content(errorMessage, "text/html");
+                _logger.LogError(ex, "Error resetting password for token: {Token}", resetPasswordDto.Token);
+                return StatusCode(500, ApiResponse<string>.Fail("Server error", new List<string> { "An unexpected error occurred. Please try again later." }));
             }
         }
     }
