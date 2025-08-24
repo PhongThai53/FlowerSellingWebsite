@@ -10,18 +10,26 @@ namespace FlowerSellingWebsite.Models.Entities
         public int SupplierId { get; set; }
 
         [Required]
+        [ForeignKey("Flower")]
+        public int FlowerId { get; set; }   // 🔥 thêm liên kết đến hoa
+
+        [Required]
         public int AvailableQuantity { get; set; }
+
         [Required]
         public decimal UnitPrice { get; set; }
+
         [Required]
         public int ShelfLifeDays { get; set; }
+
         [Required]
         public int MinOrderQty { get; set; }
+
         [Required]
         public string Status { get; set; } = "pending";
 
         // Navigation properties
         public virtual Suppliers? Supplier { get; set; }
-        public virtual ICollection<SupplierListingPhotos> SupplierListingPhotos { get; set; } = new HashSet<SupplierListingPhotos>();
+        public virtual Flowers? Flower { get; set; }   // 🔥 navigation sang hoa
     }
 }

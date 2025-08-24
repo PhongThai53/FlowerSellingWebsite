@@ -45,7 +45,6 @@ namespace FlowerSelling.Data
 
             public DbSet<Suppliers> Suppliers { get; set; }
             public DbSet<SupplierListings> SupplierListings { get; set; }
-            public DbSet<SupplierListingPhotos> SupplierListingPhotos { get; set; }
             public DbSet<PurchaseOrders> PurchaseOrders { get; set; }
             public DbSet<PurchaseOrderDetails> PurchaseOrderDetails { get; set; }
             public DbSet<FlowerDamageLogs> FlowerDamageLogs { get; set; }
@@ -109,7 +108,6 @@ namespace FlowerSelling.Data
                 ConfigureBaseEntityProperties<Deliveries>(modelBuilder);
                 ConfigureBaseEntityProperties<Suppliers>(modelBuilder);
                 ConfigureBaseEntityProperties<SupplierListings>(modelBuilder);
-                ConfigureBaseEntityProperties<SupplierListingPhotos>(modelBuilder);
                 ConfigureBaseEntityProperties<PurchaseOrders>(modelBuilder);
                 ConfigureBaseEntityProperties<PurchaseOrderDetails>(modelBuilder);
                 ConfigureBaseEntityProperties<FlowerDamageLogs>(modelBuilder);
@@ -288,10 +286,6 @@ namespace FlowerSelling.Data
                     entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
                 });
 
-                modelBuilder.Entity<SupplierListingPhotos>(entity =>
-                {
-                    entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
-                });
 
                 modelBuilder.Entity<PurchaseOrders>(entity =>
                 {
@@ -332,7 +326,6 @@ namespace FlowerSelling.Data
                 });
 
                 // ===== RELATIONSHIPS =====
-
 
                 // Composite Keys
                 modelBuilder.Entity<RolePermissions>()

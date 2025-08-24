@@ -181,9 +181,15 @@
             async function loadCategories() {
                 const res = await fetchJson(`${API_BASE}/api/ProductCategory`);
                 const list = res?.data ?? res;
-                if (!Array.isArray(list)) return;
-                if (catSelect) catSelect.innerHTML = ['<option value="">Select Category</option>']
-                    .concat(list.map(c => `<option value="${c.id}">${c.name}</option>`)).join("");
+                if (!Array.isArray(list) || !catSelect) return;
+
+                $(catSelect).empty();
+
+                $(catSelect).append('<option value="">Select Category</option>');
+
+                list.forEach(c => $(catSelect).append(`<option value="${c.id}">${c.name}</option>`));
+
+                $(catSelect).selectpicker('refresh');
             }
 
             function renderPreviewFiles(files) {

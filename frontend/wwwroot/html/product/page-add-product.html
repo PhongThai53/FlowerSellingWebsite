@@ -8,11 +8,13 @@
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="../../images/logo/favicon.ico" />
-    <link rel="stylesheet" href="../../css/">
+    <link rel="stylesheet" href="../../css/backend-plugin.min.css">
     <link rel="stylesheet" href="../../css/backend.css?v=1.0.0">
     <link rel="stylesheet" href="../../css/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="../../css/line-awesome/dist/line-awesome/css/line-awesome.min.css">
     <link rel="stylesheet" href="../../css/remixicon/fonts/remixicon.css">
+
+
 </head>
 <body class="  ">
     <!-- loader Start -->
@@ -155,10 +157,10 @@
 
 
     <script>
-        const API_BASE = "https://localhost:7062"; // sửa nếu api khác
+        const API_BASE = "https://localhost:7062"; // sửa nếu API khác
 
-        // DOM refs (theo HTML bạn đã dán)
-        const form = document.querySelector('form[data-toggle="validator"]'); // or '#productForm' nếu bạn đặt id
+        // DOM refs
+        const form = document.querySelector('form[data-toggle="validator"]');
         const catSelect = document.getElementById("categorySelect");
         const fileInput = document.getElementById("productPhotos");
         const preview = document.getElementById("preview-container");
@@ -182,27 +184,6 @@
             );
         }
 
-        function readIdFromLocation(loc) {
-            if (!loc) return 0;
-            const m = loc.match(/\/(\d+)(\/?|$|\?|#)/);
-            return m ? Number(m[1]) : 0;
-        }
-
-        function extractProductId(resp, location) {
-            // try common shapes
-            if (!resp && location) return readIdFromLocation(location);
-            try {
-                if (typeof resp === "number") return resp;
-                if (typeof resp === "string" && /^\d+$/.test(resp)) return Number(resp);
-                if (resp?.data && !Array.isArray(resp.data)) return resp.data.id ?? resp.data.productId ?? 0;
-                if (resp?.id) return resp.id;
-                return readIdFromLocation(location) || 0;
-            } catch (e) {
-                console.warn("extractProductId error", e, resp, location);
-                return readIdFromLocation(location) || 0;
-            }
-        }
-
         // ---------------- load categories ----------------
         async function loadCategories() {
             if (!catSelect) return;
@@ -210,44 +191,34 @@
             catSelect.innerHTML = `<option value="">Loading...</option>`;
             try {
                 const raw = await fetchJSON(`${API_BASE}/api/ProductCategory`);
-                // expected shape: { succeeded: true, message: "...", data: [ ... ] }
                 const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-                if (!list.length) {
-                    catSelect.innerHTML = `<option value="">No categories</option>`;
-                    return;
-                }
-                catSelect.innerHTML = `<option value="">Select Category</option>` +
-                    list.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join("");
-            } catch (err) {
-                console.error("loadCategories failed:", err);
-                catSelect.innerHTML = `<option value="">Error loading</option>`;
-                // small visual hint
-                const existing = document.getElementById("cat-error-msg");
-                if (!existing && catSelect.parentElement) {
-                    const p = document.createElement("div");
-                    p.id = "cat-error-msg";
-                    p.style.color = "red";
-                    p.style.fontSize = "0.9em";
-                    p.style.marginTop = "6px";
-                    p.textContent = "Không tải được danh mục. Kiểm tra console/network.";
-                    catSelect.parentElement.appendChild(p);
-                }
-            } finally {
-                catSelect.disabled = false;
-                // if using bootstrap-select, refresh
+                catSelect.innerHTML = `<option value="">Select Category</option>`;
+                list.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    catSelect.appendChild(opt);
+                });
+
+                // Refresh bootstrap-select nếu có
                 try {
                     if (window.jQuery && typeof jQuery('.selectpicker').selectpicker === 'function') {
                         jQuery('.selectpicker').selectpicker('refresh');
                     }
-                } catch (e) { /* ignore */ }
+                } catch (e) { console.warn("selectpicker refresh failed", e); }
+
+            } catch (err) {
+                console.error("loadCategories failed:", err);
+                catSelect.innerHTML = `<option value="">Error loading</option>`;
+            } finally {
+                catSelect.disabled = false;
             }
         }
 
-        // ---------------- preview images (with remove) ----------------
+        // ---------------- preview images ----------------
         function initPreviewHandler() {
             if (!fileInput || !preview) return;
             fileInput.addEventListener("change", () => {
-                // rebuild preview from current FileList
                 preview.innerHTML = "";
                 const files = Array.from(fileInput.files || []);
                 files.forEach((file, idx) => {
@@ -278,7 +249,6 @@
                     });
                     btn.title = "Remove this image";
                     btn.addEventListener("click", () => {
-                        // remove file at idx and rebuild FileList
                         const arr = Array.from(fileInput.files || []);
                         arr.splice(idx, 1);
                         const dt = new DataTransfer();
@@ -298,33 +268,19 @@
         async function uploadImages(productId, files) {
             if (!files || !files.length) return [];
             const fd = new FormData();
-
-            // Đổi tên ảnh đầu tiên thành primary.jpg, giữ nguyên các ảnh còn lại
             files.forEach((f, idx) => {
-                if (idx === 0) {
-                    // Lấy extension của file đầu tiên
-                    const ext = f.name.substring(f.name.lastIndexOf('.'));
-                    const primaryName = `primary${ext}`; // primary.jpg, primary.png, etc.
-                    fd.append("files", f, primaryName);
-                } else {
-                    fd.append("files", f, f.name); // Giữ nguyên tên các file còn lại
-                }
+                const ext = f.name.substring(f.name.lastIndexOf('.'));
+                const primaryName = idx === 0 ? `primary${ext}` : f.name;
+                fd.append("files", f, primaryName);
             });
-
             const res = await fetch(`${API_BASE}/api/Image/products/${productId}`, { method: "POST", body: fd });
             const text = await res.text();
             let json = null;
             try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
-            if (!res.ok) {
-                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
-                throw new Error(msg);
-            }
-            // normalize: server may return array or { data: [...] }
+            if (!res.ok) throw new Error((json && (json.message || json.error)) || text || `HTTP ${res.status}`);
             if (Array.isArray(json)) return json;
             if (Array.isArray(json?.data)) return json.data;
-            if (typeof json === "string") return [json];
-            if (json && typeof json === "object") return [json];
-            return [];
+            return typeof json === "string" ? [json] : [json];
         }
 
         // ---------------- create & update product ----------------
@@ -337,12 +293,9 @@
             const location = res.headers.get("location");
             const text = await res.text();
             let json = null;
-            try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
-            if (!res.ok) {
-                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
-                throw new Error(msg);
-            }
-            const id = extractProductId(json, location);
+            try { json = text ? JSON.parse(text) : null; } catch { json = text; }
+            if (!res.ok) throw new Error((json && (json.message || json.error)) || text || `HTTP ${res.status}`);
+            const id = json?.data?.id || json?.id || parseInt(location?.split("/").pop()) || 0;
             return { id, raw: json, location };
         }
 
@@ -354,11 +307,8 @@
             });
             const text = await res.text();
             let json = null;
-            try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
-            if (!res.ok) {
-                const msg = (json && (json.message || json.error)) || text || `HTTP ${res.status}`;
-                throw new Error(msg);
-            }
+            try { json = text ? JSON.parse(text) : null; } catch { json = text; }
+            if (!res.ok) throw new Error((json && (json.message || json.error)) || text || `HTTP ${res.status}`);
             return json;
         }
 
@@ -366,7 +316,6 @@
         async function handleSubmit(e) {
             e.preventDefault();
             try {
-                // Read fields from your form (names as in your HTML)
                 const fd = new FormData(e.target);
                 const name = (fd.get("name") || "").toString().trim();
                 const description = (fd.get("description") || "").toString().trim();
@@ -379,44 +328,27 @@
                     return alert("Vui lòng nhập Name, Price(>=0.01), Stock và Category hợp lệ.");
                 }
 
-                // 1) Create product with placeholder url
                 const createPayload = {
                     name, description, price,
                     url: "/images/products/placeholder.jpg",
                     stock, categoryId
                 };
-                const { id: productId, raw, location } = await createProduct(createPayload);
-                if (!productId) {
-                    console.warn("created product but no id found", { raw, location });
-                    return alert("Tạo sản phẩm xong nhưng không lấy được productId. Kiểm tra response API.");
-                }
+                const { id: productId } = await createProduct(createPayload);
+                if (!productId) return alert("Tạo sản phẩm xong nhưng không lấy được productId.");
 
-                // 2) Upload images if any
                 const uploaded = files.length ? await uploadImages(productId, files) : [];
-                // normalize urls: if uploaded elements are objects, try to read .url or .path
                 const urls = uploaded.map(u => (typeof u === "string" ? u : (u.url || u.path || JSON.stringify(u))));
                 const primaryUrl = urls[0] || `/images/products/${productId}/primary.jpg`;
                 const productPhotos = urls.map((u, i) => ({ url: u, isPrimary: i === 0 }));
 
-                // 3) Update product with photos & primary url
-                const updateBody = {
-                    id: productId,
-                    name, description, price,
-                    url: primaryUrl,
-                    stock, categoryId,
-                    productPhotos
-                };
-                await updateProduct(productId, updateBody);
+                await updateProduct(productId, { id: productId, name, description, price, url: primaryUrl, stock, categoryId, productPhotos });
 
                 alert("Tạo sản phẩm hoàn tất.");
                 e.target.reset();
                 if (preview) preview.innerHTML = "";
-                // refresh bootstrap-select if used
-                try {
-                    if (window.jQuery && typeof jQuery('.selectpicker').selectpicker === 'function') {
-                        jQuery('.selectpicker').selectpicker('refresh');
-                    }
-                } catch (err) { /* ignore */ }
+                if (window.jQuery && typeof jQuery('.selectpicker').selectpicker === 'function') {
+                    jQuery('.selectpicker').selectpicker('refresh');
+                }
             } catch (err) {
                 console.error("submit error:", err);
                 alert("Lỗi: " + (err.message || err));
@@ -425,11 +357,8 @@
 
         // ---------------- init ----------------
         function init() {
-            if (!form) {
-                console.warn("Form element not found (selector: form[data-toggle=\"validator\"])");
-                return;
-            }
-            loadCategories().catch(e => console.error(e));
+            if (!form) return console.warn("Form element not found");
+            loadCategories().catch(console.error);
             initPreviewHandler();
             form.addEventListener("submit", handleSubmit);
         }
