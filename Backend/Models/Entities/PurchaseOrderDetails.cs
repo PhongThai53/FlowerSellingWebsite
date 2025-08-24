@@ -24,7 +24,7 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation properties
         public virtual PurchaseOrders? PurchaseOrder { get; set; }
-        public virtual SupplierListings? SupplierListing { get; set; }   // 🔥 join vào listing
+        public virtual SupplierListings? SupplierListing { get; set; }
         public virtual ICollection<FlowerDamageLogs> FlowerDamageLogs { get; set; } = new HashSet<FlowerDamageLogs>();
     }
 }
