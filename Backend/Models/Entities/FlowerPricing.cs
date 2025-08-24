@@ -31,6 +31,5 @@ namespace FlowerSellingWebsite.Models.Entities
 
         // Navigation properties
         public virtual Flowers Flower { get; set; } = null!;
-        public virtual ICollection<FlowerPriceHistory> FlowerPriceHistories { get; set; } = new HashSet<FlowerPriceHistory>();
     }
 }

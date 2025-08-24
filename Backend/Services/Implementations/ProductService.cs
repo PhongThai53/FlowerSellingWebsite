@@ -168,27 +168,27 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
-        public async Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                foreach (var (productId, quantity) in orderItems)
-                {
-                    var success = await _productRepository.ReduceProductStockAsync(productId, quantity, cancellationToken);
-                    if (!success)
-                    {
-                        // Log the failure but continue with other products
-                        Console.WriteLine($"Failed to reduce stock for product {productId} by {quantity}");
-                        return false;
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error reducing stock for order: {ex.Message}");
-                return false;
-            }
-        }
+        //public async Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default)
+        //{
+        //    try
+        //    {
+        //        foreach (var (productId, quantity) in orderItems)
+        //        {
+        //            var success = await _productRepository.ReduceProductStockAsync(productId, quantity, cancellationToken);
+        //            if (!success)
+        //            {
+        //                // Log the failure but continue with other products
+        //                Console.WriteLine($"Failed to reduce stock for product {productId} by {quantity}");
+        //                return false;
+        //            }
+        //        }
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error reducing stock for order: {ex.Message}");
+        //        return false;
+        //    }
+        //}
     }
 }

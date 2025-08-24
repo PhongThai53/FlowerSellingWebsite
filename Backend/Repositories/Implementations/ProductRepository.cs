@@ -63,6 +63,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             int DbMax = Convert.ToInt32(await query.AnyAsync() ? await query.MaxAsync(p => p.Price) ?? 0 : 0);
 
             query = query.Where(p => p.Price >= min && p.Price <= max);
+            query = query.Where(p => p.Price >= min && p.Price <= max);
 
 
             var totalCount = await query.CountAsync();
@@ -126,33 +127,33 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return existing;
         }
 
-        public async Task<bool> ReduceProductStockAsync(int productId, int quantity, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var product = await _context.Products.FindAsync(productId);
-                if (product == null)
-                {
-                    return false;
-                }
+        //        public async Task<bool> ReduceProductStockAsync(int productId, int quantity, CancellationToken cancellationToken = default)
+        //        {
+        //            try
+        //            {
+        //                var product = await _context.Products.FindAsync(productId);
+        //                if (product == null)
+        //                {
+        //                    return false;
+        //                }
 
-                // Check if we have enough stock
-                if (product.Stock < quantity)
-                {
-                    return false;
-                }
+        //                // Check if we have enough stock
+        //                if (product.Stock<quantity)
+        //                {
+        //                    return false;
+        //                }
 
-                // Reduce stock
-                product.Stock -= quantity;
-                product.UpdatedAt = DateTime.UtcNow;
+        //    // Reduce stock
+        //    product.Stock -= quantity;
+        //                product.UpdatedAt = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync(cancellationToken);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //                await _context.SaveChangesAsync(cancellationToken);
+        //                return true;
+        //            }
+        //            catch
+        //            {
+        //    return false;
+        //}
+        //        }
     }
 }

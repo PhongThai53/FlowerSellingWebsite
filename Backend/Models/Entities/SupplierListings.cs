@@ -11,7 +11,7 @@ namespace FlowerSellingWebsite.Models.Entities
 
         [Required]
         [ForeignKey("Flower")]
-        public int FlowerId { get; set; }   // 🔥 thêm liên kết đến hoa
+        public int FlowerId { get; set; }
 
         [Required]
         public int AvailableQuantity { get; set; }
@@ -28,8 +28,7 @@ namespace FlowerSellingWebsite.Models.Entities
         [Required]
         public string Status { get; set; } = "pending";
 
-        // Navigation properties
         public virtual Suppliers? Supplier { get; set; }
-        public virtual Flowers? Flower { get; set; }   // 🔥 navigation sang hoa
+        public virtual Flowers? Flower { get; set; }
     }
 }
