@@ -233,8 +233,6 @@ namespace FlowerSellingWebsite.Services.Implementations
                     Phone = request.PhoneNumber,
                     Address = request.Address,
                     RoleId = role.Id,
-                    //IsCustomer = request.RoleName.Equals("Customer", StringComparison.OrdinalIgnoreCase),
-                    //IsSupplier = request.RoleName.Equals("Supplier", StringComparison.OrdinalIgnoreCase)
                 };
 
                 await _userRepository.AddAsync(newUser);

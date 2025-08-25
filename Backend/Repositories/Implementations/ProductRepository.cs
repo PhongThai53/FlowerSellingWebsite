@@ -20,7 +20,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return product;
         }
 
-        public async Task<bool> DeleteProductAsync(int id)
+        public async Task<bool> DeleteProductAsync(int id ,CancellationToken cancellationToken = default)
         {
             var existing = await GetProductByIdAsync(id);
             if (existing == null)

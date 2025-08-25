@@ -177,3 +177,5 @@ document.addEventListener("DOMContentLoaded", () => {
   new ForgotPasswordManager();
 });
 
+
+
