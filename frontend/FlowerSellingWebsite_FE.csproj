@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\" />
-    <Folder Include="wwwroot\html\" />
     <Folder Include="wwwroot\js\component\cart\" />
   </ItemGroup>
 

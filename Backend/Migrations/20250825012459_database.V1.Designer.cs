@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    [Migration("20250824173415_database.V1")]
+    [Migration("20250825012459_database.V1")]
     partial class databaseV1
     {
         /// <inheritdoc />

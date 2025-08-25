@@ -60,10 +60,10 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                 query = query.Where(p => p.CategoryId == categoryId);
             }
 
-            int DbMax = Convert.ToInt32(await query.AnyAsync() ? await query.MaxAsync(p => p.Price) ?? 0 : 0);
-
-            query = query.Where(p => p.Price >= min && p.Price <= max);
-            query = query.Where(p => p.Price >= min && p.Price <= max);
+            //int DbMax = Convert.ToInt32(await query.AnyAsync() ? await query.MaxAsync(p => p.Price) ?? 0 : 0);
+            int DbMax = 900000000;
+            min = 0;
+            max = DbMax;
 
 
             var totalCount = await query.CountAsync();
