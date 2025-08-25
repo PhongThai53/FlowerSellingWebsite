@@ -1,7 +1,7 @@
 ﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
-using ProjectGreenLens.Repositories.Implementations;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
 {
@@ -9,6 +9,14 @@ namespace FlowerSellingWebsite.Repositories.Implementations
     {
         public FlowersRepository(FlowerSellingDbContext context) : base(context)
         {
+        }
+
+        public async Task<IEnumerable<ProductFlowers>> GetFlowerRequirementsForProductAsync(int productId)
+        {
+            return await _context.ProductFlowers
+                .Include(pf => pf.Flower)
+                .Where(pf => pf.ProductId == productId)
+                .ToListAsync();
         }
     }
 }

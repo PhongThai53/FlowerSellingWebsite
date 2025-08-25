@@ -1,4 +1,4 @@
-﻿namespace ProjectGreenLens.Repositories.Interfaces
+﻿namespace FlowerSellingWebsite.Repositories.Interfaces
 {
     public interface IBaseRepository<T>
     {

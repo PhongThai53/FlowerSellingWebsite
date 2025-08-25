@@ -1,6 +1,7 @@
 using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.DTOs.Cart;
+using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
@@ -16,17 +17,23 @@ namespace FlowerSellingWebsite.Services.Implementations
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IProductFlowersRepository _productFlowersRepository;
+        private readonly ISupplierListingsRepository _supplierListingsRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<CartService> _logger;
 
         public CartService(
             ICartRepository cartRepository,
             IProductRepository productRepository,
+            IProductFlowersRepository productFlowersRepository,
+            ISupplierListingsRepository supplierListingsRepository,
             IMapper mapper,
             ILogger<CartService> logger)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
+            _productFlowersRepository = productFlowersRepository;
+            _supplierListingsRepository = supplierListingsRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -293,6 +300,329 @@ namespace FlowerSellingWebsite.Services.Implementations
         private CartItemDTO MapCartItemToDTO(CartItem cartItem)
         {
             return _mapper.Map<CartItemDTO>(cartItem);
+        }
+
+        public async Task<CartPriceCalculationDTO> CalculateCartPriceAsync(int userId)
+        {
+            try
+            {
+                var cart = await _cartRepository.GetCartWithItemsByUserIdAsync(userId);
+                if (cart == null || !cart.CartItems.Any())
+                {
+                    return new CartPriceCalculationDTO
+                    {
+                        IsValid = false,
+                        Message = "Cart is empty"
+                    };
+                }
+
+                var result = new CartPriceCalculationDTO
+                {
+                    IsValid = true,
+                    CartItems = new List<CartItemPriceInfo>()
+                };
+
+                decimal subtotal = 0;
+
+                foreach (var cartItem in cart.CartItems)
+                {
+                    var product = await _productRepository.GetProductByIdAsync(cartItem.ProductId);
+                    if (product == null) continue;
+
+                    // Kiểm tra availability và tính giá từ supplier
+                    var availability = await CheckProductAvailabilityWithPricingAsync(cartItem.ProductId, cartItem.Quantity);
+                    
+                    if (!availability.IsAvailable)
+                    {
+                        result.IsValid = false;
+                        result.Message = $"Product {product.Name} is not available in requested quantity";
+                        break;
+                    }
+
+                    var cartItemInfo = new CartItemPriceInfo
+                    {
+                        CartItemId = cartItem.Id,
+                        ProductId = cartItem.ProductId,
+                        ProductName = product.Name,
+                        Quantity = cartItem.Quantity,
+                        OriginalUnitPrice = product.Price ?? 0,
+                        CalculatedUnitPrice = availability.CalculatedUnitPrice,
+                        LineTotal = availability.CalculatedUnitPrice * cartItem.Quantity,
+                        PriceDifference = (availability.CalculatedUnitPrice - (product.Price ?? 0)) * cartItem.Quantity,
+                        SupplierBreakdown = availability.SupplierBreakdown
+                    };
+
+                    result.CartItems.Add(cartItemInfo);
+                    subtotal += cartItemInfo.LineTotal;
+                }
+
+                if (result.IsValid)
+                {
+                    result.Subtotal = subtotal;
+                    result.ServiceFee = subtotal * 0.5m; // 50% service fee
+                    result.TotalAmount = result.Subtotal + result.ServiceFee;
+                    result.Message = "Cart prices calculated successfully";
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating cart price for user {UserId}", userId);
+                return new CartPriceCalculationDTO
+                {
+                    IsValid = false,
+                    Message = $"Error calculating prices: {ex.Message}"
+                };
+            }
+        }
+
+        // Thêm validation methods mới
+        public async Task<CartValidationResultDTO> ValidateCartItemQuantityAsync(int userId, int productId, int quantity)
+        {
+            try
+            {
+                var product = await _productRepository.GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return new CartValidationResultDTO
+                    {
+                        IsValid = false,
+                        Message = "Product not found"
+                    };
+                }
+
+                // Kiểm tra availability
+                var availability = await CheckProductAvailabilityWithPricingAsync(productId, quantity);
+                
+                var validationInfo = new CartItemValidationInfo
+                {
+                    ProductId = productId,
+                    ProductName = product.Name,
+                    RequestedQuantity = quantity,
+                    MaxAvailableQuantity = availability.MaxAvailableQuantity,
+                    IsAvailable = availability.IsAvailable,
+                    Message = availability.IsAvailable ? "Available" : availability.Message,
+                    UnitPrice = availability.CalculatedUnitPrice,
+                    TotalPrice = availability.CalculatedUnitPrice * quantity
+                };
+
+                return new CartValidationResultDTO
+                {
+                    IsValid = availability.IsAvailable,
+                    Message = availability.IsAvailable ? "Quantity is valid" : availability.Message,
+                    CartItems = new List<CartItemValidationInfo> { validationInfo },
+                    MaxQuantityAllowed = availability.MaxAvailableQuantity,
+                    TotalPrice = validationInfo.TotalPrice
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating cart item quantity for product {ProductId}", productId);
+                return new CartValidationResultDTO
+                {
+                    IsValid = false,
+                    Message = $"Error during validation: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<CartValidationResultDTO> ValidateEntireCartAsync(int userId)
+        {
+            try
+            {
+                var cart = await _cartRepository.GetCartWithItemsByUserIdAsync(userId);
+                if (cart == null || !cart.CartItems.Any())
+                {
+                    return new CartValidationResultDTO
+                    {
+                        IsValid = false,
+                        Message = "Cart is empty"
+                    };
+                }
+
+                var result = new CartValidationResultDTO
+                {
+                    IsValid = true,
+                    CartItems = new List<CartItemValidationInfo>()
+                };
+
+                decimal totalPrice = 0;
+
+                foreach (var cartItem in cart.CartItems)
+                {
+                    var validation = await ValidateCartItemQuantityAsync(userId, cartItem.ProductId, cartItem.Quantity);
+                    if (!validation.IsValid)
+                    {
+                        result.IsValid = false;
+                    }
+                    
+                    result.CartItems.AddRange(validation.CartItems);
+                    totalPrice += validation.CartItems.Sum(ci => ci.TotalPrice);
+                }
+
+                result.TotalPrice = totalPrice;
+                result.Message = result.IsValid ? "All cart items are valid" : "Some cart items are invalid";
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating entire cart for user {UserId}", userId);
+                return new CartValidationResultDTO
+                {
+                    IsValid = false,
+                    Message = $"Error during validation: {ex.Message}"
+                };
+            }
+        }
+
+        // Helper method để kiểm tra availability và tính giá
+        private async Task<ProductAvailabilityWithPricingDTO> CheckProductAvailabilityWithPricingAsync(int productId, int quantity)
+        {
+            try
+            {
+                var product = await _productRepository.GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return new ProductAvailabilityWithPricingDTO
+                    {
+                        IsAvailable = false,
+                        ProductId = productId,
+                        Message = "Product not found"
+                    };
+                }
+
+                var flowerRequirements = await _productFlowersRepository.GetFlowerRequirementsForProductAsync(productId);
+                if (flowerRequirements == null || !flowerRequirements.Any())
+                {
+                    return new ProductAvailabilityWithPricingDTO
+                    {
+                        IsAvailable = false,
+                        ProductId = productId,
+                        ProductName = product.Name,
+                        RequestedQuantity = quantity,
+                        Message = "Product has no flower requirements"
+                    };
+                }
+
+                var result = new ProductAvailabilityWithPricingDTO
+                {
+                    ProductId = productId,
+                    ProductName = product.Name,
+                    RequestedQuantity = quantity,
+                    SupplierBreakdown = new List<SupplierPriceBreakdown>()
+                };
+
+                int maxAvailableQuantity = int.MaxValue;
+                bool isAvailable = true;
+                decimal totalCost = 0;
+
+                foreach (var flowerReq in flowerRequirements)
+                {
+                    var totalFlowersNeeded = flowerReq.QuantityNeeded * quantity;
+                    
+                    // Lấy tất cả suppliers cho flower này (không filter AvailableQuantity)
+                    var allSuppliers = await _supplierListingsRepository.GetByFlowerIdAsync(flowerReq.FlowerId);
+                    
+                    if (allSuppliers == null || !allSuppliers.Any())
+                    {
+                        isAvailable = false;
+                        result.Message = $"No suppliers found for flower {flowerReq.Flower?.Name}";
+                        break;
+                    }
+
+                    // Lọc suppliers có AvailableQuantity > 0 và Status = "available"
+                    var availableSuppliers = allSuppliers
+                        .Where(sl => sl.AvailableQuantity > 0 && sl.Status == "available")
+                        .OrderBy(sl => sl.UnitPrice) // Sắp xếp theo giá từ thấp đến cao
+                        .ToList();
+
+                    if (!availableSuppliers.Any())
+                    {
+                        isAvailable = false;
+                        result.Message = $"No available suppliers for flower {flowerReq.Flower?.Name}";
+                        break;
+                    }
+
+                    // Tính toán số lượng có thể lấy từ từng supplier
+                    int remainingNeeded = totalFlowersNeeded;
+                    decimal flowerCost = 0;
+                    var flowerSupplierBreakdown = new List<SupplierPriceBreakdown>();
+
+                    foreach (var supplier in availableSuppliers)
+                    {
+                        if (remainingNeeded <= 0) break;
+
+                        int quantityToTake = Math.Min(remainingNeeded, supplier.AvailableQuantity);
+                        decimal supplierCost = quantityToTake * supplier.UnitPrice;
+                        
+                        flowerCost += supplierCost;
+                        remainingNeeded -= quantityToTake;
+
+                        flowerSupplierBreakdown.Add(new SupplierPriceBreakdown
+                        {
+                            SupplierId = supplier.SupplierId,
+                            SupplierName = supplier.Supplier?.SupplierName ?? "Unknown",
+                            FlowerId = flowerReq.FlowerId,
+                            FlowerName = flowerReq.Flower?.Name ?? "Unknown",
+                            QuantityNeeded = quantityToTake,
+                            UnitPrice = supplier.UnitPrice,
+                            LineTotal = supplierCost
+                        });
+
+                        if (remainingNeeded <= 0) break;
+                    }
+
+                    // Nếu không đủ hoa từ tất cả suppliers
+                    if (remainingNeeded > 0)
+                    {
+                        isAvailable = false;
+                        result.Message = $"Insufficient flowers for {flowerReq.Flower?.Name}. Need: {totalFlowersNeeded}, Available: {totalFlowersNeeded - remainingNeeded}";
+                        break;
+                    }
+
+                    // Tính số lượng tối đa có thể làm được cho flower này
+                    int maxQuantityForThisFlower = availableSuppliers.Sum(sl => sl.AvailableQuantity) / flowerReq.QuantityNeeded;
+                    maxAvailableQuantity = Math.Min(maxAvailableQuantity, maxQuantityForThisFlower);
+
+                    totalCost += flowerCost;
+                    result.SupplierBreakdown.AddRange(flowerSupplierBreakdown);
+                }
+
+                result.IsAvailable = isAvailable;
+                result.MaxAvailableQuantity = maxAvailableQuantity;
+                result.TotalCost = totalCost;
+                result.CalculatedUnitPrice = isAvailable ? totalCost / quantity : 0;
+
+                if (isAvailable)
+                {
+                    result.Message = $"Available for {quantity} products. Max available: {maxAvailableQuantity}";
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking product availability with pricing for product {ProductId}", productId);
+                return new ProductAvailabilityWithPricingDTO
+                {
+                    IsAvailable = false,
+                    ProductId = productId,
+                    Message = $"Error during availability check: {ex.Message}"
+                };
+            }
+        }
+
+        // Helper methods for flower requirements and supplier listings
+        private async Task<IEnumerable<ProductFlowers>> GetFlowerRequirementsForProductAsync(int productId)
+        {
+            return await _productFlowersRepository.GetProductFlowers(productId);
+        }
+
+        private async Task<IEnumerable<SupplierListings>> GetAvailableFlowersByFlowerIdAsync(int flowerId)
+        {
+            return await _supplierListingsRepository.GetByFlowerIdAsync(flowerId);
         }
     }
 }

@@ -14,13 +14,9 @@ namespace FlowerSellingWebsite.Services.Interfaces
             string? sortBy,
             bool asc = true);
         Task<ProductDTO?> GetProductByIdAsync(int id);
-
-        Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto);
-
-        Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto);
-
+        Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO createProductDTO);
+        Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO updateProductDTO);
         Task<bool> DeleteProductAsync(int id);
-
-        //Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default);
+        Task<ProductAvailabilityDTO> CheckProductAvailabilityAsync(int productId, int quantity);
     }
 }

@@ -1,7 +1,6 @@
 using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using ProjectGreenLens.Repositories.Implementations;
 using FlowerSellingWebsite.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Implementations

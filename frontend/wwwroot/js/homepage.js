@@ -3,20 +3,19 @@ const API_BASE_URL = "https://localhost:7062/api";
 
 // Helper function để lấy URL ảnh đầy đủ
 function getProductImageUrl(product) {
-  const baseUrl = API_BASE_URL.replace("/api", ""); // ✅ FIX: Định nghĩa baseUrl trước
+  const baseUrl = "https://localhost:7062"; // Use backend port
   if (!product || !product.id) {
-    return `${baseUrl}/Image/products/default/default.jpg`;
+    return `${baseUrl}/images/products/default/default.jpg`;
   }
-  return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
-}
 
-// Helper function để format giá tiền VND
-function formatPrice(price) {
-  if (!price) return "Liên hệ";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
+  // Check if product_url starts with /images/
+  if (product.product_url && product.product_url.startsWith("/images/")) {
+    // Use the product_url directly
+    return `${baseUrl}${product.product_url}`;
+  }
+
+  // Fallback to backend structure
+  return `${baseUrl}/images/products/${product.id}/primary.jpg`;
 }
 
 // Function để fetch danh sách sản phẩm
@@ -42,18 +41,17 @@ async function fetchProducts() {
   }
 }
 
-// Function để tạo HTML cho một sản phẩm
-function createProductHTML(product) {
+// Function để tạo HTML cho sản phẩm trong section "New Products"
+function createNewProductHTML(product) {
   const imageUrl = getProductImageUrl(product);
-  const formattedPrice = formatPrice(product.price);
 
   return `
         <div class="col-lg-3 col-md-4 col-sm-6">
             <div class="product-item mt-40">
                 <figure class="product-thumb">
                     <a href="product-details.html?id=${product.id}">
-                        <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                        <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
+                        <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
+                        <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
                     </a>
                     <div class="product-badge">
                         <div class="product-label new">
@@ -61,14 +59,6 @@ function createProductHTML(product) {
                         </div>
                     </div>
                     <div class="button-group">
-                        <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích">
-                            <i class="lnr lnr-heart"></i>
-                        </a>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" onclick="loadQuickView(${product.id})">
-                            <span data-bs-toggle="tooltip" data-bs-placement="left" title="Xem nhanh">
-                                <i class="lnr lnr-magnifier"></i>
-                            </span>
-                        </a>
                         <a href="#" class="add-to-cart-btn" data-product-id="${product.id}" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng">
                             <i class="lnr lnr-cart"></i>
                         </a>
@@ -78,9 +68,6 @@ function createProductHTML(product) {
                     <p class="product-name">
                         <a href="product-details.html?id=${product.id}">${product.name}</a>
                     </p>
-                    <div class="price-box">
-                        <span class="price-regular">${formattedPrice}</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -114,7 +101,7 @@ async function loadNewProducts() {
   const displayProducts = products.slice(0, 8);
 
   displayProducts.forEach((product) => {
-    newProductsContainer.innerHTML += createProductHTML(product);
+    newProductsContainer.innerHTML += createNewProductHTML(product);
   });
 
   // ✅ FIX: Thêm lại nút "view more products" - Luôn tạo mới để tránh lỗi
@@ -130,14 +117,13 @@ async function loadNewProducts() {
 // Function để tạo HTML cho sản phẩm trending (carousel)
 function createTrendingProductHTML(product) {
   const imageUrl = getProductImageUrl(product);
-  const formattedPrice = formatPrice(product.price);
 
   return `
         <div class="product-item">
             <figure class="product-thumb">
                 <a href="product-details.html?id=${product.id}">
-                    <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                    <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
+                    <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
+                    <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
                 </a>
                 <div class="product-badge">
                     <div class="product-label new">
@@ -145,14 +131,6 @@ function createTrendingProductHTML(product) {
                     </div>
                 </div>
                 <div class="button-group">
-                    <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích">
-                        <i class="lnr lnr-heart"></i>
-                    </a>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" onclick="loadQuickView(${product.id})">
-                        <span data-bs-toggle="tooltip" data-bs-placement="left" title="Xem nhanh">
-                            <i class="lnr lnr-magnifier"></i>
-                        </span>
-                    </a>
                     <a href="#" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng" onclick="addToCart(${product.id})">
                         <i class="lnr lnr-cart"></i>
                     </a>
@@ -162,9 +140,6 @@ function createTrendingProductHTML(product) {
                 <p class="product-name">
                     <a href="product-details.html?id=${product.id}">${product.name}</a>
                 </p>
-                <div class="price-box">
-                    <span class="price-regular">${formattedPrice}</span>
-                </div>
             </div>
         </div>
     `;
@@ -205,61 +180,33 @@ async function loadTrendingProducts() {
   }
 }
 
-// Function để tạo HTML cho deals products
-function createDealsProductHTML(product) {
+// Function để tạo HTML cho sản phẩm sale
+function createSaleProductHTML(product) {
   const imageUrl = getProductImageUrl(product);
-  const originalPrice = product.price ? product.price * 1.3 : null;
-  const salePrice = formatPrice(product.price);
-  const originalPriceHTML = originalPrice
-    ? `<span class="price-old"><del>${formatPrice(originalPrice)}</del></span>`
-    : "";
 
   return `
-        <div class="deal-slide">
-            <div class="product-item deal-item">
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-item mt-40">
                 <figure class="product-thumb">
                     <a href="product-details.html?id=${product.id}">
-                        <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
-                        <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='assets/img/product/default-product.jpg'">
+                        <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
+                        <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
                     </a>
                     <div class="product-badge">
-                        <div class="product-label sale">
+                        <div class="product-label discount">
                             <span>Sale</span>
                         </div>
                     </div>
                     <div class="button-group">
-                        <a href="wishlist.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào yêu thích">
-                            <i class="lnr lnr-heart"></i>
-                        </a>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#quick_view" onclick="loadQuickView(${product.id})">
-                            <span data-bs-toggle="tooltip" data-bs-placement="left" title="Xem nhanh">
-                                <i class="lnr lnr-magnifier"></i>
-                            </span>
-                        </a>
                         <a href="#" class="add-to-cart-btn" data-product-id="${product.id}" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng">
                             <i class="lnr lnr-cart"></i>
                         </a>
                     </div>
                 </figure>
-                <div class="product-caption product-deal-content">
+                <div class="product-caption">
                     <p class="product-name">
                         <a href="product-details.html?id=${product.id}">${product.name}</a>
                     </p>
-                    <div class="ratings d-flex mb-1">
-                        <span><i class="lnr lnr-star"></i></span>
-                        <span><i class="lnr lnr-star"></i></span>
-                        <span><i class="lnr lnr-star"></i></span>
-                        <span><i class="lnr lnr-star"></i></span>
-                        <span><i class="lnr lnr-star"></i></span>
-                    </div>
-                    <div class="price-box">
-                        <span class="price-regular">${salePrice}</span>
-                        ${originalPriceHTML}
-                    </div>
-                    <div class="countdown-titmer mt-3">
-                        <h5 class="offer-text"><strong class="text-danger">Nhanh tay</strong>! Ưu đãi kết thúc trong:</h5>
-                        <div class="product-countdown" data-countdown="2024/12/25"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -311,18 +258,41 @@ function loadQuickView(productId) {
   // Implement quick view functionality here
 }
 
-// Function xử lý add to cart
+// Function để add sản phẩm vào giỏ hàng
 async function addToCart(productId) {
-  console.log("Adding to cart product:", productId);
-
-  const btn = document.querySelector(`[data-product-id="${productId}"]`);
-
   try {
+    // Check if user is authenticated
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      showToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng", "warning");
+      setTimeout(() => {
+        window.location.href = "/html/auth/login-register.html";
+      }, 2000);
+      return;
+    }
+
+    // Check product availability first
+    const availabilityResponse = await fetch(
+      `${API_BASE_URL}/Product/check-availability/${productId}?quantity=1`
+    );
+    const availabilityResult = await availabilityResponse.json();
+
+    if (!availabilityResult.succeeded) {
+      showToast("Không thể kiểm tra khả năng cung cấp sản phẩm", "error");
+      return;
+    }
+
+    const availability = availabilityResult.data;
+    if (!availability.isAvailable) {
+      showToast(availability.message, "warning");
+      return;
+    }
+
     // Set button loading state
     setButtonLoading(productId, true);
 
     // Import CartManager dynamically
-    const { CartManager } = await import("./component/cart/CartManager.js");
+    const { CartManager } = await import("/js/component/cart/CartManager.js");
 
     // Check if CartManager instance exists globally, if not create one
     if (!window.globalCartManager) {
@@ -330,13 +300,24 @@ async function addToCart(productId) {
     }
 
     // Use the CartManager to add product to cart
-    await window.globalCartManager.addToCart(productId, 1);
+    const added = await window.globalCartManager.addToCart(productId, 1);
 
-    // Show success toast
-    showToast("Đã thêm sản phẩm vào giỏ hàng!", "success");
+    if (added) {
+      // Show success toast
+      showToast("Đã thêm sản phẩm vào giỏ hàng!", "success");
 
-    // Set success state briefly
-    setButtonSuccess(productId);
+      // Set success state briefly
+      setButtonSuccess(productId);
+    }
+
+    // Refresh all button states to reflect new cart state
+    setTimeout(() => {
+      const allButtons = document.querySelectorAll(".add-to-cart-btn");
+      allButtons.forEach((button) => {
+        button.disabled = false;
+        button.title = "Thêm vào giỏ hàng";
+      });
+    }, 500);
   } catch (error) {
     console.error("Error adding to cart:", error);
     showToast("Có lỗi xảy ra khi thêm vào giỏ hàng", "error");
@@ -455,7 +436,6 @@ window.FlowerShop = {
   loadDealsProducts,
   loadQuickView,
   addToCart,
-  formatPrice,
   setButtonLoading,
   setButtonSuccess,
   showToast,

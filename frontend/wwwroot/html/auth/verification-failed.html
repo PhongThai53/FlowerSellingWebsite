@@ -149,33 +149,16 @@
                       <input
                         type="email"
                         name="email"
-                        id="resend-email"
                         placeholder="Enter your email address"
                         required
-                        maxlength="200"
-                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                        title="Please enter a valid email address"
+                        maxlength="100"
                       />
-                      <div
-                        id="email-validation-message"
-                        class="field-error"
-                        style="display: none"
-                      ></div>
                     </div>
 
                     <div class="single-input-item">
-                      <button
-                        type="submit"
-                        class="btn btn__bg"
-                        id="resend-submit-btn"
-                      >
-                        <span class="btn-text">
-                          <i class="fas fa-paper-plane"></i> Resend Verification
-                          Email
-                        </span>
-                        <span class="btn-loading" style="display: none">
-                          <i class="fa fa-spinner fa-spin"></i> Sending...
-                        </span>
+                      <button type="submit" class="btn btn__bg">
+                        <i class="fas fa-paper-plane"></i> Resend Verification
+                        Email
                       </button>
                     </div>
                   </form>
@@ -223,3 +206,4 @@
     <script src="/js/auth.js"></script>
   </body>
 </html>
+

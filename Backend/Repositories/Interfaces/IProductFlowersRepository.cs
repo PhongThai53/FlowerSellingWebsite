@@ -1,10 +1,12 @@
 ﻿using FlowerSellingWebsite.Models.Entities;
-using ProjectGreenLens.Repositories.Interfaces;
+using FlowerSellingWebsite.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Interfaces
 {
     public interface IProductFlowersRepository : IBaseRepository<ProductFlowers>
     {
-        public Task<IEnumerable<ProductFlowers>> GetProductFlowers(int productId);
+        Task<IEnumerable<ProductFlowers>> GetProductFlowers(int productId);
+        Task<IEnumerable<ProductFlowers>> GetFlowerRequirementsForProductAsync(int productId);
+        Task<ProductFlowers?> GetProductFlowerAsync(int productId, int flowerId);
     }
 }

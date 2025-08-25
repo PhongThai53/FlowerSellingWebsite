@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using ProjectGreenLens.Repositories.Implementations;
-using ProjectGreenLens.Repositories.Interfaces;
 using ProjectGreenLens.Services.Implementations;
 using ProjectGreenLens.Services.Interfaces;
 using ProjectGreenLens.Settings;
@@ -59,6 +57,10 @@ builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository
 builder.Services.AddScoped<IProductPhotoRepository, ProductPhotoRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<IProductFlowersRepository, ProductFlowersRepository>();
+builder.Services.AddScoped<ISupplierListingsRepository, SupplierListingsRepository>();
+builder.Services.AddScoped<IPurchaseOrdersRepository, PurchaseOrdersRepository>();
+builder.Services.AddScoped<IPurchaseOrderDetailsRepository, PurchaseOrderDetailsRepository>();
 
 // Application Services
 builder.Services.AddScoped<
@@ -76,14 +78,11 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();
-//.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
-builder.Services.AddScoped<ICartService, CartService>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IVnpay, Vnpay>();
-//builder.Services.AddScoped<IVNPayService, VNPayService>();
-//builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 
 builder.Services.AddScoped<IImageService, ImageService>();
 

@@ -3,30 +3,23 @@ import { ApiService } from "./services/ApiService.js";
 class CheckoutManager {
   constructor() {
     this.cartItems = [];
-    this.cartSummary = { totalItems: 0, totalAmount: 0 };
+    this.cartSummary = { totalItems: 0, total_amount: 0 };
+    this.calculatedPrices = null; // { subtotal, serviceFee, totalAmount, cartItems: [] }
     this.init();
   }
 
   async init() {
     try {
-      // Wait for HTMX to load components
       await this.waitForComponents();
-
-      // Load cart data with timeout
       await Promise.race([
         this.loadCartData(),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Cart loading timeout")), 10000)
         ),
       ]);
-
-      // Setup event listeners
       this.setupEventListeners();
-
-      // Populate order summary
+      await this.loadCalculatedPrices();
       this.populateOrderSummary();
-
-      // Check authentication
       this.checkAuthentication();
     } catch (error) {
       console.error("Error initializing checkout:", error);
@@ -35,111 +28,39 @@ class CheckoutManager {
   }
 
   async waitForComponents() {
-    return new Promise((resolve) => {
-      setTimeout(resolve, 200);
-    });
+    return new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   async loadCartData() {
     try {
-      console.log("=== LOADING CART DATA ===");
-
-      const token = localStorage.getItem("auth_token");
-      console.log("Auth token found:", !!token);
-
-      if (!token) {
-        console.log("No authentication token found");
-        this.showCartEmptyState();
-        return;
-      }
-
-      console.log("Loading cart data...");
-
-      // Test the API directly first
-      console.log("Testing API directly...");
-      try {
-        const testResponse = await fetch(
-          "https://localhost:7062/api/Cart/items?page=1&pageSize=100",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Direct API response status:", testResponse.status);
-        const testData = await testResponse.text();
-        console.log("Direct API response text:", testData);
-      } catch (testError) {
-        console.error("Direct API test failed:", testError);
-      }
-
-      // Get cart items (not just summary)
-      console.log("Calling ApiService.getCartItems...");
-      const result = await ApiService.getCartItems(1, 100); // Get all items
-      console.log("Cart API response:", result);
-      console.log("Result succeeded:", result?.succeeded);
-      console.log("Result data:", result?.data);
-
+      const result = await ApiService.getCartItems(1, 100);
       if (result && result.succeeded && result.data) {
         this.cartItems = result.data.cart_items || result.data.cartItems || [];
         this.cartSummary = result.data.cart_summary ||
-          result.data.cartSummary || {
-            totalItems: 0,
-            total_amount: 0,
-            totalAmount: 0,
-          };
-        console.log("Cart data loaded successfully:", this.cartItems);
-        console.log("Cart summary:", this.cartSummary);
-        console.log("Cart items length:", this.cartItems.length);
-
-        // Force update the order summary
-        this.populateOrderSummary();
+          result.data.cartSummary || { totalItems: 0, total_amount: 0 };
       } else {
-        console.error(
-          "Failed to load cart data:",
-          result?.message || "Unknown error"
-        );
-        console.error("Result structure:", {
-          succeeded: result?.succeeded,
-          data: result?.data,
-          message: result?.message,
-        });
         this.showCartEmptyState();
       }
     } catch (error) {
       console.error("Error loading cart data:", error);
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
-
-      // Try to get cart summary as fallback
-      try {
-        console.log("Trying cart summary as fallback...");
-        const summaryResult = await ApiService.getCartSummary();
-        console.log("Fallback summary result:", summaryResult);
-
-        if (summaryResult && summaryResult.succeeded && summaryResult.data) {
-          this.cartSummary = summaryResult.data;
-          // Ensure consistent property names
-          if (
-            this.cartSummary &&
-            !this.cartSummary.total_amount &&
-            this.cartSummary.totalAmount
-          ) {
-            this.cartSummary.total_amount = this.cartSummary.totalAmount;
-          }
-          this.cartItems = []; // Empty items but we have summary
-          console.log("Cart summary loaded as fallback:", this.cartSummary);
-          this.populateOrderSummary();
-          return;
-        }
-      } catch (summaryError) {
-        console.error("Fallback cart summary also failed:", summaryError);
-      }
-
       this.showCartEmptyState();
+    }
+  }
+
+  async loadCalculatedPrices() {
+    try {
+      const calc = await ApiService.calculateCartPrice();
+      if (calc && calc.succeeded && calc.data) {
+        // Normalize keys: serviceFee from backend is "serviceFee"
+        this.calculatedPrices = {
+          subtotal: calc.data.subtotal || 0,
+          serviceFee: calc.data.serviceFee || 0,
+          totalAmount: calc.data.totalAmount || 0,
+          cartItems: calc.data.cartItems || [],
+        };
+      }
+    } catch (e) {
+      console.error("Failed to load calculated prices:", e);
     }
   }
 
@@ -147,31 +68,21 @@ class CheckoutManager {
     const orderSummaryLoading = document.getElementById("orderSummaryLoading");
     const cartEmptyState = document.getElementById("cartEmptyState");
     const placeOrderBtn = document.getElementById("placeOrderBtn");
-
     if (orderSummaryLoading) orderSummaryLoading.style.display = "none";
     if (cartEmptyState) cartEmptyState.style.display = "block";
     if (placeOrderBtn) placeOrderBtn.disabled = true;
   }
 
   setupEventListeners() {
-    // Form validation
     this.setupFormValidation();
-
-    // Payment method selection
     this.setupPaymentMethodSelection();
-
-    // Place order button
     this.setupPlaceOrderButton();
-
-    // Refresh cart button
     this.setupRefreshCartButton();
   }
 
   setupFormValidation() {
     const form = document.getElementById("checkoutForm");
     if (!form) return;
-
-    // Real-time validation
     const inputs = form.querySelectorAll(
       "input[required], select[required], textarea[required]"
     );
@@ -186,25 +97,14 @@ class CheckoutManager {
       'input[name="paymentMethod"]'
     );
     const paymentDetails = document.querySelectorAll(".payment-method-details");
-
     paymentMethods.forEach((method) => {
       method.addEventListener("change", (e) => {
         const selectedMethod = e.target.value;
-
-        // Hide all payment details
-        paymentDetails.forEach((detail) => {
-          detail.classList.remove("show");
-        });
-
-        // Show selected payment method details
+        paymentDetails.forEach((detail) => detail.classList.remove("show"));
         const selectedDetail = document.querySelector(
           `[data-method="${selectedMethod}"]`
         );
-        if (selectedDetail) {
-          selectedDetail.classList.add("show");
-        }
-
-        // Update place order button text
+        if (selectedDetail) selectedDetail.classList.add("show");
         this.updatePlaceOrderButtonText(selectedMethod);
       });
     });
@@ -212,24 +112,23 @@ class CheckoutManager {
 
   setupPlaceOrderButton() {
     const placeOrderBtn = document.getElementById("placeOrderBtn");
-    if (placeOrderBtn) {
+    if (placeOrderBtn)
       placeOrderBtn.addEventListener("click", () => this.placeOrder());
-    }
   }
 
   setupRefreshCartButton() {
     const refreshCartBtn = document.getElementById("refreshCartBtn");
     if (refreshCartBtn) {
       refreshCartBtn.addEventListener("click", async () => {
-        console.log("Manual cart refresh requested...");
         refreshCartBtn.disabled = true;
-        refreshCartBtn.textContent = "Refreshing...";
-
+        refreshCartBtn.textContent = "Đang tải...";
         try {
           await this.loadCartData();
+          await this.loadCalculatedPrices();
+          this.populateOrderSummary();
         } finally {
           refreshCartBtn.disabled = false;
-          refreshCartBtn.textContent = "Refresh Cart";
+          refreshCartBtn.textContent = "Tải lại giỏ hàng";
         }
       });
     }
@@ -238,40 +137,33 @@ class CheckoutManager {
   validateField(field) {
     const fieldId = field.id;
     const errorElement = document.getElementById(fieldId + "Error");
-
     if (!errorElement) return true;
-
     let isValid = true;
     let errorMessage = "";
-
-    // Check if field is empty
     if (!field.value.trim()) {
       isValid = false;
-      errorMessage = "This field is required";
+      errorMessage = "Trường này là bắt buộc";
     } else {
-      // Specific validation for different field types
       switch (field.type) {
         case "email":
           if (!this.isValidEmail(field.value)) {
             isValid = false;
-            errorMessage = "Please enter a valid email address";
+            errorMessage = "Vui lòng nhập email hợp lệ";
           }
           break;
         case "tel":
           if (!this.isValidPhone(field.value)) {
             isValid = false;
-            errorMessage = "Please enter a valid phone number";
+            errorMessage = "Vui lòng nhập số điện thoại hợp lệ";
           }
           break;
       }
     }
-
     if (!isValid) {
       this.showFieldError(field, errorMessage);
     } else {
       this.clearFieldError(field);
     }
-
     return isValid;
   }
 
@@ -281,24 +173,9 @@ class CheckoutManager {
   }
 
   isValidPhone(phone) {
-    // Remove spaces and common separators
     const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, "");
-
-    // Vietnamese phone number patterns:
-    // - 09xxxxxxxx (10 digits, mobile)
-    // - 01xxxxxxxx (10 digits, mobile)
-    // - 02xxxxxxxx (10 digits, landline)
-    // - 03xxxxxxxx (10 digits, landline)
-    // - 04xxxxxxxx (10 digits, landline)
-    // - 05xxxxxxxx (10 digits, landline)
-    // - 06xxxxxxxx (10 digits, landline)
-    // - 07xxxxxxxx (10 digits, landline)
-    // - 08xxxxxxxx (10 digits, landline)
-    // - +84xxxxxxxxx (international format)
-
     const vietnamPhoneRegex = /^(0|\+84)[0-9]{9}$/;
     const internationalPhoneRegex = /^\+[1-9][0-9]{7,14}$/;
-
     return (
       vietnamPhoneRegex.test(cleanPhone) ||
       internationalPhoneRegex.test(cleanPhone)
@@ -326,9 +203,9 @@ class CheckoutManager {
     const placeOrderBtn = document.getElementById("placeOrderBtn");
     if (placeOrderBtn) {
       if (paymentMethod === "vnpay") {
-        placeOrderBtn.textContent = "Proceed to VNPay";
+        placeOrderBtn.textContent = "Thanh toán VNPay";
       } else {
-        placeOrderBtn.textContent = "Place Order";
+        placeOrderBtn.textContent = "Đặt hàng";
       }
     }
   }
@@ -339,44 +216,53 @@ class CheckoutManager {
     const placeOrderBtn = document.getElementById("placeOrderBtn");
     const orderSummaryLoading = document.getElementById("orderSummaryLoading");
     const orderSummaryTable = document.getElementById("orderSummaryTable");
-
     if (!orderSummaryBody) return;
-
-    // Hide loading state
     if (orderSummaryLoading) orderSummaryLoading.style.display = "none";
-
     if (!this.cartItems || this.cartItems.length === 0) {
-      // Show empty state
       if (cartEmptyState) cartEmptyState.style.display = "block";
       if (placeOrderBtn) placeOrderBtn.disabled = true;
       if (orderSummaryTable) orderSummaryTable.style.display = "none";
       return;
     }
-
-    // Hide empty state, show table, and enable button
     if (cartEmptyState) cartEmptyState.style.display = "none";
     if (placeOrderBtn) placeOrderBtn.disabled = false;
     if (orderSummaryTable) orderSummaryTable.style.display = "table";
 
+    const lineTotalsByProduct = new Map();
+    if (
+      this.calculatedPrices &&
+      Array.isArray(this.calculatedPrices.cartItems)
+    ) {
+      for (const ci of this.calculatedPrices.cartItems) {
+        // Expect keys: productId, quantity, calculatedUnitPrice, calculatedLineTotal
+        const pid = ci.productId || ci.product_id;
+        if (pid != null) {
+          lineTotalsByProduct.set(pid, {
+            unit: ci.calculatedUnitPrice ?? ci.unitPrice ?? 0,
+            line: ci.calculatedLineTotal ?? ci.lineTotal ?? 0,
+          });
+        }
+      }
+    }
+
     const summaryHTML = this.cartItems
-      .map(
-        (item) => `
+      .map((item) => {
+        const priceInfo = lineTotalsByProduct.get(item.product_id) || {
+          unit: item.unit_price || 0,
+          line:
+            item.line_total || (item.unit_price || 0) * (item.quantity || 1),
+        };
+        return `
             <tr>
                 <td>
-                    <a href="../common/product-details.html?id=${
-                      item.product_id
-                    }">
-                        ${item.product_name || "Product"} <strong> × ${
+                    ${item.product_name || "Sản phẩm"} <strong> × ${
           item.quantity
         }</strong>
-                    </a>
                 </td>
-                <td>${this.formatCurrency(
-                  item.line_total || item.unit_price * item.quantity
-                )}</td>
+                <td>${this.formatCurrency(priceInfo.line)}</td>
             </tr>
-        `
-      )
+        `;
+      })
       .join("");
 
     orderSummaryBody.innerHTML = summaryHTML;
@@ -384,32 +270,34 @@ class CheckoutManager {
   }
 
   updateOrderSummary() {
-    const subtotal = this.cartSummary.total_amount || 0;
-    const total = subtotal; // Total equals subtotal (no shipping fee or tax)
+    // Prefer backend calculated prices
+    const subtotal =
+      this.calculatedPrices?.subtotal ?? (this.cartSummary.total_amount || 0);
+    const serviceFee =
+      this.calculatedPrices?.serviceFee ?? Math.round(subtotal * 0.5);
+    const total = this.calculatedPrices?.totalAmount ?? subtotal + serviceFee;
 
-    // Update display
     const subtotalElement = document.getElementById("subtotalAmount");
+    const serviceFeeElement = document.getElementById("serviceFeeAmount");
     const totalElement = document.getElementById("totalAmount");
 
-    if (subtotalElement) {
+    if (subtotalElement)
       subtotalElement.textContent = this.formatCurrency(subtotal);
-    }
-    if (totalElement) {
-      totalElement.textContent = this.formatCurrency(total);
-    }
+    if (serviceFeeElement)
+      serviceFeeElement.textContent = this.formatCurrency(serviceFee);
+    if (totalElement) totalElement.textContent = this.formatCurrency(total);
   }
 
   formatCurrency(amount) {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(amount);
+    }).format(amount || 0);
   }
 
   checkAuthentication() {
     const token = localStorage.getItem("auth_token");
     if (!token) {
-      // Redirect to login if not authenticated
       window.location.href = "../auth/login-register.html";
       return;
     }
@@ -417,74 +305,48 @@ class CheckoutManager {
 
   async placeOrder() {
     try {
-      console.log("=== PLACING ORDER ===");
-      console.log("Cart items:", this.cartItems);
-      console.log("Cart summary:", this.cartSummary);
-
-      // Check if cart has items
       if (!this.cartItems || this.cartItems.length === 0) {
-        console.log("Cart is empty, showing error");
         this.showToast(
-          "Your cart is empty. Please add items before checkout.",
+          "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.",
           "error"
         );
         return;
       }
-
-      // Validate form
-      console.log("Validating form...");
       if (!this.validateForm()) {
-        console.log("Form validation failed");
-        this.showToast("Please fill in all required fields correctly", "error");
+        this.showToast("Vui lòng điền đúng các trường bắt buộc", "error");
         return;
       }
-
-      console.log("Form validation passed, collecting order data...");
-      // Get form data
       const orderData = this.collectOrderData();
-      console.log("Order data collected:", orderData);
-
-      // Show loading state
-      console.log("Setting loading state...");
       this.setLoadingState(true);
-
-      // Submit order
-      console.log("Submitting order to backend...");
       const result = await this.submitOrder(orderData);
-      console.log("Order submission result:", result);
-
       if (result.succeeded) {
-        console.log("Order placed successfully!");
-        this.showToast("Order placed successfully!", "success");
-
-        // Handle different payment methods
+        this.showToast("Đặt hàng thành công!", "success");
         if (orderData.paymentMethod === "vnpay") {
-          // Redirect to VNPay
-          console.log("Redirecting to VNPay...");
           if (result.data.paymentUrl) {
             window.location.href = result.data.paymentUrl;
           } else {
-            console.error("VNPay payment URL not received");
-            this.showToast("VNPay payment URL not received", "error");
+            this.showToast("Không nhận được liên kết VNPay", "error");
           }
         } else {
-          // Redirect to order confirmation for COD
-          console.log("Redirecting to order confirmation...");
           if (result.data.redirectUrl) {
             window.location.href = result.data.redirectUrl;
           } else {
-            window.location.href = `../user/order-confirmation.html?orderId=${result.data.orderId}&orderNumber=${result.data.orderNumber}`;
+            window.location.href = `../user/order-confirmation.html?orderId=${
+              result.data.orderId
+            }&orderNumber=${
+              result.data.orderNumber
+            }&paymentMethod=${encodeURIComponent(
+              orderData.paymentMethod
+            )}&status=Created`;
           }
         }
       } else {
-        console.log("Order placement failed:", result.message);
-        this.showToast(result.message || "Failed to place order", "error");
+        this.showToast(result.message || "Đặt hàng thất bại", "error");
       }
     } catch (error) {
       console.error("Error placing order:", error);
-      this.showToast("An error occurred while placing your order", "error");
+      this.showToast("Có lỗi xảy ra khi đặt hàng", "error");
     } finally {
-      console.log("Clearing loading state...");
       this.setLoadingState(false);
     }
   }
@@ -494,46 +356,32 @@ class CheckoutManager {
       "#checkoutForm [required]"
     );
     let isValid = true;
-
     requiredFields.forEach((field) => {
-      if (!this.validateField(field)) {
-        isValid = false;
-      }
+      if (!this.validateField(field)) isValid = false;
     });
-
     return isValid;
   }
 
   collectOrderData() {
     const form = document.getElementById("checkoutForm");
     const formData = new FormData(form);
-
     const orderData = {
-      // Customer information
       customerFirstName: formData.get("firstName"),
       customerLastName: formData.get("lastName"),
       customerEmail: formData.get("email"),
       customerPhone: formData.get("phone"),
-      companyName: formData.get("companyName"),
-
-      // Billing address
-      country: formData.get("country"),
+      companyName: formData.get("companyName") || undefined,
+      country: formData.get("country") || undefined,
       city: formData.get("city"),
       state: formData.get("state"),
-      postcode: formData.get("postcode"),
+      postcode: formData.get("postcode") || undefined,
       streetAddress: formData.get("streetAddress"),
       streetAddress2: formData.get("streetAddress2"),
-
-      // Order details
       orderNotes: formData.get("orderNotes"),
-
-      // Payment and shipping
       paymentMethod: document.querySelector(
         'input[name="paymentMethod"]:checked'
       ).value,
-      shippingMethod: "flat", // Default to flat rate shipping
-
-      // Cart data
+      shippingMethod: "flat",
       cartItems: this.cartItems.map((item) => ({
         productId: item.product_id,
         quantity: item.quantity,
@@ -542,30 +390,19 @@ class CheckoutManager {
         productName: item.product_name,
       })),
       subtotal:
-        this.cartSummary?.total_amount || this.cartSummary?.totalAmount || 0,
+        this.calculatedPrices?.subtotal ??
+        (this.cartSummary?.total_amount || this.cartSummary?.totalAmount || 0),
       totalAmount:
-        this.cartSummary?.total_amount || this.cartSummary?.totalAmount || 0, // Total equals subtotal
+        this.calculatedPrices?.totalAmount ??
+        (this.cartSummary?.total_amount || this.cartSummary?.totalAmount || 0),
     };
-
-    // Debug logging
-    console.log("Cart summary in collectOrderData:", this.cartSummary);
-    console.log("Cart items in collectOrderData:", this.cartItems);
-    console.log("Calculated values:", {
-      subtotal: orderData.subtotal,
-      totalAmount: orderData.totalAmount,
-    });
-
     return orderData;
   }
 
   async submitOrder(orderData) {
     try {
       const token = localStorage.getItem("auth_token");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
-      // Submit order to backend
+      if (!token) throw new Error("Authentication required");
       const response = await fetch(
         "https://localhost:7062/api/Order/checkout",
         {
@@ -578,12 +415,57 @@ class CheckoutManager {
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create order");
+      const status = response.status;
+      const contentType = response.headers.get("content-type") || "";
+      let rawText = "";
+      let parsedJson = null;
+
+      try {
+        rawText = await response.text();
+      } catch (readErr) {
+        console.warn("Failed reading response body:", readErr);
       }
 
-      return await response.json();
+      if (rawText) {
+        if (contentType.includes("application/json")) {
+          try {
+            parsedJson = JSON.parse(rawText);
+          } catch (parseErr) {
+            console.warn("Failed to parse JSON response:", parseErr, rawText);
+          }
+        }
+      }
+
+      if (!response.ok) {
+        const serverMessage =
+          parsedJson?.message || rawText || `HTTP ${status}`;
+        console.error("Checkout API error:", {
+          status,
+          serverMessage,
+          rawText,
+        });
+        // More friendly message for common cases
+        if (status === 404) {
+          throw new Error(
+            "Không tìm thấy API thanh toán (404). Vui lòng kiểm tra server."
+          );
+        }
+        if (status === 401 || status === 403) {
+          throw new Error(
+            "Bạn cần đăng nhập để thanh toán. Vui lòng đăng nhập lại."
+          );
+        }
+        throw new Error(serverMessage);
+      }
+
+      // Success path
+      if (parsedJson) {
+        return parsedJson;
+      }
+
+      // If no JSON returned but request succeeded, fabricate a basic success object
+      console.warn("Checkout API returned empty/non-JSON success body.");
+      return { succeeded: true, data: {} };
     } catch (error) {
       console.error("Error submitting order:", error);
       throw error;
@@ -593,22 +475,14 @@ class CheckoutManager {
   setLoadingState(loading) {
     const placeOrderBtn = document.getElementById("placeOrderBtn");
     const loadingSpinner = document.getElementById("orderLoadingSpinner");
-
-    if (placeOrderBtn) {
-      placeOrderBtn.disabled = loading;
-    }
-
+    if (placeOrderBtn) placeOrderBtn.disabled = loading;
     if (loadingSpinner) {
-      if (loading) {
-        loadingSpinner.classList.add("show");
-      } else {
-        loadingSpinner.classList.remove("show");
-      }
+      if (loading) loadingSpinner.classList.add("show");
+      else loadingSpinner.classList.remove("show");
     }
   }
 
   showToast(message, type = "info") {
-    // Create toast element
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
@@ -617,19 +491,9 @@ class CheckoutManager {
                 <span>${message}</span>
             </div>
         `;
-
-    // Add to page
     document.body.appendChild(toast);
-
-    // Show toast
-    setTimeout(() => {
-      toast.classList.add("show");
-    }, 100);
-
-    // Remove toast after 3 seconds
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => toast.remove(), 3000);
   }
 
   getToastIcon(type) {
@@ -646,5 +510,4 @@ class CheckoutManager {
   }
 }
 
-// Export for use in HTML
 export { CheckoutManager };
