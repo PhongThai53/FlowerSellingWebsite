@@ -1,0 +1,63 @@
+﻿/* CSS bổ sung để đảm bảo sản phẩm hiển thị đúng cách */
+
+/* Đảm bảo hình ảnh sản phẩm có kích thước đồng nhất */
+.product-item .product-thumb img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+/* Hiệu ứng hover cho hình ảnh thứ hai */
+.product-item .product-thumb:hover .pri-img {
+    opacity: 0;
+}
+
+.product-item .product-thumb:hover .sec-img {
+    opacity: 1;
+}
+
+.product-item .product-thumb .sec-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Loading state */
+.products-loading {
+    text-align: center;
+    padding: 50px 0;
+}
+
+    .products-loading::after {
+        content: "Loading products...";
+        font-size: 18px;
+        color: #666;
+    }
+
+/* Error state */
+.products-error {
+    text-align: center;
+    padding: 50px 0;
+    color: #dc3545;
+}
+
+    .products-error::before {
+        content: "⚠ ";
+        font-size: 24px;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-item .product-thumb img {
+        height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-item .product-thumb img {
+        height: 200px;
+    }
+}
