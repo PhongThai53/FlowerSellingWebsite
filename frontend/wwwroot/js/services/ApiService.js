@@ -206,4 +206,19 @@ export class ApiService {
       },
     });
   }
+
+  static async calculateCartPrice() {
+    const token = localStorage.getItem("auth_token");
+    return this.request("/Cart/calculate-price", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  static async checkProductAvailability(productId, quantity = 1) {
+    return this.request(
+      `/Product/check-availability/${productId}?quantity=${quantity}`
+    );
+  }
 }

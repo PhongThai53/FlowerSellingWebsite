@@ -4,9 +4,9 @@ using FlowerSellingWebsite.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
 {
-    public class ProductPhotoRepository : BaseRepository<ProductPhotos>, IProductPhotoRepository
+    public class PurchaseOrdersRepository : BaseRepository<PurchaseOrders>, IPurchaseOrdersRepository
     {
-        public ProductPhotoRepository(FlowerSellingDbContext context) : base(context)
+        public PurchaseOrdersRepository(FlowerSellingDbContext context) : base(context)
         {
         }
     }

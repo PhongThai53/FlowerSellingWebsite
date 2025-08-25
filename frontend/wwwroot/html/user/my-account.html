@@ -87,6 +87,39 @@
         color: #495057 !important;
         background-color: #e9ecef !important;
       }
+
+      /* Handle long fullname overflow */
+      .welcome {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+      }
+
+      .welcome p {
+        margin: 0;
+        padding: 0;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+      }
+
+      .welcome strong {
+        display: inline-block;
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+        line-height: 1.4;
+      }
+
+      /* Responsive text handling */
+      @media (max-width: 768px) {
+        .welcome strong {
+          font-size: 0.9em;
+          line-height: 1.3;
+        }
+      }
     </style>
   </head>
 

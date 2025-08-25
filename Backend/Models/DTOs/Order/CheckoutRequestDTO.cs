@@ -5,46 +5,37 @@ namespace FlowerSellingWebsite.Models.DTOs.Order
 {
     public class CheckoutRequestDTO
     {
-        // Customer information
-        [Required]
+        // Customer information - these will be populated from user profile
         [JsonPropertyName("customerFirstName")]
-        public string CustomerFirstName { get; set; } = null!;
+        public string? CustomerFirstName { get; set; }
 
-        [Required]
         [JsonPropertyName("customerLastName")]
-        public string CustomerLastName { get; set; } = null!;
+        public string? CustomerLastName { get; set; }
 
-        [Required]
-        [EmailAddress]
         [JsonPropertyName("customerEmail")]
-        public string CustomerEmail { get; set; } = null!;
+        public string? CustomerEmail { get; set; }
 
-        [Required]
         [JsonPropertyName("customerPhone")]
-        public string CustomerPhone { get; set; } = null!;
+        public string? CustomerPhone { get; set; }
 
         [JsonPropertyName("companyName")]
         public string? CompanyName { get; set; }
 
         // Billing address
-        [Required]
         [JsonPropertyName("country")]
-        public string Country { get; set; } = null!;
+        public string? Country { get; set; }
 
-        [Required]
         [JsonPropertyName("city")]
-        public string City { get; set; } = null!;
+        public string? City { get; set; }
 
         [JsonPropertyName("state")]
         public string? State { get; set; }
 
-        [Required]
         [JsonPropertyName("postcode")]
-        public string Postcode { get; set; } = null!;
+        public string? Postcode { get; set; }
 
-        [Required]
         [JsonPropertyName("streetAddress")]
-        public string StreetAddress { get; set; } = null!;
+        public string? StreetAddress { get; set; }
 
         [JsonPropertyName("streetAddress2")]
         public string? StreetAddress2 { get; set; }
@@ -54,33 +45,44 @@ namespace FlowerSellingWebsite.Models.DTOs.Order
         public string? OrderNotes { get; set; }
 
         // Payment and shipping
-        [Required]
         [JsonPropertyName("paymentMethod")]
-        public string PaymentMethod { get; set; } = null!; // "cash" or "vnpay"
+        public string? PaymentMethod { get; set; } // "cash" or "vnpay"
 
-        [Required]
         [JsonPropertyName("shippingMethod")]
-        public string ShippingMethod { get; set; } = null!; // "flat" or "free"
+        public string? ShippingMethod { get; set; } // "flat" or "free"
 
         // Cart data
-        [Required]
         [JsonPropertyName("cartItems")]
-        public List<CheckoutCartItemDTO> CartItems { get; set; } = new();
+        public List<CheckoutCartItemDTO>? CartItems { get; set; } = new();
 
         [JsonPropertyName("subtotal")]
         public decimal Subtotal { get; set; }
 
         [JsonPropertyName("totalAmount")]
         public decimal TotalAmount { get; set; }
+
+        // New fields for the updated flow
+        [JsonPropertyName("shippingAddress")]
+        public string? ShippingAddress { get; set; }
+
+        [JsonPropertyName("billingAddress")]
+        public string? BillingAddress { get; set; }
+
+        [JsonPropertyName("notes")]
+        public string? Notes { get; set; }
+
+        [JsonPropertyName("discountAmount")]
+        public decimal? DiscountAmount { get; set; }
+
+        [JsonPropertyName("shippingFee")]
+        public decimal? ShippingFee { get; set; }
     }
 
     public class CheckoutCartItemDTO
     {
-        [Required]
         [JsonPropertyName("productId")]
         public int ProductId { get; set; }
 
-        [Required]
         [JsonPropertyName("quantity")]
         public int Quantity { get; set; }
 

@@ -1,7 +1,6 @@
 using FlowerSellingWebsite.Models.DTOs.Blog;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Models.Enums;
-using ProjectGreenLens.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Interfaces
 {

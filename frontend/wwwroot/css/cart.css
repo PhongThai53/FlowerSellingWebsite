@@ -15,6 +15,90 @@
   opacity: 0.5;
 }
 
+/* Price display styles for supplier-based pricing */
+.price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calculated-price {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.original-price {
+  font-size: 0.85em;
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.price-difference {
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.price-difference.text-danger {
+  color: #dc3545;
+}
+
+.price-difference.text-success {
+  color: #28a745;
+}
+
+.price-label {
+  font-size: 0.85em;
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Service fee styling */
+#service-fee-amount {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+/* Service fee row styling */
+.cart-calculate-items table tr:nth-child(2) {
+  background-color: #fff5f5;
+  border-left: 3px solid #e74c3c;
+}
+
+/* Supplier breakdown tooltip */
+.supplier-breakdown {
+  position: relative;
+  cursor: help;
+}
+
+.supplier-breakdown:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+}
+
+.supplier-breakdown:hover::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+  margin-bottom: -5px;
+  z-index: 1000;
+}
+
 .quantity-controls {
   display: flex;
   align-items: center;
@@ -258,6 +342,16 @@
   text-align: center;
   vertical-align: middle;
   padding: 15px 8px;
+  color: #333;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: table-cell !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: #e9ecef !important;
+  color: #212529 !important;
+  font-weight: 700 !important;
 }
 
 .cart-table td {

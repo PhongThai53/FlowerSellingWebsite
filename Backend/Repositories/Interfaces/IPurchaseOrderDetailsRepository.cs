@@ -2,7 +2,7 @@
 
 namespace FlowerSellingWebsite.Repositories.Interfaces
 {
-    public interface IProductPhotoRepository : IBaseRepository<ProductPhotos>
+    public interface IPurchaseOrderDetailsRepository : IBaseRepository<PurchaseOrderDetails>
     {
     }
 }

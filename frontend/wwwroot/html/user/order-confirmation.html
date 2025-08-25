@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="vi">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Order Confirmation - Flower eCommerce" />
-    <title>Order Confirmation - Flower eCommerce</title>
+    <meta name="description" content="Xác nhận đơn hàng - Flower eCommerce" />
+    <title>Xác nhận đơn hàng - Flower eCommerce</title>
 
     <!--=== Favicon ===-->
     <link
@@ -26,11 +26,6 @@
     <link href="../../css/style.css" rel="stylesheet" />
     <!-- Cart CSS for styling -->
     <link href="../../css/cart.css" rel="stylesheet" />
-
-    <!--[if lt IE 9]>
-      <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
   </head>
 
   <body>
@@ -51,7 +46,7 @@
             <div class="col-12">
               <div class="breadcrumb-wrap">
                 <nav aria-label="breadcrumb">
-                  <h1>Order Confirmation</h1>
+                  <h1>Xác nhận đơn hàng</h1>
                   <ul class="breadcrumb">
                     <li class="breadcrumb-item">
                       <a href="../common/homepage.html"
@@ -59,13 +54,13 @@
                       ></a>
                     </li>
                     <li class="breadcrumb-item">
-                      <a href="../user/cart.html">Cart</a>
+                      <a href="../user/cart.html">Giỏ hàng</a>
                     </li>
                     <li class="breadcrumb-item">
-                      <a href="../Payment/checkout.html">Checkout</a>
+                      <a href="../Payment/checkout.html">Thanh toán</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
-                      Order Confirmation
+                      Xác nhận đơn hàng
                     </li>
                   </ul>
                 </nav>
@@ -89,49 +84,31 @@
                   ></i>
                 </div>
 
-                <h2 class="mb-4">Thank You for Your Order!</h2>
+                <h2 class="mb-4">Cảm ơn bạn đã đặt hàng!</h2>
 
                 <div class="order-details mb-4">
                   <p class="mb-2">
-                    <strong>Order Number:</strong>
+                    <strong>Mã đơn hàng:</strong>
                     <span id="orderNumber">-</span>
                   </p>
                   <p class="mb-2">
                     <strong>Order ID:</strong> <span id="orderId">-</span>
                   </p>
                   <p class="mb-2">
-                    <strong>Payment Method:</strong> Cash on Delivery
+                    <strong>Phương thức thanh toán:</strong>
+                    <span id="paymentMethod">-</span>
                   </p>
                   <p class="mb-2">
-                    <strong>Status:</strong>
-                    <span class="badge bg-warning">Processing</span>
-                  </p>
-                </div>
-
-                <div class="order-message mb-4">
-                  <p>
-                    Your order has been successfully placed and is being
-                    processed.
-                  </p>
-                  <p>
-                    You will receive a confirmation email shortly with order
-                    details.
-                  </p>
-                  <p>
-                    For Cash on Delivery orders, please have the exact amount
-                    ready when the delivery arrives.
+                    <strong>Trạng thái:</strong>
+                    <span class="badge bg-warning" id="orderStatus"
+                      >Created</span
+                    >
                   </p>
                 </div>
 
                 <div class="action-buttons">
                   <a href="../common/shop.html" class="btn btn__bg me-3">
-                    Continue Shopping
-                  </a>
-                  <a
-                    href="../user/order-history.html"
-                    class="btn btn-outline-primary"
-                  >
-                    View Order History
+                    Tiếp tục mua sắm
                   </a>
                 </div>
               </div>
@@ -163,24 +140,32 @@
     ></script>
 
     <script>
-      // Initialize HeaderManager
       document.addEventListener("DOMContentLoaded", function () {
-        if (typeof HeaderManager !== "undefined") {
-          window.headerManager = new HeaderManager();
-        }
-
-        // Get order details from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get("orderId");
         const orderNumber = urlParams.get("orderNumber");
+        const paymentMethod = urlParams.get("paymentMethod") || "cash";
+        const status = urlParams.get("status") || "Created";
 
-        // Display order details
         if (orderId) {
           document.getElementById("orderId").textContent = orderId;
         }
         if (orderNumber) {
           document.getElementById("orderNumber").textContent = orderNumber;
         }
+        const paymentLabel = ((pm) => {
+          const v = (pm || "").toLowerCase();
+          if (v === "vnpay") return "VNPay";
+          if (v === "cash" || v === "cod" || v === "cash on delivery")
+            return "Tiền mặt khi nhận hàng";
+          // If unknown or missing, treat as COD
+          return "Tiền mặt khi nhận hàng";
+        })(paymentMethod);
+        document.getElementById("paymentMethod").textContent = paymentLabel;
+        document.getElementById("orderStatus").textContent =
+          status === "Created" ? "Đã tạo" : status;
+        document.getElementById("orderStatus").classList.remove("bg-warning");
+        document.getElementById("orderStatus").classList.add("bg-success");
       });
     </script>
   </body>

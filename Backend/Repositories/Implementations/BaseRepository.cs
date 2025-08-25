@@ -1,13 +1,14 @@
-﻿using FlowerSelling.Data.FlowerSellingWebsite.Data;
-using FlowerSellingWebsite.Models.Entities;
+﻿using FlowerSellingWebsite.Models.Entities;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using ProjectGreenLens.Repositories.Interfaces;
+using FlowerSelling.Data.FlowerSellingWebsite.Data;
 
-namespace ProjectGreenLens.Repositories.Implementations
+namespace FlowerSellingWebsite.Repositories.Implementations
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity, new()
     {
         protected readonly FlowerSellingDbContext _context;
+        
         public BaseRepository(FlowerSellingDbContext context)
         {
             _context = context;
