@@ -14,6 +14,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public int FlowerId { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "QuantityNeeded must be greater than 0.")]
         public int QuantityNeeded { get; set; }
 
         // Navigation properties

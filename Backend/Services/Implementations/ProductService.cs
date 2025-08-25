@@ -12,15 +12,18 @@ namespace FlowerSellingWebsite.Services.Implementations
     {
         private readonly IProductRepository _productRepository;
         private readonly IProductPhotoRepository _productPhotoRepository;
+        private readonly IProductFlowersRepository _productFlowersRepository;
         private readonly IMapper _mapper;
 
         public ProductService(
             IProductRepository productRepository,
             IProductPhotoRepository productPhotoRepository,
+            IProductFlowersRepository productFlowersRepository,
             IMapper mapper)
         {
             _productRepository = productRepository;
             _productPhotoRepository = productPhotoRepository;
+            _productFlowersRepository = productFlowersRepository;
             _mapper = mapper;
         }
 
@@ -34,31 +37,46 @@ namespace FlowerSellingWebsite.Services.Implementations
             string? sortBy,
             bool asc = true)
         {
-            // Validation 
-            pageNumber = pageNumber < 1 ? 1 : pageNumber;
-            pageSize = pageSize <= 0 || pageSize > 30 ? 10 : pageSize;
+            try
+            {
+                pageNumber = pageNumber < 1 ? 1 : pageNumber;
+                pageSize = pageSize <= 0 || pageSize > 30 ? 10 : pageSize;
 
-            // Get Data
-            var result = await _productRepository.GetPagedProductsAsync(
-                pageNumber,
-                pageSize,
-                categoryId,
-                min,
-                max,
-                search,
-                sortBy,
-                asc);
+                var result = await _productRepository.GetPagedProductsAsync(
+                    pageNumber,
+                    pageSize,
+                    categoryId,
+                    min,
+                    max,
+                    search,
+                    sortBy,
+                    asc);
 
-            // Map DTO
-            var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
+                var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
 
-            return (dtoItems, result.TotalPages, result.TotalCount, result.Min, result.Max, result.DbMax);
+                return (dtoItems, result.TotalPages, result.TotalCount, result.Min, result.Max, result.DbMax);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetPagedProductsAsync Error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task<ProductDTO?> GetProductByIdAsync(int id)
         {
-            var product = await _productRepository.GetProductByIdAsync(id);
-            return product != null ? _mapper.Map<ProductDTO>(product) : null;
+            try
+            {
+                var product = await _productRepository.GetProductByIdAsync(id);
+                return product != null ? _mapper.Map<ProductDTO>(product) : null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetProductByIdAsync Error - ID {id}: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto)
@@ -70,6 +88,7 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                 ValidateDataAnnotations(dto);
                 ValidateProductPhotos(dto.ProductPhotos);
+                ValidateProductFLowers(dto.ProductFlowers);
 
                 var existing = await _productRepository.GetProductByIdAsync(id);
                 if (existing == null)
@@ -80,6 +99,11 @@ namespace FlowerSellingWebsite.Services.Implementations
                 if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
                 {
                     await HandleProductPhotos(dto.ProductPhotos, id);
+                }
+
+                if (dto.ProductFlowers != null && dto.ProductFlowers.Any())
+                {
+                    await HandleProductFLowers(dto.ProductFlowers, id);
                 }
 
                 var updated = await _productRepository.UpdateProductAsync(existing);
@@ -95,37 +119,58 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<CreateProductDTO?> CreateProductAsync(CreateProductDTO dto)
         {
-            if (dto == null)
-                return null;
-
-            ValidateDataAnnotations(dto);
-            ValidateProductPhotos(dto.ProductPhotos);
-
-            var product = _mapper.Map<Products>(dto);
-            var createdProduct = await _productRepository.CreateProductAsync(product);
-
-            if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
+            try
             {
-                await HandleProductPhotos(dto.ProductPhotos, createdProduct.Id);
+                if (dto == null)
+                    return null;
+
+                ValidateDataAnnotations(dto);
+                ValidateProductPhotos(dto.ProductPhotos);
+                ValidateProductFLowers(dto.ProductFlowers);
+
+                var product = _mapper.Map<Products>(dto);
+                var createdProduct = await _productRepository.CreateProductAsync(product);
+
+                if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
+                {
+                    await HandleProductPhotos(dto.ProductPhotos, createdProduct.Id);
+                }
+                if (dto.ProductFlowers != null && dto.ProductFlowers.Any())
+                {
+                    await HandleProductFLowers(dto.ProductFlowers, createdProduct.Id);
+                }
+
+                var result = _mapper.Map<CreateProductDTO>(createdProduct);
+                result.ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>();
+
+                return result;
             }
-
-            // Map Entity back to DTO
-            var result = _mapper.Map<CreateProductDTO>(createdProduct);
-            result.ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>();
-
-            return result;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CreateProductAsync Error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var existing = await _productRepository.GetProductByIdAsync(id);
-            if (existing == null)
-                return false;
+            try
+            {
+                var existing = await _productRepository.GetProductByIdAsync(id);
+                if (existing == null)
+                    return false;
 
-            return await _productRepository.DeleteProductAsync(id);
+                return await _productRepository.DeleteProductAsync(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeleteProductAsync Error - ID {id}: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
         }
 
-        // Private Helper Methods
         private static void ValidateDataAnnotations<T>(T dto) where T : class
         {
             var context = new ValidationContext(dto);
@@ -162,33 +207,31 @@ namespace FlowerSellingWebsite.Services.Implementations
             foreach (var photo in photos)
             {
                 photo.ProductId = productId;
-                photo.Id = 0; // Reset ID for new entity
+                photo.Id = 0;
                 ValidateDataAnnotations(photo);
                 await _productPhotoRepository.createAsync(photo);
             }
         }
 
-        //public async Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default)
-        //{
-        //    try
-        //    {
-        //        foreach (var (productId, quantity) in orderItems)
-        //        {
-        //            var success = await _productRepository.ReduceProductStockAsync(productId, quantity, cancellationToken);
-        //            if (!success)
-        //            {
-        //                // Log the failure but continue with other products
-        //                Console.WriteLine($"Failed to reduce stock for product {productId} by {quantity}");
-        //                return false;
-        //            }
-        //        }
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Error reducing stock for order: {ex.Message}");
-        //        return false;
-        //    }
-        //}
+        private static void ValidateProductFLowers(List<ProductFlowers>? flowers)
+        {
+            if (flowers == null || !flowers.Any())
+                return;
+            foreach (var flower in flowers)
+            {
+                ValidateDataAnnotations(flower);
+            }
+        }
+
+        private async Task HandleProductFLowers(List<ProductFlowers> flowers, int productId)
+        {
+            foreach (var flower in flowers)
+            {
+                flower.ProductId = productId;
+                flower.Id = 0;
+                ValidateDataAnnotations(flower);
+                await _productFlowersRepository.createAsync(flower);
+            }
+        }
     }
 }

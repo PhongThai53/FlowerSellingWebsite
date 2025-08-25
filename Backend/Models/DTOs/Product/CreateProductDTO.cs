@@ -31,5 +31,6 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
 
         public List<ProductPhotos>? ProductPhotos { get; set; } = new List<ProductPhotos>();
 
+        public List<ProductFlowers> ProductFlowers { get; set; } = new List<ProductFlowers>();
     }
 }

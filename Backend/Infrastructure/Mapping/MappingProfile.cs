@@ -4,6 +4,7 @@ using FlowerSellingWebsite.Models.DTOs.Cart;
 using FlowerSellingWebsite.Models.DTOs.Order;
 using FlowerSellingWebsite.Models.DTOs.Product;
 using FlowerSellingWebsite.Models.DTOs.ProductCategory;
+using FlowerSellingWebsite.Models.DTOs.ProductFlowersDTO;
 using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using FlowerSellingWebsite.Models.Entities;
 
@@ -16,6 +17,7 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
+                .ForMember(dest => dest.ProductFlowers, opt => opt.MapFrom(src => src.ProductFlowers))
                 .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
 
             CreateMap<Products, ProductListDTO>()
@@ -80,11 +82,13 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             // ------------------ Create Product DTO ------------------
             CreateMap<CreateProductDTO, Products>()
                 .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos))
+                .ForMember(dest => dest.ProductFlowers, opt => opt.MapFrom(src => src.ProductFlowers))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
             CreateMap<Products, CreateProductDTO>()
-                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos))
+                .ForMember(dest => dest.ProductFlowers, opt => opt.MapFrom(src => src.ProductFlowers));
 
             // ------------------ Cart ------------------
             CreateMap<Cart, CartDTO>()
@@ -106,6 +110,9 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Orders, OrderDTO>().ReverseMap();
+
+            // ======================== ProductFlowersDTO ================================
+            CreateMap<ProductFlowers, ProductFlowerResponseDTO>().ReverseMap();
         }
     }
 }

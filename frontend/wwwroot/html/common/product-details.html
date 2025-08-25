@@ -480,8 +480,30 @@
           document.querySelector(".description").textContent = p.description;
 
           // ====== Slider xử lý ======
-          const $largeSlider = $(".product-large-slider");
-          const $thumbs = $(".pro-nav");
+            // ====== Slider xử lý ======
+            const $largeSlider = $(".product-large-slider");
+            const $thumbs = $(".pro-nav");
+
+            // Nếu slick chưa init thì init trước
+            if (!$largeSlider.hasClass("slick-initialized")) {
+                $largeSlider.slick({
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    arrows: true,
+                    fade: true,
+                    asNavFor: ".pro-nav",
+                });
+            }
+
+            if (!$thumbs.hasClass("slick-initialized")) {
+                $thumbs.slick({
+                    slidesToShow: 4,
+                    slidesToScroll: 1,
+                    asNavFor: ".product-large-slider",
+                    dots: false,
+                    focusOnSelect: true,
+                });
+            }
 
           // Nếu slick chưa init thì init trước
           if (!$largeSlider.hasClass("slick-initialized")) {
@@ -517,8 +539,8 @@
           );
 
           // Thêm ảnh mới
-          photos.forEach((photo) => {
-            const fullUrl = `https://localhost:7062${photo.url}`;
+            photos.forEach((photo) => {
+                const fullUrl = `https://localhost:7062/images/products/${productId}/${photo.url}`;
 
             $largeSlider.slick(
               "slickAdd",

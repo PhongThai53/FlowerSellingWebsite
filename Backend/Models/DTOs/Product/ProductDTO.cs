@@ -1,4 +1,5 @@
-﻿using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
+﻿using FlowerSellingWebsite.Models.DTOs.ProductFlowersDTO;
+using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 
 namespace FlowerSellingWebsite.Models.DTOs.Product
 {
@@ -13,5 +14,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
         public List<ProductPhotoDTO> ProductPhotos { get; set; } = new();
+
+        public List<ProductFlowerResponseDTO> ProductFlowers { get; set; } = new();
     }
 }

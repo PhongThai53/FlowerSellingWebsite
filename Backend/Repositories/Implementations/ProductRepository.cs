@@ -99,6 +99,7 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             return await _context.Products
                 .Include(p => p.ProductPhotos)
                 .Include(p => p.ProductCategories)
+                .Include(p => p.ProductFlowers)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

@@ -20,7 +20,5 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto);
 
         Task<bool> DeleteProductAsync(int id);
-
-        //Task<bool> ReduceStockForOrderAsync(List<(int ProductId, int Quantity)> orderItems, CancellationToken cancellationToken = default);
     }
 }
