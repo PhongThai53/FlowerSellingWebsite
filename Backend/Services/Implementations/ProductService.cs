@@ -87,8 +87,6 @@ namespace FlowerSellingWebsite.Services.Implementations
                     throw new ArgumentNullException(nameof(dto));
 
                 ValidateDataAnnotations(dto);
-                ValidateProductPhotos(dto.ProductPhotos);
-                ValidateProductFLowers(dto.ProductFlowers);
 
                 var existing = await _productRepository.GetProductByIdAsync(id);
                 if (existing == null)
@@ -98,16 +96,18 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                 if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
                 {
-                    await HandleProductPhotos(dto.ProductPhotos, id);
+                    var photos = _mapper.Map<List<ProductPhotos>>(dto.ProductPhotos);
+                    await HandleProductPhotos(photos, id);
                 }
 
                 if (dto.ProductFlowers != null && dto.ProductFlowers.Any())
                 {
-                    await HandleProductFLowers(dto.ProductFlowers, id);
+                    var flowers = _mapper.Map<List<ProductFlowers>>(dto.ProductFlowers);
+                    await HandleProductFLowers(flowers, id);
                 }
 
                 var updated = await _productRepository.UpdateProductAsync(existing);
-                return _mapper.Map<UpdateProductDTO?>(updated);
+                return _mapper.Map<UpdateProductDTO>(updated);
             }
             catch (Exception ex)
             {
@@ -125,25 +125,23 @@ namespace FlowerSellingWebsite.Services.Implementations
                     return null;
 
                 ValidateDataAnnotations(dto);
-                ValidateProductPhotos(dto.ProductPhotos);
-                ValidateProductFLowers(dto.ProductFlowers);
 
                 var product = _mapper.Map<Products>(dto);
                 var createdProduct = await _productRepository.CreateProductAsync(product);
 
                 if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
                 {
-                    await HandleProductPhotos(dto.ProductPhotos, createdProduct.Id);
+                    var photos = _mapper.Map<List<ProductPhotos>>(dto.ProductPhotos);
+                    await HandleProductPhotos(photos, createdProduct.Id);
                 }
+
                 if (dto.ProductFlowers != null && dto.ProductFlowers.Any())
                 {
-                    await HandleProductFLowers(dto.ProductFlowers, createdProduct.Id);
+                    var flowers = _mapper.Map<List<ProductFlowers>>(dto.ProductFlowers);
+                    await HandleProductFLowers(flowers, createdProduct.Id);
                 }
 
-                var result = _mapper.Map<CreateProductDTO>(createdProduct);
-                result.ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>();
-
-                return result;
+                return _mapper.Map<CreateProductDTO>(createdProduct);
             }
             catch (Exception ex)
             {
@@ -152,6 +150,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 throw;
             }
         }
+
 
         public async Task<bool> DeleteProductAsync(int id)
         {
@@ -171,8 +170,13 @@ namespace FlowerSellingWebsite.Services.Implementations
             }
         }
 
-        private static void ValidateDataAnnotations<T>(T dto) where T : class
+        private static void ValidateDataAnnotations<T>(T? dto) where T : class
         {
+            if (dto == null)
+            {
+                throw new FlowerSellingWebsite.Exceptions.ValidationException("DTO must not be null.");
+            }
+
             var context = new ValidationContext(dto);
             var results = new List<ValidationResult>();
 

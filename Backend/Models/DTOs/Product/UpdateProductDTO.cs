@@ -1,4 +1,4 @@
-﻿using FlowerSellingWebsite.Models.DTOs.ProductFlowersDTO;
+﻿using FlowerSellingWebsite.Models.DTOs.ProductFlowers;
 using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,7 +27,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         public int? CategoryId { get; set; }
 
         // Product photos - cho phép cập nhật danh sách ảnh
-        public List<ProductPhotoDTO>? ProductPhotos { get; set; } = new List<ProductPhotoDTO>();
-        public List<ProductFlowerResponseDTO?> ProductFlowers { get; set; } = new List<ProductFlowerResponseDTO?>();
+        public List<UpdateProductPhotoDTO?> ProductPhotos { get; set; } = new();
+        public List<ProductFlowerUpdateDTO?> ProductFlowers { get; set; } = new();
     }
 }

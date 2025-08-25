@@ -13,8 +13,8 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         public int stock { get; set; } = 0;
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
-        public List<ProductPhotoDTO> ProductPhotos { get; set; } = new();
+        public List<ProductPhotoDTO?> ProductPhotos { get; set; } = new();
 
-        public List<ProductFlowerResponseDTO> ProductFlowers { get; set; } = new();
+        public List<ProductFlowerResponseDTO?> ProductFlowers { get; set; } = new();
     }
 }

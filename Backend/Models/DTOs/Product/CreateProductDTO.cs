@@ -1,4 +1,5 @@
-﻿using FlowerSellingWebsite.Models.Entities;
+﻿using FlowerSellingWebsite.Models.DTOs.ProductFlowers;
+using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using System.ComponentModel.DataAnnotations;
 
 namespace FlowerSellingWebsite.Models.DTOs.Product
@@ -29,8 +30,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         [Range(1, int.MaxValue, ErrorMessage = "Category ID must be greater than 0")]
         public int CategoryId { get; set; }
 
-        public List<ProductPhotos>? ProductPhotos { get; set; } = new List<ProductPhotos>();
-
-        public List<ProductFlowers> ProductFlowers { get; set; } = new List<ProductFlowers>();
+        public List<CreateProductPhotoDTO> ProductPhotos { get; set; } = new();
+        public List<ProductFlowerCreateDTO> ProductFlowers { get; set; } = new();
     }
 }
