@@ -1,8 +1,8 @@
 using FlowerSelling.Data.FlowerSellingWebsite.Data;
 using FlowerSellingWebsite.Models.Entities;
-using FlowerSellingWebsite.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using ProjectGreenLens.Repositories.Implementations;
+using FlowerSellingWebsite.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Repositories.Implementations
 {
@@ -115,14 +115,14 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         {
             var payment = await _context.Payments
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
-            
+
             if (payment == null) return false;
 
             // Map payment status values
             var mappedStatus = paymentStatus switch
             {
                 "Paid" => "Completed",
-                "Pending" => "Pending", 
+                "Pending" => "Pending",
                 "Failed" => "Failed",
                 "Refunded" => "Refunded",
                 _ => paymentStatus

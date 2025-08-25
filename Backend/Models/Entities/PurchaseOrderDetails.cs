@@ -24,6 +24,5 @@ namespace FlowerSellingWebsite.Models.Entities
         public virtual PurchaseOrders? PurchaseOrder { get; set; }
         public virtual Flowers? Flower { get; set; }
         public virtual ICollection<FlowerDamageLogs> FlowerDamageLogs { get; set; } = new HashSet<FlowerDamageLogs>();
-
     }
 }

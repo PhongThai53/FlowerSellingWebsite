@@ -10,7 +10,7 @@ namespace FlowerSellingWebsite.Models.Entities
         public string? HexCode { get; set; }
         public string? Description { get; set; }
 
-        // Navigation properties - removed FlowerCategoryImages and FlowerPricings
+        // Navigation properties
         public virtual ICollection<Flowers> Flowers { get; set; } = new HashSet<Flowers>();
     }
 }

@@ -1,5 +1,3 @@
-using FlowerSellingWebsite.Models.DTOs.Order;
-
 namespace FlowerSellingWebsite.Services.Interfaces
 {
     public interface IVNPayService

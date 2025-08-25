@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerSellingWebsite.Migrations
 {
     [DbContext(typeof(FlowerSellingDbContext))]
-    [Migration("20250822011909_UpdatePayment")]
-    partial class UpdatePayment
+    [Migration("20250824173415_database.V1")]
+    partial class databaseV1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.PrimitiveCollection<string>("Images")
+                    b.Property<string>("Images")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -115,9 +115,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
 
@@ -128,8 +125,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
 
                     b.HasIndex("PublicId")
                         .IsUnique();
@@ -162,9 +157,7 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<decimal>("LineTotal")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("decimal(18,2)")
-                        .HasComputedColumnSql("[Quantity] * [UnitPrice]", true);
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -506,62 +499,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("FlowerImages");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPriceHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ChangeDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ChangeReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ChangedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FlowerPricingId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<decimal>("NewPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OldPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChangedByUserId");
-
-                    b.HasIndex("FlowerPricingId");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
-
-                    b.ToTable("FlowerPriceHistory");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
                 {
                     b.Property<int>("Id")
@@ -599,7 +536,7 @@ namespace FlowerSellingWebsite.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("PriceType")
                         .IsRequired()
@@ -737,43 +674,54 @@ namespace FlowerSellingWebsite.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CompanyAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CompanyEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("CompanyName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("CompanyPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("CompanyTaxCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CustomerEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ExportFormat")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("ExportPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("ExportedAt")
                         .HasColumnType("datetime2");
@@ -783,13 +731,17 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -811,7 +763,13 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InvoiceNumber")
+                        .IsUnique();
+
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.ToTable("Invoices");
                 });
@@ -942,10 +900,12 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("InvoiceExportPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("InvoiceNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1029,9 +989,6 @@ namespace FlowerSellingWebsite.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("UsersId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -1041,8 +998,6 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.HasIndex("PublicId")
                         .IsUnique();
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("Orders");
                 });
@@ -1066,10 +1021,12 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("IconClass")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -1086,7 +1043,8 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.Property<string>("MethodType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
@@ -1154,46 +1112,59 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("VNPayBankCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("VNPayCancelUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("VNPayCardType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("VNPayCurrencyCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
 
                     b.Property<string>("VNPayGatewayUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("VNPayLocale")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("VNPayOrderInfo")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("VNPayProcessDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("VNPayResponseCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("VNPayResponseMessage")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("VNPayReturnUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("VNPaySecureHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("VNPayTransactionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("VNPayTxnRef")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -1459,11 +1430,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Stock")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1678,52 +1644,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListingPhotos", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("SupplierListingId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
-
-                    b.HasIndex("SupplierListingId");
-
-                    b.ToTable("SupplierListingPhotos");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListings", b =>
                 {
                     b.Property<int>("Id")
@@ -1740,6 +1660,9 @@ namespace FlowerSellingWebsite.Migrations
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("FlowerId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1770,6 +1693,8 @@ namespace FlowerSellingWebsite.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FlowerId");
 
                     b.HasIndex("PublicId")
                         .IsUnique();
@@ -1910,84 +1835,18 @@ namespace FlowerSellingWebsite.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.VNPayConfig", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CancelUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ConfigKey")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CurrencyCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HashSecret")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Locale")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ReturnUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TmnCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VNPayConfigs");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Blog", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", "Category")
                         .WithMany("Blogs")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1997,17 +1856,11 @@ namespace FlowerSellingWebsite.Migrations
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Cart", b =>
                 {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Orders", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId");
-
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Order");
 
                     b.Navigation("User");
                 });
@@ -2023,7 +1876,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Products", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");
@@ -2073,13 +1926,13 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.PurchaseOrderDetails", "PurchaseOrderDetail")
                         .WithMany("FlowerDamageLogs")
                         .HasForeignKey("PurchaseOrderDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "ReportedByUser")
                         .WithMany("FlowerDamageLogs")
                         .HasForeignKey("ReportedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PurchaseOrderDetail");
@@ -2098,25 +1951,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Flower");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPriceHistory", b =>
-                {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "ChangedByUser")
-                        .WithMany("FlowerPriceHistories")
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerPricing", "FlowerPricing")
-                        .WithMany("FlowerPriceHistories")
-                        .HasForeignKey("FlowerPricingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChangedByUser");
-
-                    b.Navigation("FlowerPricing");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
@@ -2132,18 +1966,19 @@ namespace FlowerSellingWebsite.Migrations
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerCategories", "FlowerCategory")
                         .WithMany("Flowers")
-                        .HasForeignKey("FlowerCategoryId");
+                        .HasForeignKey("FlowerCategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerColors", "FlowerColor")
                         .WithMany("Flowers")
                         .HasForeignKey("FlowerColorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.FlowerTypes", "FlowerType")
                         .WithMany("Flowers")
                         .HasForeignKey("FlowerTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FlowerCategory");
@@ -2175,7 +2010,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Products", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -2186,14 +2021,10 @@ namespace FlowerSellingWebsite.Migrations
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Orders", b =>
                 {
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Users", "Customer")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.Users", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("UsersId");
 
                     b.Navigation("Customer");
                 });
@@ -2222,7 +2053,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
                         .WithMany("ProductFlowers")
                         .HasForeignKey("FlowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Products", "Product")
@@ -2263,7 +2094,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.ProductCategories", "ProductCategories")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ProductCategories");
@@ -2274,7 +2105,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
                         .WithMany("PurchaseOrderDetails")
                         .HasForeignKey("FlowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.PurchaseOrders", "PurchaseOrder")
@@ -2293,7 +2124,7 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
                         .WithMany("PurchaseOrders")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Supplier");
@@ -2318,24 +2149,21 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListingPhotos", b =>
-                {
-                    b.HasOne("FlowerSellingWebsite.Models.Entities.SupplierListings", "SupplierListing")
-                        .WithMany("SupplierListingPhotos")
-                        .HasForeignKey("SupplierListingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SupplierListing");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListings", b =>
                 {
+                    b.HasOne("FlowerSellingWebsite.Models.Entities.Flowers", "Flower")
+                        .WithMany("SupplierListings")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
                         .WithMany("SupplierListings")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Flower");
 
                     b.Navigation("Supplier");
                 });
@@ -2345,12 +2173,13 @@ namespace FlowerSellingWebsite.Migrations
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Roles", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FlowerSellingWebsite.Models.Entities.Suppliers", "Supplier")
                         .WithMany("Users")
-                        .HasForeignKey("SupplierId");
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Role");
 
@@ -2384,11 +2213,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Flowers");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerPricing", b =>
-                {
-                    b.Navigation("FlowerPriceHistories");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.FlowerTypes", b =>
                 {
                     b.Navigation("Flowers");
@@ -2403,6 +2227,8 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("ProductFlowers");
 
                     b.Navigation("PurchaseOrderDetails");
+
+                    b.Navigation("SupplierListings");
                 });
 
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Orders", b =>
@@ -2459,11 +2285,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.SupplierListings", b =>
-                {
-                    b.Navigation("SupplierListingPhotos");
-                });
-
             modelBuilder.Entity("FlowerSellingWebsite.Models.Entities.Suppliers", b =>
                 {
                     b.Navigation("PurchaseOrders");
@@ -2478,8 +2299,6 @@ namespace FlowerSellingWebsite.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("FlowerDamageLogs");
-
-                    b.Navigation("FlowerPriceHistories");
 
                     b.Navigation("Orders");
                 });
