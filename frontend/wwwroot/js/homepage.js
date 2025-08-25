@@ -46,31 +46,40 @@ function createNewProductHTML(product) {
   const imageUrl = getProductImageUrl(product);
 
   return `
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="product-item mt-40">
-                <figure class="product-thumb">
-                    <a href="product-details.html?id=${product.id}">
-                        <img class="pri-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
-                        <img class="sec-img" src="${imageUrl}" alt="${product.name}" onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
-                    </a>
-                    <div class="product-badge">
-                        <div class="product-label new">
-                            <span>Mới</span>
-                        </div>
-                    </div>
-                    <div class="button-group">
-                        <a href="#" class="add-to-cart-btn" data-product-id="${product.id}" data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng">
-                            <i class="lnr lnr-cart"></i>
-                        </a>
-                    </div>
-                </figure>
-                <div class="product-caption">
-                    <p class="product-name">
-                        <a href="product-details.html?id=${product.id}">${product.name}</a>
-                    </p>
-                </div>
-            </div>
-        </div>
+      <div class="col-lg-3 col-md-4 col-sm-6" style="display:flex;">
+  <div class="product-item mt-40"
+       style="display:flex; flex-direction:column; height:100%;">
+
+    <figure class="product-thumb">
+      <a href="product-details.html?id=${product.id}">
+        <img class="pri-img" src="${imageUrl}" alt="${product.name}" 
+             style="width:100%; height:250px; object-fit:cover;" 
+             onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
+        <img class="sec-img" src="${imageUrl}" alt="${product.name}" 
+             style="width:100%; height:250px; object-fit:cover;" 
+             onerror="this.src='https://localhost:7062/images/products/default/default.jpg'">
+      </a>
+      <div class="product-badge">
+        <div class="product-label new"><span>Mới</span></div>
+      </div>
+      <div class="button-group">
+        <a href="#" class="add-to-cart-btn" data-product-id="${product.id}" 
+           data-bs-toggle="tooltip" data-bs-placement="left" title="Thêm vào giỏ hàng">
+          <i class="lnr lnr-cart"></i>
+        </a>
+      </div>
+    </figure>
+
+    <!-- caption căn giữa -->
+    <div class="product-caption" style="text-align:center;">
+      <p class="product-name">
+        <a href="product-details.html?id=${product.id}">${product.name}</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+  </div>
     `;
 }
 
