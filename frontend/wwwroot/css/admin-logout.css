@@ -1,0 +1,101 @@
+/* Admin Logout Styles */
+.admin-user-dropdown .dropdown-menu {
+    border: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    min-width: 280px;
+}
+
+.admin-user-dropdown .card-body {
+    padding: 0;
+}
+
+.admin-user-dropdown .p-3 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.admin-user-dropdown h5 {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.admin-user-dropdown p {
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
+    margin-bottom: 0;
+}
+
+.admin-user-dropdown .btn {
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    border: 1px solid #e3e6f0;
+}
+
+.admin-user-dropdown .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.admin-user-dropdown .btn:first-child {
+    background: #4e73df;
+    color: white;
+    border-color: #4e73df;
+}
+
+.admin-user-dropdown .btn:first-child:hover {
+    background: #2e59d9;
+    border-color: #2e59d9;
+}
+
+.admin-user-dropdown .btn:last-child {
+    background: #e74a3b;
+    color: white;
+    border-color: #e74a3b;
+}
+
+.admin-user-dropdown .btn:last-child:hover {
+    background: #d52a1a;
+    border-color: #d52a1a;
+}
+
+/* User avatar styling */
+.admin-user-dropdown .search-toggle img {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.admin-user-dropdown .search-toggle:hover img {
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+/* Loading state */
+.admin-user-dropdown .loading-text {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-user-dropdown .dropdown-menu {
+        min-width: 250px;
+        right: 0;
+        left: auto;
+    }
+    
+    .admin-user-dropdown .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .admin-user-dropdown .btn {
+        width: 100%;
+        margin: 0;
+    }
+}

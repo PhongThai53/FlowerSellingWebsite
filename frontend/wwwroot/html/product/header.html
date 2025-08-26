@@ -92,21 +92,25 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="nav-item nav-icon dropdown caption-content">
+                        <li class="nav-item nav-icon dropdown caption-content admin-user-dropdown">
                             <a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton4"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <img src="../../images/user/1.png" class="img-fluid rounded" alt="user">
                             </a>
-                            <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton4">
                                 <div class="card shadow-none m-0">
                                     <div class="card-body p-0 text-center">
 
                                         <div class="p-3">
-                                            <h5 class="mb-1">JoanDuo@property.com</h5>
-                                            <p class="mb-0">Since 10 march, 2020</p>
+                                            <h5 class="mb-1" id="admin-user-email">Đang tải...</h5>
+                                            <p class="mb-0" id="admin-user-role">Đang tải...</p>
                                             <div class="d-flex align-items-center justify-content-center mt-3">
-                                                <a href="../user/my-account.html" class="btn border mr-2">Profile</a>
-                                                <a href="auth-sign-in.html" class="btn border">Sign Out</a>
+                                                <a href="#" class="btn border mr-2" onclick="adminLogoutManager.showProfile()">
+                                                    <i class="ri-user-line mr-1"></i>Profile
+                                                </a>
+                                                <a href="#" class="btn border" onclick="adminLogoutManager.handleLogout()">
+                                                    <i class="ri-logout-box-r-line mr-1"></i>Sign Out
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
