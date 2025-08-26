@@ -302,8 +302,9 @@ namespace FlowerSellingWebsite.Controllers
             try
             {
                 var userId = await GetCurrentUserIdAsync();
-                var result = await _cartService.CalculateCartPriceAsync(userId);
-                return Ok(ApiResponse<CartPriceCalculationDTO>.Ok(result, "Cart prices calculated successfully"));
+                // Use the new sequential allocation method for better pricing accuracy
+                var result = await _cartService.CalculateCartPriceWithSequentialAllocationAsync(userId);
+                return Ok(ApiResponse<CartPriceCalculationDTO>.Ok(result, "Cart prices calculated successfully with sequential allocation"));
             }
             catch (UnauthorizedAccessException ex)
             {
