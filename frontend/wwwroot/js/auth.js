@@ -104,7 +104,16 @@ class AuthManager {
 
           if (formType === "login") {
             setTimeout(() => {
-              window.location.href = "/html/common/homepage.html";
+              // Kiểm tra vai trò của người dùng để chuyển hướng phù hợp
+              const userRole = response.data.user.roleName;
+              if (userRole === "Admin") {
+                window.location.href = "/html/admin/index.html";
+              } else if (userRole === "Supplier") {
+                window.location.href = "/html/supplier/view-flower-list.html";
+              } else {
+                // Người dùng thường và các vai trò khác
+                window.location.href = "/html/common/homepage.html";
+              }
             }, 1500);
           } else {
             // Registration successful - show email verification message
