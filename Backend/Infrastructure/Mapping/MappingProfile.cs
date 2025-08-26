@@ -106,6 +106,25 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Orders, OrderDTO>().ReverseMap();
+
+            // ------------------ Flowers ------------------
+            CreateMap<Flowers, FlowerResponse>()
+                .ForMember(dest => dest.FlowerCategory, opt => opt.MapFrom(src => src.FlowerCategory))
+                .ForMember(dest => dest.FlowerType, opt => opt.MapFrom(src => src.FlowerType))
+                .ForMember(dest => dest.FlowerColor, opt => opt.MapFrom(src => src.FlowerColor));
+
+            CreateMap<FlowerCategories, FlowerCategoryResponse>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.CategoryName))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+
+            CreateMap<FlowerTypes, FlowerTypeResponse>()
+                .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.TypeName))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+
+            CreateMap<FlowerColors, FlowerColorResponse>()
+                .ForMember(dest => dest.ColorName, opt => opt.MapFrom(src => src.ColorName))
+                .ForMember(dest => dest.HexCode, opt => opt.MapFrom(src => src.HexCode))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
         }
     }
 }
