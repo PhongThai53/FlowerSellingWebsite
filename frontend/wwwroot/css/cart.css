@@ -138,12 +138,74 @@
   background: white;
 }
 
+/* Cart summary card improvements */
 .cart-summary-card {
   background: #f8f9fa;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 1px solid #e9ecef;
+}
+
+.cart-summary-card h5 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.cart-summary-card .text-muted {
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* Loading state for prices */
+.price-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.price-loading::after {
+  content: " (Đang tính...)";
+  font-style: italic;
+  color: #6c757d;
+}
+
+/* Price update indicators */
+.price-updated {
+  background-color: #f8fff8 !important;
+  border-left: 3px solid #28a745 !important;
+}
+
+.price-difference {
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.price-difference.positive {
+  color: #dc3545;
+}
+
+.price-difference.negative {
+  color: #28a745;
+}
+
+/* Debug buttons */
+#debug-cart-btn,
+#reload-prices-btn {
+  margin-right: 10px;
+  font-size: 0.9em;
+}
+
+#debug-cart-btn:hover {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+#reload-prices-btn:hover {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
 }
 
 .pagination-wrapper {

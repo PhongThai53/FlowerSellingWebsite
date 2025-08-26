@@ -18,6 +18,9 @@ namespace FlowerSellingWebsite.Services.Interfaces
         // Thêm method validation mới
         Task<CartValidationResultDTO> ValidateCartItemQuantityAsync(int userId, int productId, int quantity);
         Task<CartValidationResultDTO> ValidateEntireCartAsync(int userId);
+
+        // New method for cart-wide pricing with sequential flower allocation
+        Task<CartPriceCalculationDTO> CalculateCartPriceWithSequentialAllocationAsync(int userId);
     }
 }
 
