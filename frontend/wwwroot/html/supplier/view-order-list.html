@@ -29,6 +29,11 @@
         <!-- Same footer content as above -->
     </footer>
     <script>fetch('../supplier/header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script>
+    
+    <!-- Supplier Authentication Check -->
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/supplier-auth-check.js"></script>
+    
     <script src="/js/supplier-logic.js"></script>
 </body>
 </html>

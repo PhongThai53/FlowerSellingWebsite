@@ -27,7 +27,7 @@ namespace FlowerSellingWebsite.Models.DTOs
 
         // Navigation properties
         public FlowerCategoryResponse? FlowerCategory { get; set; }
-        public FlowerTypeReponse? FlowerType { get; set; }
+        public FlowerTypeResponse? FlowerType { get; set; }
         public FlowerColorResponse? FlowerColor { get; set; }
     }
 
@@ -37,7 +37,7 @@ namespace FlowerSellingWebsite.Models.DTOs
         public string? Description { get; set; }
     }
 
-    public class FlowerTypeReponse
+    public class FlowerTypeResponse
     {
         public string? TypeName { get; set; }
         public string? Description { get; set; }
