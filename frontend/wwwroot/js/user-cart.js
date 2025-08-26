@@ -198,6 +198,19 @@ class CartPageManager {
         e.preventDefault();
         this.handleCheckoutClick();
       }
+
+      // Debug buttons
+      const debugCartButton = e.target.closest("#debug-cart-btn");
+      if (debugCartButton) {
+        e.preventDefault();
+        this.debugCartState();
+      }
+
+      const reloadPricesButton = e.target.closest("#reload-prices-btn");
+      if (reloadPricesButton) {
+        e.preventDefault();
+        this.forceReloadCalculatedPrices();
+      }
     });
 
     // Pagination
@@ -244,6 +257,11 @@ class CartPageManager {
 
           // Load calculated prices after rendering cart items
           await this.loadCalculatedPrices();
+
+          // After loading calculated prices, update cart summary with new totals
+          if (this.calculatedPrices && this.calculatedPrices.totalAmount > 0) {
+            this.updateCartSummaryWithCalculatedPrices();
+          }
         }
       } else {
         throw new Error(itemsResult.message || "Không thể tải giỏ hàng");
@@ -267,28 +285,60 @@ class CartPageManager {
 
   async loadCalculatedPrices() {
     try {
-      console.log("Loading calculated prices...");
+      console.log("=== LOADING CALCULATED PRICES ===");
+      console.log("Calling API endpoint: /Cart/calculate-price");
+
       const priceResult = await ApiService.calculateCartPrice();
-      console.log("Price calculation result:", priceResult);
+      console.log("API Response received:", priceResult);
 
       if (priceResult.succeeded && priceResult.data) {
         this.calculatedPrices = priceResult.data;
-        console.log("Loaded calculated prices:", this.calculatedPrices);
+        console.log("Calculated prices data:", this.calculatedPrices);
 
         // Check if we have valid data
         if (
           this.calculatedPrices.cartItems &&
           this.calculatedPrices.cartItems.length > 0
         ) {
+          console.log(
+            `Found ${this.calculatedPrices.cartItems.length} calculated cart items`
+          );
+
+          // Verify data structure
+          this.calculatedPrices.cartItems.forEach((item, index) => {
+            console.log(`Item ${index}:`, {
+              cartItemId: item.cartItemId,
+              productId: item.productId,
+              calculatedUnitPrice: item.calculatedUnitPrice,
+              lineTotal: item.lineTotal,
+              priceDifference: item.priceDifference,
+            });
+          });
+
           // Update cart display with new prices
+          console.log("Updating cart display with calculated prices...");
           this.updateCartWithCalculatedPrices();
+
+          // Re-render cart items to show calculated prices immediately
+          this.renderCartItems();
+
+          // Show info about sequential allocation
+          this.showToast(
+            "Giá được tính dựa trên phân bổ hoa tuần tự từ nhà cung cấp rẻ nhất",
+            "info"
+          );
         } else {
           console.log("No calculated prices available, using original prices");
+          console.log(
+            "Cart items in response:",
+            this.calculatedPrices.cartItems
+          );
           // Show info message
           this.showToast("Sử dụng giá gốc sản phẩm", "info");
         }
       } else {
         console.warn("Failed to load calculated prices:", priceResult.message);
+        console.warn("Full response:", priceResult);
         // Show user-friendly message
         this.showToast(
           `Không thể tính giá từ nhà cung cấp: ${priceResult.message}`,
@@ -297,6 +347,10 @@ class CartPageManager {
       }
     } catch (error) {
       console.error("Error loading calculated prices:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+      });
       // Show user-friendly message
       this.showToast(
         "Không thể tính giá từ nhà cung cấp, sử dụng giá gốc",
@@ -317,31 +371,38 @@ class CartPageManager {
     this.calculatedPrices.cartItems.forEach((calculatedItem) => {
       console.log("Processing calculated item:", calculatedItem);
 
+      // Find the corresponding cart item row
       const row = document.querySelector(
         `tr[data-cart-item-id="${calculatedItem.cartItemId}"]`
       );
+
       if (row) {
-        // Update unit price
+        console.log(
+          `Found row for cart item ${calculatedItem.cartItemId}, updating prices...`
+        );
+
+        // Update unit price - show the calculated unit price
         const priceCell = row.querySelector(".pro-price span");
         if (priceCell) {
           const calculatedPrice = this.formatCurrency(
             calculatedItem.calculatedUnitPrice
           );
 
-          if (calculatedItem.priceDifference != 0) {
-            priceCell.textContent = calculatedPrice;
-          } else {
-            priceCell.textContent = calculatedPrice;
-          }
+          // Always update with calculated price
+          priceCell.textContent = calculatedPrice;
+          console.log(`Updated unit price to: ${calculatedPrice}`);
         }
 
         // Update line total
         const subtotalCell = row.querySelector(".pro-subtotal span");
         if (subtotalCell) {
-          subtotalCell.textContent = this.formatCurrency(
-            calculatedItem.lineTotal
-          );
+          const calculatedTotal = this.formatCurrency(calculatedItem.lineTotal);
+          subtotalCell.textContent = calculatedTotal;
+          console.log(`Updated line total to: ${calculatedTotal}`);
         }
+
+        // Add visual indicator that price has been updated
+        row.classList.add("price-updated");
       } else {
         console.warn(
           `Could not find row for cart item ${calculatedItem.cartItemId}`
@@ -351,6 +412,9 @@ class CartPageManager {
 
     // Update cart totals
     this.updateCartSummaryWithCalculatedPrices();
+
+    // Show success message
+    this.showToast("Đã cập nhật giá theo phân bổ hoa tuần tự", "success");
   }
 
   updateCartSummaryWithCalculatedPrices() {
@@ -394,7 +458,7 @@ class CartPageManager {
 
     if (this.cartItems.length === 0) {
       container.innerHTML =
-        '<tr><td colspan="6" class="text-center">Không có sản phẩm nào trong giỏ hàng</td></tr>';
+        '<tr><td colspan="5" class="text-center">Không có sản phẩm nào trong giỏ hàng</td></tr>';
       return;
     }
 
@@ -414,6 +478,7 @@ class CartPageManager {
 
           if (calculatedItem) {
             console.log("Found calculated price for item:", calculatedItem);
+            // Use calculated prices instead of original prices
             displayPrice = this.formatCurrency(
               calculatedItem.calculatedUnitPrice
             );
@@ -434,9 +499,6 @@ class CartPageManager {
                 </td>
                 <td class="pro-title">
                     ${item.product_name}
-                </td>
-                <td class="pro-price">
-                    <span>${displayPrice}</span>
                 </td>
                 <td class="pro-quantity">
                     <div class="quantity-controls">
@@ -473,7 +535,7 @@ class CartPageManager {
     // Add Update Cart button below the table
     const updateButtonContainer = document.createElement("tr");
     updateButtonContainer.innerHTML = `
-      <td colspan="6" class="text-center">
+      <td colspan="5" class="text-center">
         <div class="update-cart-section">
 <button type="button" class="btn btn-primary update-cart-btn" id="update-cart-btn" style="background-color: #007bff; color: #ffffff;">
     <i class="fa fa-refresh"></i> Cập nhật giỏ hàng
@@ -1209,6 +1271,22 @@ class CartPageManager {
           checkoutBtn.innerHTML = "Proceed To Checkout";
         }
       });
+  }
+
+  debugCartState() {
+    console.log("Current Cart State:");
+    console.log("Cart Items:", this.cartItems);
+    console.log("Cart Summary:", this.cartSummary);
+    console.log("Calculated Prices:", this.calculatedPrices);
+    console.log("Pending Changes:", this.pendingChanges);
+    console.log("Current Page:", this.currentPage);
+    console.log("Page Size:", this.pageSize);
+  }
+
+  forceReloadCalculatedPrices() {
+    this.loadCalculatedPrices().then(() => {
+      this.showToast("Giá đã được tải lại từ nhà cung cấp.", "success");
+    });
   }
 }
 

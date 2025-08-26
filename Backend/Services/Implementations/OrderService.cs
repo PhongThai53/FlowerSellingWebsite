@@ -389,14 +389,93 @@ namespace FlowerSellingWebsite.Services.Implementations
                 FlowerRequirements = new List<FlowerRequirementInfo>()
             };
 
+            // Step 1: Calculate total flower requirements for entire cart
+            var totalFlowerRequirements = new Dictionary<int, int>(); // FlowerId -> Total Quantity Needed
+            var productFlowerMappings = new Dictionary<int, List<ProductFlowers>>(); // ProductId -> Flower Requirements
+
+            foreach (var cartItem in cartItems)
+            {
+                var flowerRequirements = await _productFlowersRepository.GetFlowerRequirementsForProductAsync(cartItem.ProductId);
+                productFlowerMappings[cartItem.ProductId] = flowerRequirements.ToList();
+
+                foreach (var flowerReq in flowerRequirements)
+                {
+                    var totalNeeded = flowerReq.QuantityNeeded * cartItem.Quantity;
+                    if (totalFlowerRequirements.ContainsKey(flowerReq.FlowerId))
+                    {
+                        totalFlowerRequirements[flowerReq.FlowerId] += totalNeeded;
+                    }
+                    else
+                    {
+                        totalFlowerRequirements[flowerReq.FlowerId] = totalNeeded;
+                    }
+                }
+            }
+
+            // Step 2: Allocate flowers sequentially from cheapest suppliers for entire cart
+            var flowerAllocations = new Dictionary<int, List<SequentialAllocation>>(); // FlowerId -> Sequential Allocations
+
+            foreach (var flowerReq in totalFlowerRequirements)
+            {
+                var flowerId = flowerReq.Key;
+                var totalQuantityNeeded = flowerReq.Value;
+
+                var suppliers = await _supplierListingsRepository.GetAvailableFlowersByFlowerIdAsync(flowerId);
+                var availableSuppliers = suppliers
+                    .Where(sl => sl.AvailableQuantity > 0)
+                    .OrderBy(sl => sl.UnitPrice)
+                    .ToList();
+
+                if (!availableSuppliers.Any())
+                {
+                    result.IsValid = false;
+                    result.ErrorMessage = $"No available suppliers for flower ID {flowerId}";
+                    return result;
+                }
+
+                var allocations = new List<SequentialAllocation>();
+                int remainingNeeded = totalQuantityNeeded;
+                int allocationIndex = 0;
+
+                foreach (var supplier in availableSuppliers)
+                {
+                    if (remainingNeeded <= 0) break;
+
+                    int quantityToTake = Math.Min(remainingNeeded, supplier.AvailableQuantity);
+                    var allocation = new SequentialAllocation
+                    {
+                        Index = allocationIndex,
+                        SupplierId = supplier.SupplierId,
+                        SupplierName = supplier.Supplier?.SupplierName ?? "Unknown",
+                        FlowerId = flowerId,
+                        Quantity = quantityToTake,
+                        UnitPrice = supplier.UnitPrice,
+                        LineTotal = quantityToTake * supplier.UnitPrice
+                    };
+
+                    allocations.Add(allocation);
+                    remainingNeeded -= quantityToTake;
+                    allocationIndex++;
+                }
+
+                if (remainingNeeded > 0)
+                {
+                    result.IsValid = false;
+                    result.ErrorMessage = $"Insufficient flowers for flower ID {flowerId}. Need: {totalQuantityNeeded}, Available: {totalQuantityNeeded - remainingNeeded}";
+                    return result;
+                }
+
+                flowerAllocations[flowerId] = allocations;
+            }
+
+            // Step 3: Calculate price for each cart item based on sequential allocation
             decimal subtotal = 0;
-            decimal taxAmount = 0;
             const decimal TAX_RATE = 0.5m; // 50% service fee
 
             foreach (var cartItem in cartItems)
             {
                 var product = await _productRepository.GetProductByIdAsync(cartItem.ProductId);
-                var flowerRequirements = await _productFlowersRepository.GetFlowerRequirementsForProductAsync(cartItem.ProductId);
+                var flowerRequirements = productFlowerMappings[cartItem.ProductId];
                 
                 decimal productTotalCost = 0;
                 var flowerReqs = new List<FlowerRequirementInfo>();
@@ -404,13 +483,11 @@ namespace FlowerSellingWebsite.Services.Implementations
                 foreach (var flowerReq in flowerRequirements)
                 {
                     var totalFlowersNeeded = flowerReq.QuantityNeeded * cartItem.Quantity;
-                    var availableFlowers = await _supplierListingsRepository.GetAvailableFlowersByFlowerIdAsync(flowerReq.FlowerId);
-                    
-                    // Sort by price (cheapest first)
-                    var sortedSuppliers = availableFlowers.OrderBy(sl => sl.UnitPrice).ToList();
-                    
-                    int remainingNeeded = totalFlowersNeeded;
+                    var allocations = flowerAllocations[flowerReq.FlowerId];
+
+                    // Calculate cost for this product's flower requirement
                     decimal flowerCost = 0;
+                    int flowersAllocated = 0;
                     var flowerReqInfo = new FlowerRequirementInfo
                     {
                         FlowerId = flowerReq.FlowerId,
@@ -419,23 +496,23 @@ namespace FlowerSellingWebsite.Services.Implementations
                         SupplierAllocations = new List<SupplierAllocationInfo>()
                     };
 
-                    foreach (var supplier in sortedSuppliers)
+                    foreach (var allocation in allocations)
                     {
-                        if (remainingNeeded <= 0) break;
+                        if (flowersAllocated >= totalFlowersNeeded) break;
 
-                        int quantityToTake = Math.Min(remainingNeeded, supplier.AvailableQuantity);
-                        decimal supplierCost = quantityToTake * supplier.UnitPrice;
+                        int quantityToTake = Math.Min(totalFlowersNeeded - flowersAllocated, allocation.Quantity);
+                        decimal supplierCost = quantityToTake * allocation.UnitPrice;
                         
                         flowerCost += supplierCost;
-                        remainingNeeded -= quantityToTake;
+                        flowersAllocated += quantityToTake;
 
                         flowerReqInfo.SupplierAllocations.Add(new SupplierAllocationInfo
                         {
-                            SupplierListingId = supplier.Id,
-                            SupplierId = supplier.SupplierId,
-                            SupplierName = supplier.Supplier?.SupplierName ?? "Unknown",
+                            SupplierListingId = 0, // Not applicable for checkout
+                            SupplierId = allocation.SupplierId,
+                            SupplierName = allocation.SupplierName,
                             Quantity = quantityToTake,
-                            UnitPrice = supplier.UnitPrice,
+                            UnitPrice = allocation.UnitPrice,
                             LineTotal = supplierCost
                         });
                     }
@@ -458,7 +535,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 subtotal += productTotalCost;
             }
 
-            taxAmount = subtotal * TAX_RATE;
+            var taxAmount = subtotal * TAX_RATE;
             result.Subtotal = subtotal;
             result.TaxAmount = taxAmount;
             result.TotalAmount = subtotal + taxAmount;
@@ -572,6 +649,18 @@ namespace FlowerSellingWebsite.Services.Implementations
         public int SupplierListingId { get; set; }
         public int SupplierId { get; set; }
         public string SupplierName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+    }
+
+    // Helper class for sequential allocation (same as in CartService)
+    public class SequentialAllocation
+    {
+        public int Index { get; set; }
+        public int SupplierId { get; set; }
+        public string SupplierName { get; set; } = string.Empty;
+        public int FlowerId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal LineTotal { get; set; }

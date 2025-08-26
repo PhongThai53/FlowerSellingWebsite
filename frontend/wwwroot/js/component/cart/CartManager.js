@@ -186,6 +186,13 @@ export class CartManager {
           this.showSuccessNotification(
             `${productName} đã được thêm vào giỏ hàng`
           );
+
+          // Show info about pricing strategy
+          setTimeout(() => {
+            this.showSuccessNotification(
+              "Giá sẽ được tính lại dựa trên phân bổ hoa tuần tự từ nhà cung cấp rẻ nhất"
+            );
+          }, 1000);
         }
 
         await this.loadCartData(); // Reload cart data
