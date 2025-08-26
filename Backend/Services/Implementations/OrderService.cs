@@ -182,6 +182,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 {
                     await CreatePurchaseOrdersAsync(costCalculation.FlowerRequirements, createdOrder.Id);
                 }
+                // For VNPay orders, keep status as "Created" until payment is confirmed
 
                 // Clear cart
                 await _cartRepository.ClearCartByUserIdAsync(customerId);
@@ -298,9 +299,10 @@ namespace FlowerSellingWebsite.Services.Implementations
                 if (order == null) return false;
 
                 // Only allocate if not already allocated
-                if (order.Status == "StockReduced")
+                if (order.Status == "Created")
                 {
-                    return true;
+                    // For VNPay orders, we need to allocate stock after payment confirmation
+                    // This method is called after successful payment
                 }
 
                 if (order.OrderDetails == null || !order.OrderDetails.Any())
@@ -332,7 +334,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                 if (!calc.IsValid) return false;
 
                 await CreatePurchaseOrdersAsync(calc.FlowerRequirements, order.Id);
-                await _orderRepository.UpdateOrderStatusAsync(order.Id, "StockReduced");
+                // Keep order status as "Created" - no need to change status
                 return true;
             }
             catch (Exception ex)
