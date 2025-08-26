@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FlowerSellingWebsite.Models.Entities;
-using ProjectGreenLens.Repositories.Interfaces;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using ProjectGreenLens.Services.Interfaces;
 
 namespace ProjectGreenLens.Services.Implementations

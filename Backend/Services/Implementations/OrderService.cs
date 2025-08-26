@@ -1,456 +1,577 @@
-﻿//using AutoMapper;
-//using FlowerSellingWebsite.Models.DTOs;
-//using FlowerSellingWebsite.Models.DTOs.Order;
-//using FlowerSellingWebsite.Models.Entities;
-//using FlowerSellingWebsite.Repositories.Interfaces;
-//using FlowerSellingWebsite.Services.Interfaces;
-//using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Order;
+using FlowerSellingWebsite.Models.DTOs.Cart;
+using FlowerSellingWebsite.Models.DTOs.Order;
+using FlowerSellingWebsite.Models.Entities;
+using FlowerSellingWebsite.Repositories.Interfaces;
+using FlowerSellingWebsite.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-//namespace FlowerSellingWebsite.Services.Implementations
-//{
-//    public class OrderService : IOrderService
-//    {
-//        private readonly IOrderRepository _orderRepository;
-//        private readonly ICartRepository _cartRepository;
-//        private readonly IProductRepository _productRepository;
-//        private readonly IUserRepository _userRepository;
-//        private readonly IVNPayService _vnPayService;
-//        private readonly IConfiguration _configuration;
+namespace FlowerSellingWebsite.Services.Implementations
+{
+    public class OrderService : IOrderService
+    {
+        private readonly IOrderRepository _orderRepository;
+        private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IProductFlowersRepository _productFlowersRepository;
+        private readonly ISupplierListingsRepository _supplierListingsRepository;
+        private readonly IPurchaseOrdersRepository _purchaseOrdersRepository;
+        private readonly IPurchaseOrderDetailsRepository _purchaseOrderDetailsRepository;
+        private readonly IVNPayService _vnPayService;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<OrderService> _logger;
 
-//        public OrderService(
-//            IOrderRepository orderRepository,
-//            ICartRepository cartRepository,
-//            IProductRepository productRepository,
-//            IUserRepository userRepository,
-//            IVNPayService vnPayService,
-//            IConfiguration configuration)
-//        {
-//            _orderRepository = orderRepository;
-//            _cartRepository = cartRepository;
-//            _productRepository = productRepository;
-//            _userRepository = userRepository;
-//            _vnPayService = vnPayService;
-//            _configuration = configuration;
-//        }
+        public OrderService(
+            IOrderRepository orderRepository,
+            ICartRepository cartRepository,
+            IProductRepository productRepository,
+            IUserRepository userRepository,
+            IProductFlowersRepository productFlowersRepository,
+            ISupplierListingsRepository supplierListingsRepository,
+            IPurchaseOrdersRepository purchaseOrdersRepository,
+            IPurchaseOrderDetailsRepository purchaseOrderDetailsRepository,
+            IVNPayService vnPayService,
+            IConfiguration configuration,
+            ILogger<OrderService> logger)
+        {
+            _orderRepository = orderRepository;
+            _cartRepository = cartRepository;
+            _productRepository = productRepository;
+            _userRepository = userRepository;
+            _productFlowersRepository = productFlowersRepository;
+            _supplierListingsRepository = supplierListingsRepository;
+            _purchaseOrdersRepository = purchaseOrdersRepository;
+            _purchaseOrderDetailsRepository = purchaseOrderDetailsRepository;
+            _vnPayService = vnPayService;
+            _configuration = configuration;
+            _logger = logger;
+        }
 
-//        public async Task<PagedResult<OrderDTO>> GetOrderHistoryAsync(UrlQueryParams urlQueryParams, int? customerId = null)
-//        {
-//            // Implementation for getting order history
-//            // This would need to be implemented based on your existing logic
-//            throw new NotImplementedException("GetOrderHistoryAsync not implemented yet");
-//        }
+        public async Task<PagedResult<OrderDTO>> GetOrderHistoryAsync(UrlQueryParams urlQueryParams, int? customerId = null)
+        {
+            // Implementation for getting order history
+            throw new NotImplementedException("GetOrderHistoryAsync not implemented yet");
+        }
 
-//        public async Task<OrderDTO?> GetOrderByIdAsync(int orderId)
-//        {
-//            // Implementation for getting order by ID
-//            // This would need to be implemented based on your existing logic
-//            throw new NotImplementedException("GetOrderByIdAsync not implemented yet");
-//        }
+        public async Task<OrderDTO?> GetOrderByIdAsync(int orderId)
+        {
+            // Implementation for getting order by ID
+            throw new NotImplementedException("GetOrderByIdAsync not implemented yet");
+        }
 
-//        public async Task<UserDTO?> GetUserByPublicIdAsync(Guid publicId)
-//        {
-//            try
-//            {
-//                var user = await _userRepository.GetByPublicIdAsync(publicId);
-//                if (user == null) return null;
+        public async Task<UserDTO?> GetUserByPublicIdAsync(Guid publicId)
+        {
+            try
+            {
+                var user = await _userRepository.GetByPublicIdAsync(publicId);
+                if (user == null) return null;
 
-//                return new UserDTO
-//                {
-//                    Id = user.Id,
-//                    PublicId = user.PublicId,
-//                    UserName = user.UserName,
-//                    Email = user.Email,
-//                    FullName = user.FullName,
-//                    RoleName = user.Role?.RoleName
-//                };
-//            }
-//            catch
-//            {
-//                return null;
-//            }
-//        }
+                return new UserDTO
+                {
+                    Id = user.Id,
+                    PublicId = user.PublicId,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    RoleName = user.Role?.RoleName
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-//        public async Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId, string clientIpAddress = null)
-//        {
-//            try
-//            {
-//                // Validate customer exists
-//                var customer = await _userRepository.GetByIdAsync(customerId);
-//                if (customer == null)
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "Customer not found"
-//                    };
-//                }
+        public async Task<CheckoutResponseDTO> ProcessCheckoutAsync(CheckoutRequestDTO checkoutRequest, int customerId, string clientIpAddress = null)
+        {
+            try
+            {
+                _logger.LogInformation("Starting checkout process for customer {CustomerId}", customerId);
 
-//                // Validate cart items and stock
-//                var validationResult = await ValidateCartItemsAsync(checkoutRequest.CartItems);
-//                if (!validationResult.IsValid)
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = validationResult.ErrorMessage
-//                    };
-//                }
+                // Validate customer exists
+                var customer = await _userRepository.GetByIdAsync(customerId);
+                if (customer == null)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Customer not found"
+                    };
+                }
 
-//                // Generate order number
-//                // Generate order number
-//                var orderNumber = await _orderRepository.GenerateOrderNumberAsync();
+                // Validate cart items and flower availability
+                var validationResult = await ValidateCartItemsFlowerAvailabilityAsync(checkoutRequest.CartItems);
+                if (!validationResult.IsValid)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = validationResult.ErrorMessage
+                    };
+                }
 
-//                // Create order (for both COD and VNPay, but VNPay will be updated when payment succeeds)
-//                var order = new Orders
-//                {
-//                    OrderNumber = orderNumber,
-//                    CustomerId = customerId,
-//                    OrderDate = DateTime.UtcNow,
-//                    Status = "Created",
-//                    Subtotal = checkoutRequest.Subtotal,
-//                    DiscountAmount = 0, // No discount for now
-//                    TaxAmount = 0, // No tax
-//                    ShippingFee = 0, // No shipping fee
-//                    TotalAmount = checkoutRequest.Subtotal, // Total equals subtotal
-//                    PaymentStatus = checkoutRequest.PaymentMethod == "vnpay" ? "Pending" : "Pending",
-//                    ShippingAddress = $"{checkoutRequest.StreetAddress}, {checkoutRequest.City}, {checkoutRequest.Country}",
-//                    BillingAddress = $"{checkoutRequest.StreetAddress}, {checkoutRequest.City}, {checkoutRequest.Country}",
-//                    Notes = checkoutRequest.OrderNotes,
-//                    CustomerFirstName = checkoutRequest.CustomerFirstName,
-//                    CustomerLastName = checkoutRequest.CustomerLastName,
-//                    CustomerEmail = checkoutRequest.CustomerEmail,
-//                    CustomerPhone = checkoutRequest.CustomerPhone,
-//                    CompanyName = checkoutRequest.CompanyName,
-//                    Country = checkoutRequest.Country,
-//                    City = checkoutRequest.City,
-//                    State = checkoutRequest.State,
-//                    Postcode = checkoutRequest.Postcode,
-//                    StreetAddress = checkoutRequest.StreetAddress,
-//                    StreetAddress2 = checkoutRequest.StreetAddress2,
-//                    CreatedBy = customer.Email,
-//                    CreatedAt = DateTime.UtcNow
-//                };
+                // Calculate total costs based on flower availability
+                var costCalculation = await CalculateProductCostsAsync(checkoutRequest.CartItems);
+                if (!costCalculation.IsValid)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = costCalculation.ErrorMessage
+                    };
+                }
 
-//                // Save order
-//                var savedOrder = await _orderRepository.CreateOrderAsync(order);
+                // Generate order number
+                var orderNumber = GenerateOrderNumber();
 
-//                // Create order details
-//                foreach (var cartItem in checkoutRequest.CartItems)
-//                {
-//                    // Get product name from the cart item
-//                    var productName = cartItem.ProductName ?? $"Product {cartItem.ProductId}";
+                // Create order
+                var order = new Orders
+                {
+                    OrderNumber = orderNumber,
+                    CustomerId = customerId,
+                    OrderDate = DateTime.UtcNow,
+                    Status = "Created",
+                    Subtotal = costCalculation.Subtotal,
+                    DiscountAmount = checkoutRequest.DiscountAmount ?? 0,
+                    TaxAmount = costCalculation.TaxAmount,
+                    ShippingFee = checkoutRequest.ShippingFee ?? 0,
+                    TotalAmount = costCalculation.TotalAmount,
+                    PaymentStatus = "Pending",
+                    ShippingAddress = checkoutRequest.ShippingAddress,
+                    BillingAddress = checkoutRequest.BillingAddress,
+                    Notes = checkoutRequest.Notes,
+                    CustomerFirstName = customer.FullName,
+                    CustomerLastName = string.Empty,
+                    CustomerEmail = customer.Email,
+                    CustomerPhone = customer.Phone,
+                    CompanyName = null,
+                    Country = null,
+                    City = checkoutRequest.City,
+                    State = checkoutRequest.State,
+                    Postcode = null,
+                    StreetAddress = checkoutRequest.StreetAddress,
+                    StreetAddress2 = checkoutRequest.StreetAddress2
+                };
 
-//                    var orderDetail = new OrderDetails
-//                    {
-//                        OrderId = savedOrder.Id,
-//                        ProductId = cartItem.ProductId,
-//                        ItemName = productName,
-//                        Quantity = cartItem.Quantity,
-//                        UnitPrice = cartItem.UnitPrice,
-//                        LineTotal = cartItem.LineTotal,
-//                        CreatedAt = DateTime.UtcNow
-//                    };
+                var createdOrder = await _orderRepository.CreateOrderAsync(order);
 
-//                    await _orderRepository.CreateOrderDetailAsync(orderDetail);
-//                }
+                // Create order details
+                foreach (var item in costCalculation.ProductCosts)
+                {
+                    var orderDetail = new OrderDetails
+                    {
+                        OrderId = createdOrder.Id,
+                        ProductId = item.ProductId,
+                        ItemName = item.ProductName,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        LineTotal = item.LineTotal
+                    };
+                    await _orderRepository.CreateOrderDetailAsync(orderDetail);
+                }
 
-//                // Create payment record
-//                var paymentMethod = await GetOrCreatePaymentMethodAsync(checkoutRequest.PaymentMethod);
-//                var payment = new Payments
-//                {
-//                    OrderId = savedOrder.Id,
-//                    PaymentMethodId = paymentMethod.Id,
-//                    MethodName = paymentMethod.MethodName,
-//                    Description = $"Payment for order {orderNumber}",
-//                    Amount = checkoutRequest.TotalAmount,
-//                    PaymentDate = DateTime.UtcNow,
-//                    Status = "Pending",
-//                    CreatedAt = DateTime.UtcNow
-//                };
+                // Allocate immediately for COD, defer for VNPay until payment success
+                if (!string.Equals(checkoutRequest.PaymentMethod, "vnpay", StringComparison.OrdinalIgnoreCase))
+                {
+                    await CreatePurchaseOrdersAsync(costCalculation.FlowerRequirements, createdOrder.Id);
+                }
 
-//                await _orderRepository.CreatePaymentAsync(payment);
+                // Clear cart
+                await _cartRepository.ClearCartByUserIdAsync(customerId);
 
-//                // For COD orders: reduce stock immediately
-//                // For VNPay orders: reduce stock only after payment confirmation
-//                if (checkoutRequest.PaymentMethod == "cash")
-//                {
-//                    var orderItems = checkoutRequest.CartItems.Select(item => (item.ProductId, item.Quantity)).ToList();
+                _logger.LogInformation("Checkout completed successfully for order {OrderId}", createdOrder.Id);
 
-//                    // Reduce stock for each product in the order
-//                    foreach (var (productId, quantity) in orderItems)
-//                    {
-//                        var stockReductionSuccess = await _productRepository.ReduceProductStockAsync(productId, quantity);
-//                        if (!stockReductionSuccess)
-//                        {
-//                            // If stock reduction fails, rollback the order
-//                            await _orderRepository.DeleteOrderAsync(order.Id);
-//                            return new CheckoutResponseDTO
-//                            {
-//                                Succeeded = false,
-//                                Message = $"Failed to update stock for product {productId}. Please try again."
-//                            };
-//                        }
-//                    }
+                var response = new CheckoutResponseDTO
+                {
+                    Succeeded = true,
+                    Message = "Order created successfully",
+                    Data = new CheckoutResponseDataDTO
+                    {
+                        OrderId = createdOrder.Id,
+                        OrderNumber = orderNumber,
+                        TotalAmount = costCalculation.TotalAmount,
+                        OrderStatus = "Created",
+                        PaymentStatus = "Pending"
+                    }
+                };
 
-//                    // Log successful stock reduction for COD
-//                    Console.WriteLine($"Successfully reduced stock for COD order {orderNumber}: {orderItems.Count} products updated");
-//                }
-//                else
-//                {
-//                    // For VNPay orders, stock will be reduced after payment confirmation
-//                    Console.WriteLine($"VNPay order {orderNumber} created. Stock will be reduced after payment confirmation.");
-//                }
+                // If VNPay selected, generate payment URL
+                if (string.Equals(checkoutRequest.PaymentMethod, "vnpay", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var returnUrl = _configuration["VNPay:ReturnUrl"] ?? string.Empty;
+                        var cancelUrl = _configuration["VNPay:CancelUrl"] ?? string.Empty;
+                        var paymentUrl = await _vnPayService.CreatePaymentUrlAsync(
+                            createdOrder.Id,
+                            orderNumber,
+                            costCalculation.TotalAmount,
+                            returnUrl,
+                            cancelUrl,
+                            clientIpAddress
+                        );
+                        response.Data.PaymentUrl = paymentUrl;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to create VNPay URL for order {OrderId}", createdOrder.Id);
+                    }
+                }
 
-//                // Clear cart after successful order
-//                await _cartRepository.ClearCartByUserIdAsync(customerId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing checkout for customer {CustomerId}", customerId);
+                return new CheckoutResponseDTO
+                {
+                    Succeeded = false,
+                    Message = "An error occurred while processing checkout"
+                };
+            }
+        }
 
-//                // Prepare response
-//                var response = new CheckoutResponseDTO
-//                {
-//                    Succeeded = true,
-//                    Message = "Order created successfully",
-//                    Data = new CheckoutResponseDataDTO
-//                    {
-//                        OrderId = savedOrder.Id,
-//                        OrderNumber = orderNumber,
-//                        PaymentStatus = payment.Status,
-//                        OrderStatus = order.Status,
-//                        TotalAmount = order.TotalAmount
-//                    }
-//                };
+        public async Task<CheckoutResponseDTO> ConfirmCODOrderAsync(int orderId, int customerId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Order not found"
+                    };
+                }
 
-//                // Handle VNPay payment
-//                if (checkoutRequest.PaymentMethod == "vnpay")
-//                {
-//                    try
-//                    {
-//                        var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7062";
-//                        var returnUrl = $"{baseUrl}/api/payment/vnpay/return";
-//                        var cancelUrl = $"{baseUrl}/api/payment/vnpay/cancel?orderNumber={orderNumber}";
+                if (order.CustomerId != customerId)
+                {
+                    return new CheckoutResponseDTO
+                    {
+                        Succeeded = false,
+                        Message = "Unauthorized access to order"
+                    };
+                }
 
-//                        // Use provided client IP or get a fallback IP
-//                        var ipAddress = clientIpAddress ?? VNPayService.GetClientIpAddress();
+                // Update order status
+                await _orderRepository.UpdateOrderStatusAsync(orderId, "Confirmed");
+                await _orderRepository.UpdatePaymentStatusAsync(orderId, "Pending");
 
-//                        var paymentUrl = await _vnPayService.CreatePaymentUrlAsync(
-//                            savedOrder.Id, // Use the actual order ID
-//                            orderNumber, 
-//                            checkoutRequest.TotalAmount, 
-//                            returnUrl, 
-//                            cancelUrl,
-//                            ipAddress
-//                        );
+                return new CheckoutResponseDTO
+                {
+                    Succeeded = true,
+                    Message = "COD order confirmed successfully",
+                    Data = new CheckoutResponseDataDTO
+                    {
+                        OrderId = orderId,
+                        OrderNumber = order.OrderNumber,
+                        TotalAmount = order.TotalAmount,
+                        OrderStatus = "Confirmed",
+                        PaymentStatus = "Pending"
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming COD order {OrderId}", orderId);
+                return new CheckoutResponseDTO
+                {
+                    Succeeded = false,
+                    Message = "An error occurred while confirming order"
+                };
+            }
+        }
 
-//                        if (string.IsNullOrEmpty(paymentUrl))
-//                        {
-//                            throw new InvalidOperationException("VNPay payment URL is empty");
-//                        }
+        public async Task<bool> ConfirmPaidOrderAsync(int orderId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null) return false;
 
-//                        // Test if the VNPay URL is actually valid by checking if it contains required parameters
-//                        if (!paymentUrl.Contains("vnp_SecureHash=") || !paymentUrl.Contains("vnp_TmnCode="))
-//                        {
-//                            throw new InvalidOperationException("VNPay payment URL is malformed");
-//                        }
+                // Only allocate if not already allocated
+                if (order.Status == "StockReduced")
+                {
+                    return true;
+                }
 
-//                        response.Data.PaymentUrl = paymentUrl;
-//                        response.Message = "Order created successfully. Redirecting to VNPay for payment...";
-//                    }
-//                    catch (Exception ex)
-//                    {
-//                        // If VNPay fails, ROLLBACK the order and return error
-//                        await _orderRepository.DeleteOrderAsync(order.Id);
+                if (order.OrderDetails == null || !order.OrderDetails.Any())
+                {
+                    // Load order with details if repository method returns without
+                    order = await _orderRepository.GetOrderWithDetailsAsync(orderId) ?? order;
+                }
 
-//                        response.Succeeded = false;
-//                        response.Message = $"VNPay payment setup failed: {ex.Message}";
-//                        response.Data = null;
+                var cartItems = new List<CheckoutCartItemDTO>();
+                if (order.OrderDetails != null)
+                {
+                    foreach (var d in order.OrderDetails)
+                    {
+                        cartItems.Add(new CheckoutCartItemDTO
+                        {
+                            ProductId = d.ProductId,
+                            Quantity = d.Quantity,
+                            UnitPrice = d.UnitPrice,
+                            LineTotal = d.LineTotal,
+                            ProductName = d.ItemName
+                        });
+                    }
+                }
 
-//                        return response;
-//                    }
-//                }
-//                else
-//                {
-//                    // For COD, redirect to order confirmation
-//                    response.Data.RedirectUrl = $"/html/user/order-confirmation.html?orderNumber={orderNumber}";
-//                }
+                if (!cartItems.Any()) return false;
 
-//                return response;
-//            }
-//            catch (Exception ex)
-//            {
-//                return new CheckoutResponseDTO
-//                {
-//                    Succeeded = false,
-//                    Message = $"Error processing checkout: {ex.Message}"
-//                };
-//            }
-//        }
+                // Recalculate allocations based on current supplier listings
+                var calc = await CalculateProductCostsAsync(cartItems);
+                if (!calc.IsValid) return false;
 
-//        private async Task<(bool IsValid, string ErrorMessage)> ValidateCartItemsAsync(List<CheckoutCartItemDTO> cartItems)
-//        {
-//            foreach (var item in cartItems)
-//            {
-//                var product = await _productRepository.GetProductByIdAsync(item.ProductId);
-//                if (product == null)
-//                {
-//                    return (false, $"Product with ID {item.ProductId} not found");
-//                }
+                await CreatePurchaseOrdersAsync(calc.FlowerRequirements, order.Id);
+                await _orderRepository.UpdateOrderStatusAsync(order.Id, "StockReduced");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming paid order {OrderId}", orderId);
+                return false;
+            }
+        }
 
-//                // Check stock availability
-//                if (product.Stock < item.Quantity)
-//                {
-//                    return (false, $"Insufficient stock for product {product.Name}. Available: {product.Stock}, Requested: {item.Quantity}");
-//                }
-//            }
+        private async Task<FlowerAvailabilityValidationResult> ValidateCartItemsFlowerAvailabilityAsync(List<CheckoutCartItemDTO> cartItems)
+        {
+            var result = new FlowerAvailabilityValidationResult { IsValid = true };
 
-//            return (true, string.Empty);
-//        }
+            foreach (var cartItem in cartItems)
+            {
+                var product = await _productRepository.GetProductByIdAsync(cartItem.ProductId);
+                if (product == null)
+                {
+                    result.IsValid = false;
+                    result.ErrorMessage = $"Product {cartItem.ProductId} not found";
+                    return result;
+                }
 
-//        private async Task<PaymentMethods> GetOrCreatePaymentMethodAsync(string paymentMethodName)
-//        {
-//            try
-//            {
-//                // First, try to find existing payment method
-//                var existingMethod = await _orderRepository.GetPaymentMethodByNameAsync(paymentMethodName);
-//                if (existingMethod != null)
-//                {
-//                    return existingMethod;
-//                }
+                // Get flower requirements for this product
+                var flowerRequirements = await _productFlowersRepository.GetFlowerRequirementsForProductAsync(cartItem.ProductId);
+                
+                foreach (var flowerReq in flowerRequirements)
+                {
+                    var totalFlowersNeeded = flowerReq.QuantityNeeded * cartItem.Quantity;
+                    var availableFlowers = await _supplierListingsRepository.GetAvailableFlowersByFlowerIdAsync(flowerReq.FlowerId);
+                    
+                    var totalAvailable = availableFlowers.Sum(sl => sl.AvailableQuantity);
+                    
+                    if (totalAvailable < totalFlowersNeeded)
+                    {
+                        result.IsValid = false;
+                        result.ErrorMessage = $"Insufficient flowers for product {product.Name}. Need {totalFlowersNeeded} {flowerReq.Flower.Name}, but only {totalAvailable} available.";
+                        return result;
+                    }
+                }
+            }
 
-//                // If not found, create a new one
-//                var methodName = paymentMethodName switch
-//                {
-//                    "cash" => "Cash on Delivery",
-//                    "vnpay" => "VNPay",
-//                    _ => "Unknown"
-//                };
+            return result;
+        }
 
-//                var newPaymentMethod = new PaymentMethods
-//                {
-//                    MethodName = methodName,
-//                    MethodType = paymentMethodName == "vnpay" ? "VNPay" : "Standard",
-//                    IsActive = true,
-//                    DisplayName = methodName,
-//                    CreatedAt = DateTime.UtcNow
-//                };
+        private async Task<ProductCostCalculationResult> CalculateProductCostsAsync(List<CheckoutCartItemDTO> cartItems)
+        {
+            var result = new ProductCostCalculationResult 
+            { 
+                IsValid = true,
+                ProductCosts = new List<ProductCostInfo>(),
+                FlowerRequirements = new List<FlowerRequirementInfo>()
+            };
 
-//                // Save the new payment method to database
-//                var savedMethod = await _orderRepository.CreatePaymentMethodAsync(newPaymentMethod);
-//                return savedMethod;
-//            }
-//            catch (Exception ex)
-//            {
-//                // If payment method creation fails, return a default one
-//                // This is a fallback to prevent order creation from failing
-//                return new PaymentMethods
-//                {
-//                    Id = 1, // Use a default ID
-//                    MethodName = "Cash on Delivery",
-//                    MethodType = "Standard",
-//                    IsActive = true,
-//                    DisplayName = "Cash on Delivery",
-//                    CreatedAt = DateTime.UtcNow
-//                };
-//            }
-//        }
+            decimal subtotal = 0;
+            decimal taxAmount = 0;
+            const decimal TAX_RATE = 0.5m; // 50% service fee
 
-//        public async Task<CheckoutResponseDTO> ConfirmCODOrderAsync(int orderId, int customerId)
-//        {
-//            try
-//            {
-//                // Get the order
-//                var order = await _orderRepository.GetOrderByIdAsync(orderId);
-//                if (order == null)
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "Order not found"
-//                    };
-//                }
+            foreach (var cartItem in cartItems)
+            {
+                var product = await _productRepository.GetProductByIdAsync(cartItem.ProductId);
+                var flowerRequirements = await _productFlowersRepository.GetFlowerRequirementsForProductAsync(cartItem.ProductId);
+                
+                decimal productTotalCost = 0;
+                var flowerReqs = new List<FlowerRequirementInfo>();
 
-//                // Verify the order belongs to the customer
-//                if (order.CustomerId != customerId)
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "Order does not belong to this customer"
-//                    };
-//                }
+                foreach (var flowerReq in flowerRequirements)
+                {
+                    var totalFlowersNeeded = flowerReq.QuantityNeeded * cartItem.Quantity;
+                    var availableFlowers = await _supplierListingsRepository.GetAvailableFlowersByFlowerIdAsync(flowerReq.FlowerId);
+                    
+                    // Sort by price (cheapest first)
+                    var sortedSuppliers = availableFlowers.OrderBy(sl => sl.UnitPrice).ToList();
+                    
+                    int remainingNeeded = totalFlowersNeeded;
+                    decimal flowerCost = 0;
+                    var flowerReqInfo = new FlowerRequirementInfo
+                    {
+                        FlowerId = flowerReq.FlowerId,
+                        FlowerName = flowerReq.Flower.Name,
+                        TotalQuantityNeeded = totalFlowersNeeded,
+                        SupplierAllocations = new List<SupplierAllocationInfo>()
+                    };
 
-//                // Check if order is already confirmed
-//                if (order.Status == "Confirmed" || order.PaymentStatus == "Paid")
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "Order is already confirmed"
-//                    };
-//                }
+                    foreach (var supplier in sortedSuppliers)
+                    {
+                        if (remainingNeeded <= 0) break;
 
-//                // Get order details to reduce stock
-//                var orderDetails = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId);
-//                if (orderDetails == null || !orderDetails.Any())
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "No order details found"
-//                    };
-//                }
+                        int quantityToTake = Math.Min(remainingNeeded, supplier.AvailableQuantity);
+                        decimal supplierCost = quantityToTake * supplier.UnitPrice;
+                        
+                        flowerCost += supplierCost;
+                        remainingNeeded -= quantityToTake;
 
-//                // Reduce stock for all products in the order
-//                foreach (var detail in orderDetails)
-//                {
-//                    var stockReductionSuccess = await _productRepository.ReduceProductStockAsync(detail.ProductId, detail.Quantity);
-//                    if (!stockReductionSuccess)
-//                    {
-//                        return new CheckoutResponseDTO
-//                        {
-//                            Succeeded = false,
-//                            Message = $"Failed to update stock for product {detail.ProductId}. Please try again."
-//                        };
-//                    }
-//                }
+                        flowerReqInfo.SupplierAllocations.Add(new SupplierAllocationInfo
+                        {
+                            SupplierListingId = supplier.Id,
+                            SupplierId = supplier.SupplierId,
+                            SupplierName = supplier.Supplier?.SupplierName ?? "Unknown",
+                            Quantity = quantityToTake,
+                            UnitPrice = supplier.UnitPrice,
+                            LineTotal = supplierCost
+                        });
+                    }
+                    
+                    productTotalCost += flowerCost;
+                    flowerReqs.Add(flowerReqInfo);
+                }
 
-//                // Update order status to confirmed
-//                var statusUpdated = await _orderRepository.UpdateOrderStatusAsync(orderId, "Confirmed");
-//                var paymentStatusUpdated = await _orderRepository.UpdatePaymentStatusAsync(orderId, "Paid");
+                var productCostInfo = new ProductCostInfo
+                {
+                    ProductId = cartItem.ProductId,
+                    ProductName = product.Name,
+                    Quantity = cartItem.Quantity,
+                    UnitPrice = productTotalCost / cartItem.Quantity,
+                    LineTotal = productTotalCost
+                };
 
-//                if (!statusUpdated || !paymentStatusUpdated)
-//                {
-//                    return new CheckoutResponseDTO
-//                    {
-//                        Succeeded = false,
-//                        Message = "Failed to update order status"
-//                    };
-//                }
+                result.ProductCosts.Add(productCostInfo);
+                result.FlowerRequirements.AddRange(flowerReqs);
+                subtotal += productTotalCost;
+            }
 
-//                // Log successful confirmation
-//                Console.WriteLine($"COD order {orderId} confirmed successfully. Stock reduced for {orderDetails.Count()} products.");
+            taxAmount = subtotal * TAX_RATE;
+            result.Subtotal = subtotal;
+            result.TaxAmount = taxAmount;
+            result.TotalAmount = subtotal + taxAmount;
 
-//                return new CheckoutResponseDTO
-//                {
-//                    Succeeded = true,
-//                    Message = "Order confirmed successfully",
-//                    Data = new CheckoutResponseDataDTO
-//                    {
-//                        OrderId = orderId,
-//                        OrderNumber = order.OrderNumber,
-//                        PaymentStatus = "Paid",
-//                        OrderStatus = "Confirmed",
-//                        TotalAmount = order.TotalAmount
-//                    }
-//                };
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine($"Error confirming COD order {orderId}: {ex.Message}");
-//                return new CheckoutResponseDTO
-//                {
-//                    Succeeded = false,
-//                    Message = $"Error confirming order: {ex.Message}"
-//                };
-//            }
-//        }
-//    }
-//}
+            return result;
+        }
+
+        private async Task CreatePurchaseOrdersAsync(List<FlowerRequirementInfo> flowerRequirements, int orderId)
+        {
+            // Group by supplier
+            var supplierGroups = flowerRequirements
+                .SelectMany(fr => fr.SupplierAllocations.Select(sa => new { 
+                    SupplierId = sa.SupplierId, 
+                    FlowerId = fr.FlowerId,
+                    Allocation = sa 
+                }))
+                .GroupBy(x => x.SupplierId)
+                .ToList();
+
+            foreach (var supplierGroup in supplierGroups)
+            {
+                var supplierId = supplierGroup.Key;
+                var totalAmount = supplierGroup.Sum(x => x.Allocation.LineTotal);
+
+                var purchaseOrder = new PurchaseOrders
+                {
+                    PurchaseOrderNumber = GeneratePurchaseOrderNumber(),
+                    SupplierId = supplierId,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = "pending",
+                    TotalAmount = totalAmount,
+                    Notes = $"Generated from order {orderId}"
+                };
+
+                var createdPO = await _purchaseOrdersRepository.createAsync(purchaseOrder);
+
+                // Create purchase order details
+                foreach (var item in supplierGroup)
+                {
+                    var poDetail = new PurchaseOrderDetails
+                    {
+                        PurchaseOrderId = createdPO.Id,
+                        FlowerId = item.FlowerId,
+                        Quantity = item.Allocation.Quantity,
+                        UnitPrice = item.Allocation.UnitPrice,
+                        LineTotal = item.Allocation.LineTotal
+                    };
+
+                    await _purchaseOrderDetailsRepository.createAsync(poDetail);
+
+                    // Deduct from supplier listing stock if tracked
+                    if (item.Allocation.SupplierListingId > 0)
+                    {
+                        await _supplierListingsRepository.DeductAvailableQuantityAsync(
+                            item.Allocation.SupplierListingId,
+                            item.Allocation.Quantity
+                        );
+                    }
+                }
+            }
+        }
+
+        private string GenerateOrderNumber()
+        {
+            return $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        private string GeneratePurchaseOrderNumber()
+        {
+            return $"PO-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+        }
+    }
+
+    // Helper classes for the new flow
+    public class FlowerAvailabilityValidationResult
+    {
+        public bool IsValid { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
+    }
+
+    public class ProductCostCalculationResult
+    {
+        public bool IsValid { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
+        public List<ProductCostInfo> ProductCosts { get; set; } = new List<ProductCostInfo>();
+        public List<FlowerRequirementInfo> FlowerRequirements { get; set; } = new List<FlowerRequirementInfo>();
+        public decimal Subtotal { get; set; }
+        public decimal TaxAmount { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
+    public class ProductCostInfo
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+    }
+
+    public class FlowerRequirementInfo
+    {
+        public int FlowerId { get; set; }
+        public string FlowerName { get; set; } = string.Empty;
+        public int TotalQuantityNeeded { get; set; }
+        public List<SupplierAllocationInfo> SupplierAllocations { get; set; } = new List<SupplierAllocationInfo>();
+    }
+
+    public class SupplierAllocationInfo
+    {
+        public int SupplierListingId { get; set; }
+        public int SupplierId { get; set; }
+        public string SupplierName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+    }
+}

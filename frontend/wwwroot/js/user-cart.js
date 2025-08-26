@@ -8,6 +8,7 @@ class CartPageManager {
     this.cartItems = [];
     this.cartSummary = { totalItems: 0, totalAmount: 0, cartId: 0 };
     this.pendingChanges = new Map(); // Track pending quantity changes
+    this.calculatedPrices = null; // Store calculated prices from supplier
 
     // Simple initialization
     this.init();
@@ -116,7 +117,8 @@ class CartPageManager {
         }
 
         // Check stock validation asynchronously
-        this.validateQuantityAgainstStock(cartItemId, quantity, e.target);
+        // Đã bỏ stock validation - không còn cần thiết
+        // this.validateQuantityAgainstStock(cartItemId, quantity, e.target);
       }
     });
 
@@ -148,8 +150,11 @@ class CartPageManager {
         const currentValue = parseInt(input.value) || 1;
         if (currentValue > 1) {
           const newQuantity = currentValue - 1;
-          // Check stock before allowing decrease
-          this.validateQuantityChange(input, newQuantity);
+          input.value = newQuantity;
+          this.markItemAsChanged(
+            input.getAttribute("data-cart-item-id"),
+            newQuantity
+          );
         }
       }
 
@@ -157,13 +162,12 @@ class CartPageManager {
         e.preventDefault();
         const input = e.target.previousElementSibling;
         const currentValue = parseInt(input.value) || 1;
-        if (currentValue < 100) {
-          const newQuantity = currentValue + 1;
-          // Check stock before allowing increase
-          this.validateQuantityChange(input, newQuantity);
-        } else {
-          this.showToast("Số lượng tối đa là 100", "warning");
-        }
+        const newQuantity = currentValue + 1;
+        input.value = newQuantity;
+        this.markItemAsChanged(
+          input.getAttribute("data-cart-item-id"),
+          newQuantity
+        );
       }
 
       // Remove item buttons
@@ -213,15 +217,18 @@ class CartPageManager {
     this.showLoading();
 
     try {
-      // Load cart items with pagination
+      console.log("Loading cart data...");
       const itemsResult = await ApiService.getCartItems(
         this.currentPage,
         this.pageSize
       );
+      console.log("Cart data loaded:", itemsResult);
 
       if (itemsResult.succeeded) {
         this.cartItems = itemsResult.data.cart_items;
         this.cartSummary = itemsResult.data.cart_summary;
+        console.log("Cart items loaded:", this.cartItems);
+        console.log("Cart summary loaded:", this.cartSummary);
 
         // Debug: Log cart items for troubleshooting
         console.log("Loaded cart items:", this.cartItems);
@@ -234,6 +241,9 @@ class CartPageManager {
           this.renderPagination(itemsResult.data);
           this.updateCartSummary();
           this.showCartContent();
+
+          // Load calculated prices after rendering cart items
+          await this.loadCalculatedPrices();
         }
       } else {
         throw new Error(itemsResult.message || "Không thể tải giỏ hàng");
@@ -255,6 +265,130 @@ class CartPageManager {
     }
   }
 
+  async loadCalculatedPrices() {
+    try {
+      console.log("Loading calculated prices...");
+      const priceResult = await ApiService.calculateCartPrice();
+      console.log("Price calculation result:", priceResult);
+
+      if (priceResult.succeeded && priceResult.data) {
+        this.calculatedPrices = priceResult.data;
+        console.log("Loaded calculated prices:", this.calculatedPrices);
+
+        // Check if we have valid data
+        if (
+          this.calculatedPrices.cartItems &&
+          this.calculatedPrices.cartItems.length > 0
+        ) {
+          // Update cart display with new prices
+          this.updateCartWithCalculatedPrices();
+        } else {
+          console.log("No calculated prices available, using original prices");
+          // Show info message
+          this.showToast("Sử dụng giá gốc sản phẩm", "info");
+        }
+      } else {
+        console.warn("Failed to load calculated prices:", priceResult.message);
+        // Show user-friendly message
+        this.showToast(
+          `Không thể tính giá từ nhà cung cấp: ${priceResult.message}`,
+          "warning"
+        );
+      }
+    } catch (error) {
+      console.error("Error loading calculated prices:", error);
+      // Show user-friendly message
+      this.showToast(
+        "Không thể tính giá từ nhà cung cấp, sử dụng giá gốc",
+        "warning"
+      );
+    }
+  }
+
+  updateCartWithCalculatedPrices() {
+    if (!this.calculatedPrices || !this.calculatedPrices.cartItems) {
+      console.log("No calculated prices available");
+      return;
+    }
+
+    console.log("Updating cart with calculated prices:", this.calculatedPrices);
+
+    // Update each cart item with calculated prices
+    this.calculatedPrices.cartItems.forEach((calculatedItem) => {
+      console.log("Processing calculated item:", calculatedItem);
+
+      const row = document.querySelector(
+        `tr[data-cart-item-id="${calculatedItem.cartItemId}"]`
+      );
+      if (row) {
+        // Update unit price
+        const priceCell = row.querySelector(".pro-price span");
+        if (priceCell) {
+          const calculatedPrice = this.formatCurrency(
+            calculatedItem.calculatedUnitPrice
+          );
+
+          if (calculatedItem.priceDifference != 0) {
+            priceCell.textContent = calculatedPrice;
+          } else {
+            priceCell.textContent = calculatedPrice;
+          }
+        }
+
+        // Update line total
+        const subtotalCell = row.querySelector(".pro-subtotal span");
+        if (subtotalCell) {
+          subtotalCell.textContent = this.formatCurrency(
+            calculatedItem.lineTotal
+          );
+        }
+      } else {
+        console.warn(
+          `Could not find row for cart item ${calculatedItem.cartItemId}`
+        );
+      }
+    });
+
+    // Update cart totals
+    this.updateCartSummaryWithCalculatedPrices();
+  }
+
+  updateCartSummaryWithCalculatedPrices() {
+    if (!this.calculatedPrices) return;
+
+    // Update subtotal
+    const subtotalElement = document.getElementById("subtotal-amount");
+    if (subtotalElement) {
+      subtotalElement.textContent = this.formatCurrency(
+        this.calculatedPrices.subtotal
+      );
+    }
+
+    // Update service fee
+    const serviceFeeElement = document.getElementById("service-fee-amount");
+    if (serviceFeeElement) {
+      serviceFeeElement.textContent = this.formatCurrency(
+        this.calculatedPrices.serviceFee
+      );
+    }
+
+    // Update total amount
+    const totalElement = document.getElementById("final-total-amount");
+    if (totalElement) {
+      totalElement.textContent = this.formatCurrency(
+        this.calculatedPrices.totalAmount
+      );
+    }
+
+    // Update cart total amount in summary card
+    const cartTotalElement = document.getElementById("cart-total-amount");
+    if (cartTotalElement) {
+      cartTotalElement.textContent = this.formatCurrency(
+        this.calculatedPrices.totalAmount
+      );
+    }
+  }
+
   renderCartItems() {
     const container = document.getElementById("cart-items-container");
 
@@ -269,26 +403,40 @@ class CartPageManager {
         // Debug: Log each item structure
         console.log("Rendering cart item:", item);
 
+        // Try to get calculated price if available
+        let displayPrice = this.formatCurrency(item.unit_price);
+        let displayTotal = this.formatCurrency(item.line_total);
+
+        if (this.calculatedPrices && this.calculatedPrices.cartItems) {
+          const calculatedItem = this.calculatedPrices.cartItems.find(
+            (ci) => ci.cartItemId === item.id
+          );
+
+          if (calculatedItem) {
+            console.log("Found calculated price for item:", calculatedItem);
+            displayPrice = this.formatCurrency(
+              calculatedItem.calculatedUnitPrice
+            );
+            displayTotal = this.formatCurrency(calculatedItem.lineTotal);
+          }
+        }
+
         return `
             <tr data-cart-item-id="${item.id}">
                 <td class="pro-thumbnail">
-                    <a href="#">
-                        <img class="img-fluid" 
+                    <img class="img-fluid" 
                              src="${this.getProductImageUrl({
                                id: item.product_id,
                              })}" 
                              alt="${item.product_name}" 
                              style="width: 80px; height: 80px; object-fit: cover;"
-                             onerror="this.src='https://localhost:7062/Image/products/default/default.jpg'" />
-                    </a>
+                             onerror="this.src='https://localhost:7062/images/products/default/default.jpg'" />
                 </td>
                 <td class="pro-title">
-                    <a href="${item.product_url || "#"}">${
-          item.product_name
-        }</a>
+                    ${item.product_name}
                 </td>
                 <td class="pro-price">
-                    <span>${this.formatCurrency(item.unit_price)}</span>
+                    <span>${displayPrice}</span>
                 </td>
                 <td class="pro-quantity">
                     <div class="quantity-controls">
@@ -297,7 +445,6 @@ class CartPageManager {
                                class="cart-quantity-input" 
                                value="${item.quantity}" 
                                min="0"
-                               max="100"
                                step="1"
                                inputmode="numeric"
                                pattern="[0-9]*"
@@ -307,7 +454,7 @@ class CartPageManager {
                     </div>
                 </td>
                 <td class="pro-subtotal">
-                    <span>${this.formatCurrency(item.line_total)}</span>
+                    <span>${displayTotal}</span>
                 </td>
                 <td class="pro-remove">
                     <button class="btn-remove-item remove-cart-item" 
@@ -364,12 +511,31 @@ class CartPageManager {
     // Update header elements
     document.getElementById("cart-total-items").textContent =
       this.cartSummary.total_items;
+
+    // Use calculated prices if available, otherwise use cart summary
+    let totalAmount = this.cartSummary.total_amount;
+    if (this.calculatedPrices && this.calculatedPrices.totalAmount > 0) {
+      totalAmount = this.calculatedPrices.totalAmount;
+      console.log("Using calculated total amount:", totalAmount);
+    }
+
     document.getElementById("cart-total-amount").textContent =
-      this.formatCurrency(this.cartSummary.total_amount);
+      this.formatCurrency(totalAmount);
 
     // Update sidebar summary
-    const subtotal = this.cartSummary.total_amount;
-    const total = subtotal; // Total is just the product total, no shipping
+    let subtotal = this.cartSummary.total_amount;
+    let total = subtotal; // Total is just the product total, no shipping
+
+    if (this.calculatedPrices) {
+      subtotal = this.calculatedPrices.subtotal;
+      total = this.calculatedPrices.totalAmount;
+      console.log(
+        "Using calculated prices - Subtotal:",
+        subtotal,
+        "Total:",
+        total
+      );
+    }
 
     document.getElementById("subtotal-amount").textContent =
       this.formatCurrency(subtotal);
@@ -608,9 +774,17 @@ class CartPageManager {
   getProductImageUrl(product) {
     const baseUrl = "https://localhost:7062"; // Use the same base URL as shop/homepage
     if (!product || !product.id) {
-      return `${baseUrl}/Image/products/default/default.jpg`;
+      return `${baseUrl}/images/products/default/default.jpg`;
     }
-    return `${baseUrl}/Image/products/${product.id}/primary.jpg`;
+
+    // Check if product_url starts with /images/
+    if (product.product_url && product.product_url.startsWith("/images/")) {
+      // Use the product_url directly
+      return `${baseUrl}${product.product_url}`;
+    }
+
+    // Fallback to old format
+    return `${baseUrl}/images/products/${product.id}/primary.jpg`;
   }
 
   async updateCartItemDisplay(cartItemId, updatedData) {
@@ -668,124 +842,15 @@ class CartPageManager {
 
   // Function to validate all pending changes against stock
   async validateAllPendingChanges() {
-    const validChanges = new Map();
-    const invalidChanges = [];
-
-    for (const [cartItemId, change] of this.pendingChanges) {
-      if (change.action === "update" && change.newQuantity > 0) {
-        const cartItem = this.cartItems.find(
-          (item) => item.id.toString() === cartItemId.toString()
-        );
-
-        if (cartItem && cartItem.productId) {
-          try {
-            const stockResult = await ApiService.getProductStock(
-              cartItem.productId
-            );
-            if (stockResult && stockResult.succeeded) {
-              const currentStock = stockResult.data.stock || 0;
-
-              if (change.newQuantity > currentStock) {
-                invalidChanges.push({
-                  cartItemId,
-                  requestedQuantity: change.newQuantity,
-                  currentStock,
-                  productName: cartItem.productName || "Sản phẩm",
-                });
-
-                // Reset the input to original value
-                const input = document.querySelector(
-                  `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
-                );
-                if (input) {
-                  input.value = input.getAttribute("data-original-quantity");
-                  input.classList.remove("has-changes");
-                }
-
-                continue; // Skip this change
-              }
-            }
-          } catch (error) {
-            console.warn(
-              "Could not validate stock for cart item:",
-              cartItemId,
-              error
-            );
-            // Allow if stock check fails
-          }
-        }
-      }
-
-      // Add to valid changes
-      validChanges.set(cartItemId, change);
-    }
-
-    // Show error message for invalid changes
-    if (invalidChanges.length > 0) {
-      const errorMessage = invalidChanges
-        .map(
-          (item) =>
-            `${item.productName}: ${item.requestedQuantity} > ${item.currentStock}`
-        )
-        .join(", ");
-
-      this.showToast(
-        `Không thể cập nhật một số sản phẩm vì vượt quá tồn kho: ${errorMessage}`,
-        "error"
-      );
-    }
-
-    return validChanges;
+    // Bỏ stock validation - cho phép tất cả thay đổi
+    return this.pendingChanges;
   }
 
   // Function to validate quantity against stock
   async validateQuantityAgainstStock(cartItemId, quantity, inputElement) {
-    // Find the cart item to get product ID
-    const cartItem = this.cartItems.find(
-      (item) => item.id.toString() === cartItemId.toString()
-    );
-
-    if (!cartItem || !cartItem.productId) {
-      console.warn(
-        "Could not find cart item or product ID for stock validation"
-      );
-      // Mark as changed if we can't validate
-      await this.markItemAsChanged(cartItemId, quantity);
-      return true;
-    }
-
-    try {
-      // Get current stock for the product
-      const stockResult = await ApiService.getProductStock(cartItem.productId);
-      if (stockResult && stockResult.succeeded) {
-        const currentStock = stockResult.data.stock || 0;
-
-        if (quantity > currentStock) {
-          // Show error message
-          this.showToast(
-            `Không thể đặt ${quantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
-            "error"
-          );
-
-          // Reset input to original value
-          this.resetCartItemInput(cartItemId);
-
-          return false; // Validation failed
-        }
-      }
-
-      // Stock validation passed, mark as changed
-      await this.markItemAsChanged(cartItemId, quantity);
-      return true; // Validation passed
-    } catch (error) {
-      console.warn(
-        "Could not validate stock, allowing quantity change:",
-        error
-      );
-      // Allow if stock check fails
-      await this.markItemAsChanged(cartItemId, quantity);
-      return true;
-    }
+    // Bỏ stock validation - cho phép thay đổi bất kỳ số lượng nào
+    await this.markItemAsChanged(cartItemId, quantity);
+    return true;
   }
 
   // Function to validate quantity change (for +/- buttons)
@@ -797,49 +862,9 @@ class CartPageManager {
       return;
     }
 
-    // Find the cart item to get product ID
-    const cartItem = this.cartItems.find(
-      (item) => item.id.toString() === cartItemId.toString()
-    );
-
-    if (!cartItem || !cartItem.productId) {
-      console.warn(
-        "Could not find cart item or product ID for quantity change validation"
-      );
-      // Mark as changed if we can't validate
-      inputElement.value = newQuantity;
-      await this.markItemAsChanged(cartItemId, newQuantity);
-      return;
-    }
-
-    try {
-      const stockResult = await ApiService.getProductStock(cartItem.productId);
-      if (stockResult && stockResult.succeeded) {
-        const currentStock = stockResult.data.stock || 0;
-
-        if (newQuantity > currentStock) {
-          this.showToast(
-            `Không thể đặt ${newQuantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
-            "error"
-          );
-          // Revert to original quantity
-          const originalQuantity = inputElement.getAttribute(
-            "data-original-quantity"
-          );
-          inputElement.value = originalQuantity;
-          await this.markItemAsChanged(cartItemId, parseInt(originalQuantity));
-          return;
-        }
-      }
-      // Stock validation passed, mark as changed
-      inputElement.value = newQuantity;
-      await this.markItemAsChanged(cartItemId, newQuantity);
-    } catch (error) {
-      console.warn("Could not validate stock for quantity change:", error);
-      // Allow if stock check fails
-      inputElement.value = newQuantity;
-      await this.markItemAsChanged(cartItemId, newQuantity);
-    }
+    // Bỏ stock validation - cho phép thay đổi bất kỳ số lượng nào
+    inputElement.value = newQuantity;
+    await this.markItemAsChanged(cartItemId, newQuantity);
   }
 
   // Function to reset cart item input to original value
@@ -889,45 +914,7 @@ class CartPageManager {
       return;
     }
 
-    // Check stock validation before marking as changed
-    const cartItem = this.cartItems.find(
-      (item) => item.id.toString() === cartItemId.toString()
-    );
-
-    if (cartItem && cartItem.productId && newQuantity > 0) {
-      try {
-        const stockResult = await ApiService.getProductStock(
-          cartItem.productId
-        );
-        if (stockResult && stockResult.succeeded) {
-          const currentStock = stockResult.data.stock || 0;
-
-          if (newQuantity > currentStock) {
-            this.showToast(
-              `Không thể đặt ${newQuantity} sản phẩm. Chỉ còn ${currentStock} sản phẩm trong kho.`,
-              "error"
-            );
-
-            // Reset input to original value
-            const input = document.querySelector(
-              `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
-            );
-            if (input) {
-              input.value = input.getAttribute("data-original-quantity");
-              input.classList.remove("has-changes");
-            }
-
-            return; // Don't mark as changed
-          }
-        }
-      } catch (error) {
-        console.warn(
-          "Could not validate stock, allowing quantity change:",
-          error
-        );
-        // Continue if stock check fails
-      }
-    }
+    // Bỏ stock validation - cho phép thay đổi bất kỳ số lượng nào
 
     // Mark as changed
     this.pendingChanges.set(cartItemId, {
@@ -965,54 +952,8 @@ class CartPageManager {
   }
 
   async updateCartWithChanges() {
-    if (!this.pendingChanges || this.pendingChanges.size === 0) {
-      this.showToast("Không có thay đổi nào để cập nhật", "info");
-      return;
-    }
-
-    // First, validate all pending changes against stock
-    console.log("Validating all pending changes against stock...");
-    const validChanges = await this.validateAllPendingChanges();
-
-    if (validChanges.size === 0) {
-      this.showToast("Không có thay đổi hợp lệ để cập nhật", "warning");
-      this.updateUpdateCartButton();
-      return;
-    }
-
-    // Update pendingChanges to only include valid items
-    this.pendingChanges = validChanges;
-
-    // Verify that all cart items still exist
-    console.log("Verifying cart items still exist...");
-    const existingChanges = new Map();
-
-    for (const [cartItemId, change] of this.pendingChanges) {
-      const itemExists = this.cartItems.find(
-        (item) => item.id.toString() === cartItemId.toString()
-      );
-
-      if (itemExists) {
-        existingChanges.set(cartItemId, change);
-        console.log(`Cart item ${cartItemId} is valid`);
-      } else {
-        console.warn(`Cart item ${cartItemId} no longer exists, skipping...`);
-        // Remove visual feedback for this item
-        const input = document.querySelector(
-          `[data-cart-item-id="${cartItemId}"] .cart-quantity-input`
-        );
-        if (input) {
-          input.classList.remove("has-changes");
-        }
-      }
-    }
-
-    // Update pendingChanges to only include existing items
-    this.pendingChanges = existingChanges;
-
     if (this.pendingChanges.size === 0) {
-      this.showToast("Không có thay đổi hợp lệ để cập nhật", "warning");
-      this.updateUpdateCartButton();
+      this.showToast("Không có thay đổi nào để cập nhật", "info");
       return;
     }
 
@@ -1024,6 +965,57 @@ class CartPageManager {
     }
 
     try {
+      // Validate supplier availability before updating
+      this.showToast("Đang kiểm tra khả năng cung cấp...", "info");
+
+      for (const [cartItemId, change] of this.pendingChanges) {
+        const cartItem = this.cartItems.find(
+          (item) => item.id === parseInt(cartItemId)
+        );
+        if (cartItem) {
+          try {
+            const availabilityResponse = await fetch(
+              `https://localhost:7062/api/Product/check-availability/${cartItem.product_id}?quantity=${change.newQuantity}`
+            );
+
+            if (!availabilityResponse.ok) {
+              this.showToast(
+                `Không thể kiểm tra sản phẩm ${cartItem.product_name}`,
+                "error"
+              );
+              return;
+            }
+
+            const availabilityResult = await availabilityResponse.json();
+            if (!availabilityResult.succeeded) {
+              this.showToast(
+                `Lỗi kiểm tra sản phẩm ${cartItem.product_name}`,
+                "error"
+              );
+              return;
+            }
+
+            const availability = availabilityResult.data;
+            if (!availability.isAvailable) {
+              this.showToast(
+                `Sản phẩm ${cartItem.product_name}: ${availability.message}`,
+                "warning"
+              );
+              return;
+            }
+          } catch (error) {
+            console.error("Error checking availability:", error);
+            this.showToast(
+              `Không thể kiểm tra sản phẩm ${cartItem.product_name}`,
+              "error"
+            );
+            return;
+          }
+        }
+      }
+
+      this.showToast("Tất cả sản phẩm đều có thể cung cấp!", "success");
+
       let successCount = 0;
       let errorCount = 0;
 
@@ -1068,22 +1060,6 @@ class CartPageManager {
           }
         } catch (error) {
           console.error(`Error updating cart item ${cartItemId}:`, error);
-
-          // Log more details about the error
-          if (error.message.includes("404")) {
-            console.error(
-              `Cart item ${cartItemId} not found - it may have been removed or doesn't exist`
-            );
-          } else if (error.message.includes("401")) {
-            console.error(
-              `Authentication error for cart item ${cartItemId} - token may be invalid`
-            );
-          } else if (error.message.includes("403")) {
-            console.error(
-              `Forbidden error for cart item ${cartItemId} - user may not own this item`
-            );
-          }
-
           errorCount++;
         }
       }
@@ -1113,7 +1089,7 @@ class CartPageManager {
           "warning"
         );
 
-        // If we had 404 errors, the cart data might be stale
+        // Reload cart data if there were errors
         if (errorCount > 0) {
           console.log(
             "Some updates failed, refreshing cart data to get latest state..."
@@ -1138,28 +1114,6 @@ class CartPageManager {
     }
   }
 
-  // Debug helper method - can be called from browser console
-  debugCartState() {
-    console.log("=== CART DEBUG INFO ===");
-    console.log("Cart Items:", this.cartItems);
-    console.log("Cart Summary:", this.cartSummary);
-    console.log("Current Page:", this.currentPage);
-    console.log("Page Size:", this.pageSize);
-    console.log("Pending Changes:", this.pendingChanges);
-
-    // Check all cart item elements
-    const cartRows = document.querySelectorAll("[data-cart-item-id]");
-    console.log("Cart rows in DOM:", cartRows.length);
-    cartRows.forEach((row, index) => {
-      const cartItemId = row.getAttribute("data-cart-item-id");
-      const quantityInput = row.querySelector(".cart-quantity-input");
-      console.log(
-        `Row ${index + 1}: ID=${cartItemId}, Quantity=${quantityInput?.value}`
-      );
-    });
-    console.log("======================");
-  }
-
   // Validate cart items before checkout
   async validateCartForCheckout() {
     // Ensure cart items are loaded
@@ -1180,59 +1134,46 @@ class CartPageManager {
       }
     }
 
-    const validationErrors = [];
-    let hasStockIssues = false;
+    // Validate supplier availability for each cart item
+    try {
+      this.showToast("Đang kiểm tra khả năng cung cấp sản phẩm...", "info");
 
-    // Check each cart item against current stock
-    for (const cartItem of this.cartItems) {
-      try {
-        const stockResult = await ApiService.getProductStock(
-          cartItem.product_id
+      for (const item of this.cartItems) {
+        const availabilityResponse = await fetch(
+          `https://localhost:7062/api/Product/check-availability/${item.product_id}?quantity=${item.quantity}`
         );
-        if (stockResult && stockResult.succeeded) {
-          const currentStock = stockResult.data.stock || 0;
-          const cartQuantity = cartItem.quantity || 0;
 
-          if (cartQuantity > currentStock) {
-            hasStockIssues = true;
-            validationErrors.push({
-              productName: cartItem.product_name || "Sản phẩm",
-              requestedQuantity: cartQuantity,
-              currentStock: currentStock,
-              message: `${cartItem.product_name}: Yêu cầu ${cartQuantity} nhưng chỉ còn ${currentStock} trong kho`,
-            });
-          }
+        if (!availabilityResponse.ok) {
+          this.showToast(
+            `Không thể kiểm tra sản phẩm ${item.product_name}`,
+            "error"
+          );
+          return false;
         }
-      } catch (error) {
-        console.warn(
-          `Could not validate stock for product ${cartItem.product_id}:`,
-          error
-        );
-        // Continue validation for other items
+
+        const availabilityResult = await availabilityResponse.json();
+        if (!availabilityResult.succeeded) {
+          this.showToast(`Lỗi kiểm tra sản phẩm ${item.product_name}`, "error");
+          return false;
+        }
+
+        const availability = availabilityResult.data;
+        if (!availability.isAvailable) {
+          this.showToast(
+            `Sản phẩm ${item.product_name}: ${availability.message}`,
+            "warning"
+          );
+          return false;
+        }
       }
-    }
 
-    // If there are stock issues, show detailed error message
-    if (hasStockIssues) {
-      const errorMessage = validationErrors
-        .map((error) => error.message)
-        .join("\n");
-
-      this.showToast(
-        `Không thể tiến hành thanh toán:\n${errorMessage}`,
-        "error"
-      );
-
-      // Also show a more detailed alert for better visibility
-      alert(
-        `Không thể tiến hành thanh toán vì một số sản phẩm vượt quá tồn kho:\n\n${errorMessage}\n\nVui lòng cập nhật số lượng trong giỏ hàng.`
-      );
-
+      this.showToast("Tất cả sản phẩm đều có thể cung cấp!", "success");
+      return true;
+    } catch (error) {
+      console.error("Error validating supplier availability:", error);
+      this.showToast("Có lỗi xảy ra khi kiểm tra khả năng cung cấp", "error");
       return false;
     }
-
-    // All validations passed
-    return true;
   }
 
   // Handle checkout button click

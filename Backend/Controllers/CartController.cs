@@ -296,6 +296,72 @@ namespace FlowerSellingWebsite.Controllers
             }
         }
 
+        [HttpGet("calculate-price")]
+        public async Task<IActionResult> CalculateCartPrice()
+        {
+            try
+            {
+                var userId = await GetCurrentUserIdAsync();
+                var result = await _cartService.CalculateCartPriceAsync(userId);
+                return Ok(ApiResponse<CartPriceCalculationDTO>.Ok(result, "Cart prices calculated successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Authentication error in CalculateCartPrice: {Message}", ex.Message);
+                return Unauthorized(ApiResponse<CartPriceCalculationDTO>.Fail("Authentication failed. Please log in again."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating cart prices");
+                return StatusCode(500, ApiResponse<CartPriceCalculationDTO>.Fail("An error occurred while calculating cart prices"));
+            }
+        }
+
+        // Thêm validation endpoints mới
+        [HttpGet("validate-item")]
+        public async Task<IActionResult> ValidateCartItem(
+            [FromQuery] int productId,
+            [FromQuery] int quantity = 1)
+        {
+            try
+            {
+                var userId = await GetCurrentUserIdAsync();
+                var result = await _cartService.ValidateCartItemQuantityAsync(userId, productId, quantity);
+                return Ok(ApiResponse<CartValidationResultDTO>.Ok(result, "Cart item validation completed"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Authentication error in ValidateCartItem: {Message}", ex.Message);
+                return Unauthorized(ApiResponse<CartValidationResultDTO>.Fail("Authentication failed. Please log in again."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating cart item");
+                return StatusCode(500, ApiResponse<CartValidationResultDTO>.Fail("An error occurred while validating cart item"));
+            }
+        }
+
+        [HttpGet("validate")]
+        public async Task<IActionResult> ValidateEntireCart()
+        {
+            try
+            {
+                var userId = await GetCurrentUserIdAsync();
+                var result = await _cartService.ValidateEntireCartAsync(userId);
+                return Ok(ApiResponse<CartValidationResultDTO>.Ok(result, "Cart validation completed"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Authentication error in ValidateEntireCart: {Message}", ex.Message);
+                return Unauthorized(ApiResponse<CartValidationResultDTO>.Fail("Authentication failed. Please log in again."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating entire cart");
+                return StatusCode(500, ApiResponse<CartValidationResultDTO>.Fail("An error occurred while validating cart"));
+            }
+        }
+
         private async Task<int> GetCurrentUserIdAsync()
         {
             try

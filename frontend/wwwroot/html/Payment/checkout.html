@@ -53,7 +53,7 @@
             <div class="col-12">
               <div class="breadcrumb-wrap">
                 <nav aria-label="breadcrumb">
-                  <h1>Checkout</h1>
+                  <h1>Thanh toán</h1>
                   <ul class="breadcrumb">
                     <li class="breadcrumb-item">
                       <a href="../common/homepage.html"
@@ -61,10 +61,10 @@
                       ></a>
                     </li>
                     <li class="breadcrumb-item">
-                      <a href="../user/cart.html">Cart</a>
+                      <a href="../user/cart.html">Giỏ hàng</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
-                      Checkout
+                      Thanh toán
                     </li>
                   </ul>
                 </nav>
@@ -82,102 +82,69 @@
             <!-- Checkout Billing Details -->
             <div class="col-lg-6">
               <div class="checkout-billing-details-wrap">
-                <h2>Billing Details</h2>
+                <h2>Thông tin thanh toán</h2>
                 <div class="billing-form-wrap">
                   <form id="checkoutForm">
                     <div class="row">
                       <div class="col-md-6">
                         <div class="single-input-item">
-                          <label for="firstName" class="required"
-                            >First Name</label
-                          >
+                          <label for="firstName" class="required">Họ</label>
                           <input
                             type="text"
                             id="firstName"
                             name="firstName"
-                            placeholder="First Name"
+                            placeholder="Họ"
                             required
                           />
                           <div class="form-error" id="firstNameError">
-                            First name is required
+                            Vui lòng nhập họ
                           </div>
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="single-input-item">
-                          <label for="lastName" class="required"
-                            >Last Name</label
-                          >
+                          <label for="lastName" class="required">Tên</label>
                           <input
                             type="text"
                             id="lastName"
                             name="lastName"
-                            placeholder="Last Name"
+                            placeholder="Tên"
                             required
                           />
                           <div class="form-error" id="lastNameError">
-                            Last name is required
+                            Vui lòng nhập tên
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div class="single-input-item">
-                      <label for="email" class="required">Email Address</label>
+                      <label for="email" class="required">Email</label>
                       <input
                         type="email"
                         id="email"
                         name="email"
-                        placeholder="Email Address"
+                        placeholder="Email"
                         required
                       />
                       <div class="form-error" id="emailError">
-                        Valid email address is required
-                      </div>
-                    </div>
-
-                    <div class="single-input-item">
-                      <label for="companyName">Company Name</label>
-                      <input
-                        type="text"
-                        id="companyName"
-                        name="companyName"
-                        placeholder="Company Name"
-                      />
-                    </div>
-
-                    <div class="single-input-item">
-                      <label for="country" class="required">Country</label>
-                      <select name="country" id="country" required>
-                        <option value="">Select Country</option>
-                        <option value="Vietnam">Vietnam</option>
-                        <option value="United States">United States</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Canada">Canada</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Germany">Germany</option>
-                        <option value="France">France</option>
-                        <option value="Japan">Japan</option>
-                        <option value="South Korea">South Korea</option>
-                      </select>
-                      <div class="form-error" id="countryError">
-                        Country is required
+                        Vui lòng nhập email hợp lệ
                       </div>
                     </div>
 
                     <div class="single-input-item">
                       <label for="streetAddress" class="required"
-                        >Street Address</label
+                        >Địa chỉ</label
                       >
                       <input
                         type="text"
                         id="streetAddress"
                         name="streetAddress"
-                        placeholder="Street Address Line 1"
+                        placeholder="Địa chỉ (số nhà, đường, phường/xã)"
                         required
                       />
                       <div class="form-error" id="streetAddressError">
-                        Street address is required
+                        Vui lòng nhập địa chỉ
                       </div>
                     </div>
 
@@ -186,72 +153,56 @@
                         type="text"
                         id="streetAddress2"
                         name="streetAddress2"
-                        placeholder="Street Address Line 2 (Optional)"
+                        placeholder="Địa chỉ bổ sung (không bắt buộc)"
                       />
                     </div>
 
                     <div class="single-input-item">
-                      <label for="city" class="required">Town / City</label>
+                      <label for="city" class="required">Thành phố</label>
                       <input
                         type="text"
                         id="city"
                         name="city"
-                        placeholder="Town / City"
+                        placeholder="Thành phố"
                         required
                       />
                       <div class="form-error" id="cityError">
-                        City is required
+                        Vui lòng nhập thành phố
                       </div>
                     </div>
 
                     <div class="single-input-item">
-                      <label for="state">State / Division</label>
+                      <label for="state">Tỉnh/Quận/Huyện</label>
                       <input
                         type="text"
                         id="state"
                         name="state"
-                        placeholder="State / Division"
+                        placeholder="Tỉnh/Quận/Huyện"
                       />
                     </div>
 
                     <div class="single-input-item">
-                      <label for="postcode" class="required"
-                        >Postcode / ZIP</label
-                      >
-                      <input
-                        type="text"
-                        id="postcode"
-                        name="postcode"
-                        placeholder="Postcode / ZIP"
-                        required
-                      />
-                      <div class="form-error" id="postcodeError">
-                        Postcode is required
-                      </div>
-                    </div>
-
-                    <div class="single-input-item">
-                      <label for="phone" class="required">Phone</label>
+                      <label for="phone" class="required">Số điện thoại</label>
                       <input
                         type="tel"
                         id="phone"
                         name="phone"
-                        placeholder="Phone"
+                        placeholder="Số điện thoại"
                         required
                       />
                       <div class="form-error" id="phoneError">
-                        Phone number is required
+                        Vui lòng nhập số điện thoại
                       </div>
                     </div>
 
                     <div class="single-input-item">
-                      <label for="orderNotes">Order Note</label>
+                      <label for="orderNotes">Ghi chú đơn hàng</label>
                       <textarea
                         name="orderNotes"
                         id="orderNotes"
                         cols="30"
                         rows="3"
-                        placeholder="Notes about your order, e.g. special notes for delivery."
+                        placeholder="Ghi chú về đơn hàng, ví dụ hướng dẫn giao hàng."
                       ></textarea>
                     </div>
                   </form>
@@ -262,7 +213,7 @@
             <!-- Order Summary Details -->
             <div class="col-lg-6">
               <div class="order-summary-details">
-                <h2>Your Order Summary</h2>
+                <h2>Đơn hàng của bạn</h2>
                 <div class="order-summary-content">
                   <!-- Order Summary Table -->
                   <div class="order-summary-table table-responsive text-center">
@@ -271,7 +222,7 @@
                       <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                       </div>
-                      <p class="mt-2">Loading your cart...</p>
+                      <p class="mt-2">Đang tải giỏ hàng...</p>
                     </div>
 
                     <table
@@ -281,8 +232,8 @@
                     >
                       <thead>
                         <tr>
-                          <th><strong>Products</strong></th>
-                          <th><strong>Total</strong></th>
+                          <th><strong>Sản phẩm</strong></th>
+                          <th><strong>Tổng</strong></th>
                         </tr>
                       </thead>
                       <tbody id="orderSummaryBody">
@@ -290,12 +241,16 @@
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td>Sub Total</td>
-                          <td id="subtotalAmount">$0.00</td>
+                          <td>Tạm tính</td>
+                          <td id="subtotalAmount">0 ₫</td>
+                        </tr>
+                        <tr>
+                          <td>Phí dịch vụ (50%)</td>
+                          <td id="serviceFeeAmount">0 ₫</td>
                         </tr>
                         <tr class="total-row">
-                          <td><strong>Total Amount</strong></td>
-                          <td id="totalAmount"><strong>$0.00</strong></td>
+                          <td><strong>Tổng cộng</strong></td>
+                          <td id="totalAmount"><strong>0 ₫</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -308,21 +263,20 @@
                     style="display: none"
                   >
                     <i class="fa fa-shopping-cart fa-3x text-muted mb-3"></i>
-                    <h5>Your Cart is Empty</h5>
+                    <h5>Giỏ hàng trống</h5>
                     <p class="text-muted">
-                      Please add items to your cart before proceeding to
-                      checkout.
+                      Vui lòng thêm sản phẩm vào giỏ trước khi thanh toán.
                     </p>
                     <div class="mb-3">
                       <a href="../user/cart.html" class="btn btn__bg me-2"
-                        >View Cart</a
+                        >Xem giỏ hàng</a
                       >
                       <button
                         type="button"
                         id="refreshCartBtn"
                         class="btn btn-outline-primary"
                       >
-                        Refresh Cart
+                        Tải lại giỏ hàng
                       </button>
                     </div>
                   </div>
@@ -343,7 +297,7 @@
                           <label
                             class="custom-control-label"
                             for="cashOnDelivery"
-                            >Tiền mặt khi nhận hàng</label
+                            >Thanh toán khi nhận hàng</label
                           >
                         </div>
                       </div>
@@ -351,10 +305,7 @@
                         class="payment-method-details show"
                         data-method="cash"
                       >
-                        <p>
-                          Thanh toán bằng tiền mặt khi nhận hàng. Đơn hàng sẽ
-                          được xử lý ngay lập tức.
-                        </p>
+                        <p>Thanh toán bằng tiền mặt khi nhận hàng.</p>
                       </div>
                     </div>
 
@@ -374,10 +325,7 @@
                         </div>
                       </div>
                       <div class="payment-method-details" data-method="vnpay">
-                        <p>
-                          Thanh toán an toàn qua VNPay. Bạn sẽ được chuyển đến
-                          trang thanh toán của VNPay.
-                        </p>
+                        <p>Thanh toán an toàn qua VNPay.</p>
                       </div>
                     </div>
 
@@ -387,7 +335,7 @@
                         id="placeOrderBtn"
                         class="btn btn__bg"
                       >
-                        Place Order
+                        Đặt hàng
                         <span class="loading-spinner" id="orderLoadingSpinner">
                           <i class="fa fa-spinner fa-spin"></i>
                         </span>

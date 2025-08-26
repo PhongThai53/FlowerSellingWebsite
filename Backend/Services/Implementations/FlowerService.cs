@@ -2,9 +2,9 @@
 using FlowerSellingWebsite.Models.DTOs;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Services.Interfaces;
+using FlowerSellingWebsite.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using ProjectGreenLens.Repositories.Interfaces;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {

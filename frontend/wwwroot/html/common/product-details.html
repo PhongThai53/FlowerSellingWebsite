@@ -118,14 +118,6 @@
         order: 2;
       }
 
-      /* Stock error styling */
-      .stock-error {
-        color: #dc3545;
-        font-size: 12px;
-        margin-top: 5px;
-        font-weight: 500;
-      }
-
       /* Ensure quantity controls are properly spaced */
       .quantity {
         margin: 0 15px;
@@ -249,31 +241,31 @@
                     <div class="pro-nav slick-row-10 slick-arrow-style">
                       <div class="pro-nav-thumb">
                         <img
-                          src="assets/img/product/product-details-img1.jpg"
+                          src="https://localhost:7062/images/product/product-details-img1.jpg"
                           alt="product-details"
                         />
                       </div>
                       <div class="pro-nav-thumb">
                         <img
-                          src="assets/img/product/product-details-img2.jpg"
+                          src="https://localhost:7062/images/product/product-details-img2.jpg"
                           alt="product-details"
                         />
                       </div>
                       <div class="pro-nav-thumb">
                         <img
-                          src="assets/img/product/product-details-img3.jpg"
+                          src="https://localhost:7062/images/product/product-details-img3.jpg"
                           alt="product-details"
                         />
                       </div>
                       <div class="pro-nav-thumb">
                         <img
-                          src="assets/img/product/product-details-img4.jpg"
+                          src="https://localhost:7062/images/product/product-details-img4.jpg"
                           alt="product-details"
                         />
                       </div>
                       <div class="pro-nav-thumb">
                         <img
-                          src="assets/img/product/product-details-img5.jpg"
+                          src="https://localhost:7062/images/product/product-details-img5.jpg"
                           alt="product-details"
                         />
                       </div>
@@ -282,13 +274,9 @@
                   <div class="col-lg-7">
                     <div class="product-details-des">
                       <h3 class="product-name"></h3>
-                      <div class="price-box">
-                        <span class="price-regular"></span>
-                        <span class="price-old"><del></del></span>
-                      </div>
                       <div class="availability">
                         <i class="fa fa-check-circle product-stock"></i>
-                        <span></span>
+                        <span>In Stock</span>
                       </div>
                       <p class="pro-desc description"></p>
                       <div class="quantity-cart-box d-flex align-items-center">
@@ -305,18 +293,6 @@
                               inputmode="numeric"
                               placeholder="Enter quantity"
                             />
-                          </div>
-                          <div
-                            id="stockError"
-                            class="stock-error"
-                            style="
-                              display: none;
-                              color: #dc3545;
-                              font-size: 12px;
-                              margin-top: 5px;
-                            "
-                          >
-                            Số lượng vượt quá tồn kho hiện tại
                           </div>
                         </div>
                         <div class="action_link">
@@ -394,23 +370,10 @@
 
                 // --- Cập nhật thông tin sản phẩm ---
                 document.querySelector(".product-name").textContent = p.name;
-                document.querySelector(".price-regular").textContent =
-                  p.price.toLocaleString("vi-VN") + " ₫";
-                document.querySelector(".price-old del").textContent =
-                  (p.price * 1.2).toLocaleString("vi-VN") + " ₫";
 
                 const stockEl = document.querySelector(".availability span");
-                if (p.stock > 0) {
-                  stockEl.textContent = `${p.stock} available`;
-                  document
-                    .querySelector(".product-stock")
-                    ?.style.setProperty("color", "green");
-                } else {
-                  stockEl.textContent = "Out of stock";
-                  document
-                    .querySelector(".product-stock")
-                    ?.style.setProperty("color", "red");
-                }
+                stockEl.textContent = "In Stock";
+                document.querySelector(".product-stock").style.color = "green";
 
                 document.querySelector(".description").textContent =
                   p.description;
@@ -463,19 +426,10 @@
 
           // ====== Gán thông tin sản phẩm ======
           document.querySelector(".product-name").textContent = p.name;
-          document.querySelector(".price-regular").textContent =
-            p.price.toLocaleString("vi-VN") + " ₫";
-          document.querySelector(".price-old del").textContent =
-            (p.price * 1.2).toLocaleString("vi-VN") + " ₫";
 
           const stockEl = document.querySelector(".availability span");
-          if (p.stock > 0) {
-            stockEl.textContent = `${p.stock} available`;
-            document.querySelector(".product-stock").style.color = "green";
-          } else {
-            stockEl.textContent = "Out of stock";
-            document.querySelector(".product-stock").style.color = "red";
-          }
+          stockEl.textContent = "In Stock";
+          document.querySelector(".product-stock").style.color = "green";
 
           document.querySelector(".description").textContent = p.description;
 
@@ -518,7 +472,7 @@
 
           // Thêm ảnh mới
           photos.forEach((photo) => {
-            const fullUrl = `https://localhost:7062${photo.url}`;
+            const fullUrl = `https://localhost:7062/images/products/${productId}/${photo.url}`;
 
             $largeSlider.slick(
               "slickAdd",
@@ -581,34 +535,23 @@
 
         const quantityInput = document.getElementById("productQuantity");
         const addToCartBtn = document.querySelector(".add-to-cart-btn");
-        const stockErrorDiv = document.getElementById("stockError");
 
         console.log("Elements found:", {
           quantityInput: !!quantityInput,
           addToCartBtn: !!addToCartBtn,
-          stockErrorDiv: !!stockErrorDiv,
         });
 
-        let currentStock = 0; // Will be set when product loads
-
-        if (!quantityInput || !addToCartBtn || !stockErrorDiv) {
+        if (!quantityInput || !addToCartBtn) {
           console.error("Some elements not found, returning early");
           return;
         }
 
-        // Function to validate quantity against stock
+        // Function to validate quantity
         function validateQuantity(quantity) {
           if (quantity <= 0) {
-            stockErrorDiv.style.display = "none";
-            addToCartBtn.disabled = true;
-            return false;
-          } else if (quantity > currentStock) {
-            stockErrorDiv.style.display = "block";
-            stockErrorDiv.textContent = `Số lượng vượt quá tồn kho hiện tại (${currentStock})`;
             addToCartBtn.disabled = true;
             return false;
           } else {
-            stockErrorDiv.style.display = "none";
             addToCartBtn.disabled = false;
             return true;
           }
@@ -620,8 +563,10 @@
           value = Math.max(1, Math.min(100, value)); // Ensure value is between 1 and 100
           this.value = value;
           addToCartBtn.setAttribute("data-quantity", value);
-          // Validate against stock
+          // Validate quantity
           validateQuantity(value);
+          // Check availability in real-time
+          checkAvailabilityInRealTime(value);
         });
 
         // Real-time validation as user types
@@ -629,8 +574,10 @@
           let value = parseInt(this.value) || 0;
           if (value > 0) {
             addToCartBtn.setAttribute("data-quantity", value);
-            // Validate against stock in real-time
+            // Validate quantity in real-time
             validateQuantity(value);
+            // Check availability in real-time
+            checkAvailabilityInRealTime(value);
           }
         });
 
@@ -691,9 +638,26 @@
             return;
           }
 
-          // Final stock validation before adding to cart
-          if (quantity > currentStock) {
-            showToast("Số lượng vượt quá tồn kho hiện tại", "error");
+          // Check product availability first
+          try {
+            const availabilityResponse = await fetch(
+              `https://localhost:7062/api/Product/check-availability/${productId}?quantity=${quantity}`
+            );
+            const availabilityResult = await availabilityResponse.json();
+            
+            if (!availabilityResult.succeeded) {
+              showToast("Không thể kiểm tra khả năng cung cấp sản phẩm", "error");
+              return;
+            }
+
+            const availability = availabilityResult.data;
+            if (!availability.isAvailable) {
+              showToast(availability.message, "warning");
+              return;
+            }
+          } catch (error) {
+            console.error("Error checking availability:", error);
+            showToast("Không thể kiểm tra khả năng cung cấp sản phẩm", "error");
             return;
           }
 
@@ -705,7 +669,7 @@
 
             // Import CartManager dynamically
             const { CartManager } = await import(
-              "../../js/component/cart/CartManager.js"
+              "/js/component/cart/CartManager.js"
             );
 
             // Check if CartManager instance exists globally, if not create one
@@ -714,10 +678,11 @@
             }
 
             // Use the CartManager to add product to cart
-            await window.globalCartManager.addToCart(productId, quantity);
-
-            // Show success toast
-            showToast("Đã thêm sản phẩm vào giỏ hàng!", "success");
+            const added = await window.globalCartManager.addToCart(productId, quantity);
+            if (added) {
+              // Show success toast
+              showToast("Đã thêm sản phẩm vào giỏ hàng!", "success");
+            }
 
             // Reset button state
             setTimeout(() => {
@@ -735,16 +700,40 @@
           }
         });
 
+        // Function to check availability in real-time
+        async function checkAvailabilityInRealTime(quantity) {
+          const productId = addToCartBtn.getAttribute("data-product-id");
+          if (!productId) return;
+
+          try {
+            const availabilityResponse = await fetch(
+              `https://localhost:7062/api/Product/check-availability/${productId}?quantity=${quantity}`
+            );
+            const availabilityResult = await availabilityResponse.json();
+            
+            if (availabilityResult.succeeded) {
+              const availability = availabilityResult.data;
+              if (!availability.isAvailable) {
+                addToCartBtn.disabled = true;
+                addToCartBtn.title = availability.message;
+                showToast(availability.message, "warning");
+              } else {
+                addToCartBtn.disabled = false;
+                addToCartBtn.title = "Thêm vào giỏ hàng";
+              }
+            }
+          } catch (error) {
+            console.error("Error checking availability in real-time:", error);
+          }
+        }
+
         // Mark as set up
         quantityControlsSetup = true;
 
-        // Return the function to set current stock
+        // Return the function to set current stock (no longer needed but keeping for compatibility)
         return function setStock(stock) {
-          currentStock = stock;
-          // Set max attribute for input
-          quantityInput.max = stock;
-          // Validate current quantity
-          validateQuantity(parseInt(quantityInput.value) || 1);
+          // No stock validation needed
+          console.log("Stock set to:", stock, "but no validation applied");
         };
       }
 
@@ -776,5 +765,8 @@
         }, 3000);
       }
     </script>
+  </body>
+</html>
+
   </body>
 </html>

@@ -134,6 +134,13 @@ class MyAccountManager {
     if (addressField) addressField.value = this.currentUser.address || "";
   }
 
+  // Refresh dashboard with current user data
+  refreshDashboard() {
+    if (this.currentUser) {
+      this.populateUserData();
+    }
+  }
+
   // Address functionality removed - no longer needed
 
   switchToTab(tabId) {
@@ -184,6 +191,10 @@ class MyAccountManager {
       if (response.succeeded) {
         this.currentUser = response.data;
         this.showAlert("Success", "Account updated successfully!", "success");
+
+        // Refresh dashboard to show updated fullname
+        this.refreshDashboard();
+
         // Address functionality removed - no longer needed
       } else {
         throw new Error(response.message || "Failed to update account");

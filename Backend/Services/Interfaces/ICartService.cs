@@ -13,6 +13,11 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<CartSummaryDTO> GetCartSummaryAsync(int userId);
         Task<int> GetCartItemsCountAsync(int userId);
         Task<CartDTO> EnsureActiveCartAsync(int userId);
+        Task<CartPriceCalculationDTO> CalculateCartPriceAsync(int userId);
+        
+        // Thêm method validation mới
+        Task<CartValidationResultDTO> ValidateCartItemQuantityAsync(int userId, int productId, int quantity);
+        Task<CartValidationResultDTO> ValidateEntireCartAsync(int userId);
     }
 }
 

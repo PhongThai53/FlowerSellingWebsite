@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chi tiết người dùng | Flower Selling Website</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" href="../../css/backend-plugin.min.css">
+    <link rel="stylesheet" href="../../css/backend.css?v=1.0.0">
+    <link rel="stylesheet" href="../../css/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../../css/line-awesome/dist/line-awesome/css/line-awesome.min.css">
+    <link rel="stylesheet" href="../../css/remixicon/fonts/remixicon.css">
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loading">
+        <div id="loading-center"></div>
+    </div>
+    
+    <!-- Wrapper Start -->
+    <div class="wrapper">
+        <!-- Nav -->
+        <div id="nav-placeholder"></div>
+
+        <!-- Header -->
+        <div id="header-placeholder"></div>
+        
+        <!-- Content Page -->
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!-- Breadcrumb -->
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="user-list.html">Danh sách người dùng</a></li>
+                                <li class="breadcrumb-item active" id="breadcrumb-current">Chi tiết người dùng</li>
+                            </ol>
+                        </nav>
+                        
+                        <!-- Alert Container -->
+                        <div id="alert-container"></div>
+                        
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="header-title">
+                                    <h4 class="card-title" id="card-title">Chi tiết người dùng</h4>
+                                </div>
+                                <div class="header-action" id="view-mode-buttons">
+                                    <button class="btn btn-primary" onclick="userManager.toggleEditMode()">
+                                        <i class="las la-edit mr-2"></i>Cập nhật
+                                    </button>
+                                    <a href="user-list.html" class="btn btn-secondary ml-2">
+                                        <i class="las la-arrow-left mr-2"></i>Quay lại
+                                    </a>
+                                </div>
+                                <div class="header-action" id="edit-mode-buttons" style="display: none;">
+                                    <button class="btn btn-success" onclick="userManager.saveUser()">
+                                        <i class="las la-save mr-2"></i>Lưu
+                                    </button>
+                                    <button class="btn btn-warning ml-2" onclick="userManager.cancelEdit()">
+                                        <i class="las la-times mr-2"></i>Hủy
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <form id="user-form">
+                                    <div class="row">
+                                        <!-- User Avatar -->
+                                        <div class="col-md-12 text-center mb-4">
+                                            <div id="user-avatar" class="rounded d-inline-flex align-items-center justify-content-center avatar-100 bg-primary text-white mx-auto">
+                                                <span class="h2 mb-0">U</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Basic Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="fullName" name="fullName" required readonly>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" name="email" readonly>
+                                                <small class="form-text text-muted">Email không thể thay đổi</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Vai trò</label>
+                                                <select class="form-control" id="roleName" name="roleName" disabled>
+                                                    <option value="">Chọn vai trò</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Địa chỉ</label>
+                                                <textarea class="form-control" id="address" name="address" rows="3" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Additional Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Ngày tạo</label>
+                                                <input type="text" class="form-control" id="createdAt" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Trạng thái</label>
+                                                <input type="text" class="form-control" id="status" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- User ID Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">ID người dùng</label>
+                                                <input type="text" class="form-control" id="publicId" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">ID nội bộ</label>
+                                                <input type="text" class="form-control" id="id" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-light" role="status">
+            <span class="sr-only">Đang tải...</span>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>fetch('../product/nav.html').then(response => response.text()).then(data => { document.getElementById('nav-placeholder').innerHTML = data; });</script>
+    <script>fetch('../product/header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script> <!--nav--> <!--header--> <!-- Backend Bundle JavaScript -->
+    <script src="../../js/admin/backend-bundle.min.js"></script>
+    <script src="../../js/admin/app.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/user-manager.js"></script>
+    
+    <script>
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.userManager) {
+                window.userManager.initializeUserDetail();
+            }
+        });
+    </script>
+    
+    <style>
+        .avatar-100 {
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
+            font-weight: bold;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+            color: #6c757d;
+        }
+        
+        .form-control:disabled {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:hover {
+            border-color: #667eea;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .form-control.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+    </style>
+</body>
+</html>
