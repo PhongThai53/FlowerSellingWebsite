@@ -2,6 +2,7 @@
 using FlowerSellingWebsite.Infrastructure.DbContext;
 using FlowerSellingWebsite.Infrastructure.Middleware.ErrorHandlingMiddleware;
 using FlowerSellingWebsite.Infrastructure.Swagger;
+using FlowerSellingWebsite.Infrastructure.Authorization;
 using FlowerSellingWebsite.Models.DTOs.ProductCategory;
 using FlowerSellingWebsite.Repositories.Implementations;
 using FlowerSellingWebsite.Repositories.Interfaces;
@@ -81,6 +82,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IFlowerService, FlowerService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ISupplierListingService, SupplierListingService>();
 
 builder.Services.AddScoped<IVnpay, Vnpay>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();

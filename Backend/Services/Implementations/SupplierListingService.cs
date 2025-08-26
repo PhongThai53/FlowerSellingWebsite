@@ -1,143 +1,141 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.SupplierListing;
 using FlowerSellingWebsite.Models.Entities;
-using FlowerSellingWebsite.Services.Interfaces;
 using FlowerSellingWebsite.Repositories.Interfaces;
-using System.Linq.Expressions;
+using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowerSellingWebsite.Services.Implementations
 {
     public class SupplierListingService : ISupplierListingService
     {
-        private readonly IBaseRepository<SupplierListings> _supplierListing;
+        private readonly IBaseRepository<SupplierListings> _supplierListingRepository;
+        private readonly IBaseRepository<Flowers> _flowerRepository;
+        private readonly IBaseRepository<FlowerCategories> _categoryRepository;
+        private readonly IBaseRepository<FlowerTypes> _typeRepository;
+        private readonly IBaseRepository<FlowerColors> _colorRepository;
 
-        public SupplierListingService(IBaseRepository<SupplierListings> supplierListing)
+        public SupplierListingService(
+            IBaseRepository<SupplierListings> supplierListingRepository,
+            IBaseRepository<Flowers> flowerRepository,
+            IBaseRepository<FlowerCategories> categoryRepository,
+            IBaseRepository<FlowerTypes> typeRepository,
+            IBaseRepository<FlowerColors> colorRepository)
         {
-            _supplierListing = supplierListing;
+            _supplierListingRepository = supplierListingRepository;
+            _flowerRepository = flowerRepository;
+            _categoryRepository = categoryRepository;
+            _typeRepository = typeRepository;
+            _colorRepository = colorRepository;
         }
 
-        public async Task<bool> CreateSupplierListingAsync(SupplierListingDTO request)
+        public async Task<bool> CreateAsync(CreateSupplierListingDTO request)
         {
-
-            var findExist = await _supplierListing.AsQueryable().Where(x => x.FlowerId == request.FlowerId && x.SupplierId == request.SupplierId).FirstOrDefaultAsync();
-
-            if(findExist != null)
+            try
             {
-                findExist.AvailableQuantity += request.AvailableQuantity;
+                // Kiểm tra xem hoa đã tồn tại trong kho của supplier chưa
+                var existingListing = await _supplierListingRepository.AsQueryable()
+                    .FirstOrDefaultAsync(x => x.SupplierId == request.SupplierId && x.FlowerId == request.FlowerId);
 
-                await _supplierListing.updateAsync(findExist);
-
-                return true;
-            }
-
-            var entity = new SupplierListings
-            {
-                SupplierId = request.SupplierId,
-                FlowerId = request.FlowerId,
-                AvailableQuantity = request.AvailableQuantity,
-                UnitPrice = request.UnitPrice,
-                ShelfLifeDays = request.ShelfLifeDays,
-                MinOrderQty = request.MinOrderQty,
-                Status = request.Status ?? "Pending"
-            };
-
-            await _supplierListing.createAsync(entity);
-            return true;
-        }
-
-        public async Task<SupplierListingDTO> GetSupplierListingDetail(int supplierId)
-        {
-            var entity = await _supplierListing.AsQueryable()
-                .Include(x => x.Supplier)
-                .Include(x => x.Flower)
-                .FirstOrDefaultAsync(x => x.SupplierId == supplierId);
-
-            if (entity == null) return null!;
-
-            return new SupplierListingDTO
-            {
-                SupplierId = entity.SupplierId,
-                FlowerId = entity.FlowerId,
-                AvailableQuantity = entity.AvailableQuantity,
-                UnitPrice = entity.UnitPrice,
-                ShelfLifeDays = entity.ShelfLifeDays,
-                MinOrderQty = entity.MinOrderQty,
-                Status = entity.Status
-            };
-        }
-
-        public async Task<PagedResult<SupplierListingDTO>> ListSupplierListing(UrlQueryParams urlQueryParams)
-        {
-            var query = _supplierListing.AsQueryable()
-                .Include(x => x.Supplier)
-                .Include(x => x.Flower)
-                .AsQueryable();
-
-            // Filtering
-            if (!string.IsNullOrEmpty(urlQueryParams.SearchBy))
-            {
-                query = query.Where(x => x.Flower.Name.Contains(urlQueryParams.SearchValue) ||
-                                         x.Supplier.SupplierName.Contains(urlQueryParams.SearchValue));
-            }
-
-            // Paging
-            var totalRecords = await query.CountAsync();
-            var items = await query
-                .Skip((urlQueryParams.Page - 1) * urlQueryParams.PageSize)
-                .Take(urlQueryParams.PageSize)
-                .Select(entity => new SupplierListingDTO
+                if (existingListing != null)
                 {
-                    SupplierId = entity.SupplierId,
-                    FlowerId = entity.FlowerId,
-                    AvailableQuantity = entity.AvailableQuantity,
-                    UnitPrice = entity.UnitPrice,
-                    ShelfLifeDays = entity.ShelfLifeDays,
-                    MinOrderQty = entity.MinOrderQty,
-                    Status = entity.Status
-                })
-                .ToListAsync();
+                    // Nếu đã tồn tại, cập nhật số lượng và giá
+                    existingListing.AvailableQuantity += request.AvailableQuantity;
+                    existingListing.UnitPrice = request.UnitPrice;
+                    existingListing.ShelfLifeDays = request.ShelfLifeDays;
+                    existingListing.MinOrderQty = request.MinOrderQty;
+                    existingListing.Status = request.Status;
+                    
+                    await _supplierListingRepository.updateAsync(existingListing);
+                }
+                else
+                {
+                    // Nếu chưa tồn tại, tạo mới
+                    var newListing = new SupplierListings
+                    {
+                        SupplierId = request.SupplierId,
+                        FlowerId = request.FlowerId,
+                        AvailableQuantity = request.AvailableQuantity,
+                        UnitPrice = request.UnitPrice,
+                        ShelfLifeDays = request.ShelfLifeDays,
+                        MinOrderQty = request.MinOrderQty,
+                        Status = request.Status
+                    };
 
-            return new PagedResult<SupplierListingDTO>
-            {
-                Items = items,
-                TotalItems = totalRecords,
-                Page = urlQueryParams.Page,
-                PageSize = urlQueryParams.PageSize
-            };
-        }
+                    await _supplierListingRepository.createAsync(newListing);
+                }
 
-        public async Task<bool> RemoveSupplierListingAsync(int supplierId, int flowerId)
-        {
-            var entity = await _supplierListing.AsQueryable()
-                .FirstOrDefaultAsync(x => x.SupplierId == supplierId && x.FlowerId == flowerId);
-
-            if (entity == null) return false;
-
-            await _supplierListing.deleteAsync(entity);
-            return true;
-        }
-
-        public async Task<bool> UpdateSupplierListingAsync(SupplierListingDTO request)
-        {
-            var entity = await _supplierListing.AsQueryable()
-                .FirstOrDefaultAsync(x => x.SupplierId == request.SupplierId && x.FlowerId == request.FlowerId);
-
-            if (entity == null) return false;
-
-            if(request.AvailableQuantity < 0)
-            {
-                await _supplierListing.deleteAsync(entity);
                 return true;
             }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
-            entity.AvailableQuantity = request.AvailableQuantity;
-            entity.UnitPrice = request.UnitPrice;
-            entity.ShelfLifeDays = request.ShelfLifeDays;
-            entity.MinOrderQty = request.MinOrderQty;
-            entity.Status = request.Status;
+        public async Task<PagedResult<SupplierListingResponseDTO>> GetListAsync(SupplierListingListRequestDTO request)
+        {
+            try
+            {
+                var query = _supplierListingRepository.AsQueryable()
+                    .Include(x => x.Flower)
+                    .ThenInclude(f => f.FlowerCategory)
+                    .Include(x => x.Flower)
+                    .ThenInclude(f => f.FlowerType)
+                    .Include(x => x.Flower)
+                    .ThenInclude(f => f.FlowerColor);
 
-            await _supplierListing.updateAsync(entity);
-            return true;
+                // Lấy tổng số records
+                var totalRecords = await query.CountAsync();
+
+                // Áp dụng paging
+                var items = await query
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync();
+
+                // Map sang DTO
+                var responseItems = items.Select(item => new SupplierListingResponseDTO
+                {
+                    SupplierId = item.SupplierId,
+                    FlowerId = item.FlowerId,
+                    AvailableQuantity = item.AvailableQuantity,
+                    UnitPrice = item.UnitPrice,
+                    ShelfLifeDays = item.ShelfLifeDays,
+                    MinOrderQty = item.MinOrderQty,
+                    Status = item.Status,
+                    FlowerName = item.Flower?.Name,
+                    FlowerDescription = item.Flower?.Description,
+                    FlowerSize = item.Flower?.Size,
+                    CategoryName = item.Flower?.FlowerCategory?.CategoryName,
+                    TypeName = item.Flower?.FlowerType?.TypeName,
+                    ColorName = item.Flower?.FlowerColor?.ColorName
+                }).ToList();
+
+                var totalPages = (int)Math.Ceiling((double)totalRecords / request.PageSize);
+
+                return new PagedResult<SupplierListingResponseDTO>
+                {
+                    Items = responseItems,
+                    TotalItems = totalRecords,
+                    Page = request.PageIndex,
+                    PageSize = request.PageSize,
+                    TotalPages = totalPages
+                    // HasNext và HasPrev sẽ tự động được tính toán từ Page và TotalPages
+                };
+            }
+            catch (Exception)
+            {
+                return new PagedResult<SupplierListingResponseDTO>
+                {
+                    Items = new List<SupplierListingResponseDTO>(),
+                    TotalItems = 0,
+                    Page = request.PageIndex,
+                    PageSize = request.PageSize,
+                    TotalPages = 0
+                    // HasNext và HasPrev sẽ tự động được tính toán từ Page và TotalPages
+                };
+            }
         }
     }
 }

@@ -27,9 +27,6 @@ namespace FlowerSellingWebsite.Models.DTOs
 
         [JsonPropertyName("flower_images")]
         public FlowerImageRequest FlowerImageRequests { get; set; }
-
-        [JsonPropertyName("flower_prices")]
-        public FlowerPriceRequest FlowerPriceRequests { get; set; }
     }
 
     public class CreateSupplierListingRequest

@@ -39,5 +39,47 @@ namespace FlowerSellingWebsite.Controllers
 
             return Ok(rs);
         }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetFlowerCategories()
+        {
+            try
+            {
+                var categories = await _flowerService.GetFlowerCategoriesAsync();
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error getting flower categories", error = ex.Message });
+            }
+        }
+
+        [HttpGet("types")]
+        public async Task<IActionResult> GetFlowerTypes()
+        {
+            try
+            {
+                var types = await _flowerService.GetFlowerTypesAsync();
+                return Ok(types);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error getting flower types", error = ex.Message });
+            }
+        }
+
+        [HttpGet("colors")]
+        public async Task<IActionResult> GetFlowerColors()
+        {
+            try
+            {
+                var colors = await _flowerService.GetFlowerColorsAsync();
+                return Ok(colors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error getting flower colors", error = ex.Message });
+            }
+        }
     }
 }

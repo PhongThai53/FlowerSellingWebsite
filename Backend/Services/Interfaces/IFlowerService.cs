@@ -8,5 +8,9 @@ namespace FlowerSellingWebsite.Services.Interfaces
 
         Task<bool> CreateFlowerWithSupplier(CreateSupplierListingRequest request, int supplierId);
         Task<bool> CreateFlowerAsync(CreateFlowerWithSupplierRequest request, int supplerId);
+        
+        Task<IEnumerable<FlowerCategoryResponse>> GetFlowerCategoriesAsync();
+        Task<IEnumerable<FlowerTypeResponse>> GetFlowerTypesAsync();
+        Task<IEnumerable<FlowerColorResponse>> GetFlowerColorsAsync();
     }
 }
