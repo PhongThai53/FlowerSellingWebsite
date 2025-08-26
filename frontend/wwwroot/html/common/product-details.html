@@ -472,7 +472,7 @@
 
           // Thêm ảnh mới
           photos.forEach((photo) => {
-            const fullUrl = `https://localhost:7062${photo.url}`;
+            const fullUrl = `https://localhost:7062/images/products/${productId}/${photo.url}`;
 
             $largeSlider.slick(
               "slickAdd",
