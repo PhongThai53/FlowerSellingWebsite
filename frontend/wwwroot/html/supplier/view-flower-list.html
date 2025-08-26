@@ -332,6 +332,10 @@
         .then((response) => response.text())
         .then((data) => {
           document.getElementById("header-placeholder").innerHTML = data;
+          // Khởi tạo logout manager sau khi header được load
+          if (window.supplierLogoutManager) {
+            window.supplierLogoutManager.init();
+          }
         });
     </script>
 

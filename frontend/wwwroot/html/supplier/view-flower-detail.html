@@ -17,7 +17,13 @@
     <footer class="footer-wrapper">
         <!-- Same footer content as above -->
     </footer>
-    <script>fetch('../supplier/header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script>
+    <script>fetch('../supplier/header.html').then(response => response.text()).then(data => { 
+        document.getElementById('header-placeholder').innerHTML = data; 
+        // Khởi tạo logout manager sau khi header được load
+        if (window.supplierLogoutManager) {
+            window.supplierLogoutManager.reinit();
+        }
+    });</script>
     
     <!-- Supplier Authentication Check -->
     <script src="../../js/auth.js"></script>
