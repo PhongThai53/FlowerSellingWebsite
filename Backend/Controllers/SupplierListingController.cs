@@ -1,11 +1,12 @@
-﻿using FlowerSellingWebsite.Models.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+using FlowerSellingWebsite.Models.DTOs.SupplierListing;
 using FlowerSellingWebsite.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+using FlowerSellingWebsite.Infrastructure.Authorization;
 
 namespace FlowerSellingWebsite.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class SupplierListingController : ControllerBase
     {
         private readonly ISupplierListingService _supplierListingService;
@@ -15,42 +16,38 @@ namespace FlowerSellingWebsite.Controllers
             _supplierListingService = supplierListingService;
         }
 
-        [HttpPost("list")]
-        public async Task<IActionResult> GetList([FromBody] UrlQueryParams queryParams)
-        {
-            var result = await _supplierListingService.ListSupplierListing(queryParams);
-            return result != null ? Ok(result) : NotFound();
-        }
-
-        [HttpGet("{supplierId}")]
-        public async Task<IActionResult> GetDetail(int supplierId)
-        {
-            var result = await _supplierListingService.GetSupplierListingDetail(supplierId);
-            return result != null ? Ok(result) : NotFound();
-        }
-
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] SupplierListingDTO request)
+        [Role("Supplier")]
+        public async Task<IActionResult> Create([FromBody] CreateSupplierListingDTO request)
         {
-            var success = await _supplierListingService.CreateSupplierListingAsync(request);
-            return success ? Ok(new { message = "Supplier listing created successfully." })
-                           : BadRequest(new { message = "Failed to create supplier listing." });
+            try
+            {
+                var result = await _supplierListingService.CreateAsync(request);
+                if (result)
+                {
+                    return Ok(new { message = "Thêm hoa vào kho thành công!" });
+                }
+                return BadRequest(new { message = "Không thể thêm hoa vào kho" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] SupplierListingDTO request)
+        [HttpGet("list")]
+        [Role("Supplier")]
+        public async Task<IActionResult> GetList([FromQuery] SupplierListingListRequestDTO request)
         {
-            var success = await _supplierListingService.UpdateSupplierListingAsync(request);
-            return success ? Ok(new { message = "Supplier listing updated successfully." })
-                           : NotFound(new { message = "Supplier listing not found." });
-        }
-
-        [HttpDelete("remove")]
-        public async Task<IActionResult> Remove([FromQuery] int supplierId, [FromQuery] int flowerId)
-        {
-            var success = await _supplierListingService.RemoveSupplierListingAsync(supplierId, flowerId);
-            return success ? Ok(new { message = "Supplier listing removed successfully." })
-                           : NotFound(new { message = "Supplier listing not found." });
+            try
+            {
+                var result = await _supplierListingService.GetListAsync(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

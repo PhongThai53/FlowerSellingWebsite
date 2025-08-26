@@ -2,44 +2,690 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thêm Hoa</title>
+    <title>Thêm Hoa Mới</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/supplier.css">
+    <style>
+        .add-flower-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+
+        .auto-name-preview {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .auto-name-preview h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+
+        .auto-name-preview p {
+            margin: 0;
+            font-size: 16px;
+            color: #495057;
+        }
+    </style>
 </head>
 <body>
     <div id="header-placeholder"></div>
-
-    <div class="supplier-container">
+    
+    <div class="add-flower-container">
         <h2>Thêm Hoa Mới</h2>
-        <form>
-            <div class="form-group">
-                <label for="name">Tên Hoa</label>
-                <input type="text" id="name" required>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+
+        <!-- Success Message -->
+        <div id="success-message" class="success-message" style="display: none;"></div>
+
+        <!-- Auto-generated Name Preview -->
+        <div id="auto-name-preview" class="auto-name-preview" style="display: none;">
+            <h4>Tên hoa sẽ được tạo tự động:</h4>
+            <p id="preview-name"></p>
+        </div>
+
+        <!-- Flower Form -->
+        <form id="add-flower-form">
+            <div class="form-section">
+                <h3>Thông tin cơ bản</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="flower-type">Loại hoa *</label>
+                        <select id="flower-type" name="flowerTypeId" required>
+                            <option value="">-- Chọn loại hoa --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="flower-category">Danh mục hoa *</label>
+                        <select id="flower-category" name="flowerCategoryId" required>
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="flower-color">Màu sắc *</label>
+                        <select id="flower-color" name="flowerColorId" required>
+                            <option value="">-- Chọn màu sắc --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="flower-size">Kích thước *</label>
+                        <select id="flower-size" name="size" required>
+                            <option value="">-- Chọn kích thước --</option>
+                            <option value="S">S - Nhỏ</option>
+                            <option value="M">M - Trung bình</option>
+                            <option value="L">L - Lớn</option>
+                            <option value="XL">XL - Rất lớn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">Mô tả</label>
+                    <textarea id="description" name="description" placeholder="Nhập mô tả chi tiết về hoa..."></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="price">Giá (VNĐ)</label>
-                <input type="number" id="price" required>
+
+            <div class="form-section">
+                <h3>Hình ảnh</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="image-url">URL hình ảnh *</label>
+                        <input type="url" id="image-url" name="imageUrl" required placeholder="https://example.com/image.jpg">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="image-type">Loại hình ảnh</label>
+                        <select id="image-type" name="imageType">
+                            <option value="primary">Hình chính</option>
+                            <option value="detail">Hình chi tiết</option>
+                            <option value="gallery">Hình thư viện</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="is-primary">Hình chính</label>
+                        <select id="is-primary" name="isPrimary">
+                            <option value="true">Có</option>
+                            <option value="false">Không</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="display-order">Thứ tự hiển thị</label>
+                        <input type="number" id="display-order" name="displayOrder" value="1" min="1">
+                    </div>
+                </div>
+
+                <div class="image-preview" id="image-preview" style="display: none;">
+                    <img id="preview-img" src="" alt="Preview">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="image">Đường Dẫn Ảnh</label>
-                <input type="text" id="image" required>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Thêm Hoa</button>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">Quay lại</button>
             </div>
-            <div class="form-group">
-                <label for="description">Mô Tả</label>
-                <textarea id="description" required></textarea>
-            </div>
-            <button type="submit" class="btn">Thêm Hoa</button>
         </form>
     </div>
-    <footer class="footer-wrapper">
-        <!-- Same footer content as above -->
-    </footer>
+
     <script>fetch('../supplier/header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script>
     
     <!-- Supplier Authentication Check -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/supplier-auth-check.js"></script>
+    <script src="../../js/supplier-logout.js"></script>
     
-    <script src="/js/supplier-logic.js"></script>
+    <script>
+        class AddFlowerManager {
+            constructor() {
+                this.apiBaseUrl = 'http://localhost:5062/api';
+                this.categories = [];
+                this.types = [];
+                this.colors = [];
+                
+                this.init();
+            }
+
+            async init() {
+                try {
+                    this.showLoading(true);
+                    await this.loadDropdownData();
+                    this.setupEventListeners();
+                    this.showLoading(false);
+                } catch (error) {
+                    console.error('Error initializing:', error);
+                    this.showError('Lỗi khi khởi tạo trang: ' + error.message);
+                    this.showLoading(false);
+                }
+            }
+
+            async loadDropdownData() {
+                try {
+                    console.log('Loading dropdown data...');
+                    
+                    // Load categories
+                    const categoriesResponse = await fetch(`${this.apiBaseUrl}/flower/categories`);
+                    console.log('Categories response status:', categoriesResponse.status);
+                    if (categoriesResponse.ok) {
+                        const rawData = await categoriesResponse.json();
+                        console.log('Raw categories response:', rawData);
+                        
+                        // Check if data is wrapped in response object
+                        if (rawData.data && Array.isArray(rawData.data)) {
+                            this.categories = rawData.data;
+                            console.log('Categories extracted from data field:', this.categories);
+                        } else if (rawData.items && Array.isArray(rawData.items)) {
+                            this.categories = rawData.items;
+                            console.log('Categories extracted from items field:', this.categories);
+                        } else if (Array.isArray(rawData)) {
+                            this.categories = rawData;
+                            console.log('Categories directly from response:', this.categories);
+                        } else {
+                            console.error('Unexpected categories response structure:', rawData);
+                            this.categories = [];
+                        }
+                        
+                        console.log('Categories loaded:', this.categories);
+                        console.log('Categories type:', typeof this.categories);
+                        console.log('Categories length:', this.categories.length);
+                        console.log('First category item structure:', this.categories[0]);
+                        console.log('All category keys:', this.categories.length > 0 ? Object.keys(this.categories[0]) : 'No items');
+                        if (this.categories.length > 0) {
+                            this.populateDropdown('flower-category', this.categories, 'categoryName');
+                        } else {
+                            console.warn('No categories data to populate dropdown');
+                        }
+                    } else {
+                        console.error('Failed to load categories:', categoriesResponse.status, categoriesResponse.statusText);
+                    }
+
+                    // Load types
+                    const typesResponse = await fetch(`${this.apiBaseUrl}/flower/types`);
+                    console.log('Types response status:', typesResponse.status);
+                    if (typesResponse.ok) {
+                        const rawData = await typesResponse.json();
+                        console.log('Raw types response:', rawData);
+                        
+                        // Check if data is wrapped in response object
+                        if (rawData.data && Array.isArray(rawData.data)) {
+                            this.types = rawData.data;
+                            console.log('Types extracted from data field:', this.types);
+                        } else if (rawData.items && Array.isArray(rawData.items)) {
+                            this.types = rawData.items;
+                            console.log('Types extracted from items field:', this.types);
+                        } else if (Array.isArray(rawData)) {
+                            this.types = rawData;
+                            console.log('Types directly from response:', this.types);
+                        } else {
+                            console.error('Unexpected types response structure:', rawData);
+                            this.types = [];
+                        }
+                        
+                        console.log('Types loaded:', this.types);
+                        console.log('Types type:', typeof this.types);
+                        console.log('Types length:', this.types.length);
+                        console.log('First type item structure:', this.types[0]);
+                        console.log('All type keys:', this.types.length > 0 ? Object.keys(this.types[0]) : 'No items');
+                        if (this.types.length > 0) {
+                            this.populateDropdown('flower-type', this.types, 'typeName');
+                        } else {
+                            console.warn('No types data to populate dropdown');
+                        }
+                    } else {
+                        console.error('Failed to load types:', typesResponse.status, typesResponse.statusText);
+                    }
+
+                    // Load colors
+                    const colorsResponse = await fetch(`${this.apiBaseUrl}/flower/colors`);
+                    console.log('Colors response status:', colorsResponse.status);
+                    if (colorsResponse.ok) {
+                        const rawData = await colorsResponse.json();
+                        console.log('Raw colors response:', rawData);
+                        
+                        // Check if data is wrapped in response object
+                        if (rawData.data && Array.isArray(rawData.data)) {
+                            this.colors = rawData.data;
+                            console.log('Colors extracted from data field:', this.colors);
+                        } else if (rawData.items && Array.isArray(rawData.items)) {
+                            this.colors = rawData.items;
+                            console.log('Colors extracted from items field:', this.colors);
+                        } else if (Array.isArray(rawData)) {
+                            this.colors = rawData;
+                            console.log('Colors directly from response:', this.colors);
+                        } else {
+                            console.error('Unexpected colors response structure:', rawData);
+                            this.colors = [];
+                        }
+                        
+                        console.log('Colors loaded:', this.colors);
+                        console.log('Colors type:', typeof this.colors);
+                        console.log('Colors length:', this.colors.length);
+                        console.log('First color item structure:', this.colors[0]);
+                        console.log('All color keys:', this.colors.length > 0 ? Object.keys(this.colors[0]) : 'No items');
+                        if (this.colors.length > 0) {
+                            this.populateDropdown('flower-color', this.colors, 'colorName');
+                        } else {
+                            console.warn('No colors data to populate dropdown');
+                        }
+                    } else {
+                        console.error('Failed to load colors:', colorsResponse.status, colorsResponse.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error loading dropdown data:', error);
+                    throw error;
+                }
+            }
+
+            populateDropdown(selectId, data, displayField) {
+                const select = document.getElementById(selectId);
+                if (!select) {
+                    console.error(`Select element with id '${selectId}' not found`);
+                    return;
+                }
+
+                console.log(`Populating dropdown ${selectId} with data:`, data);
+                console.log(`Display field: ${displayField}`);
+                
+                // NOTE: Backend now returns proper ID fields for categories, types, and colors
+
+                // Clear existing options except the first one
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+
+                // Add new options
+                data.forEach((item, index) => {
+                    const option = document.createElement('option');
+                    
+                    // Backend now returns proper ID fields
+                    const value = item.id || item.Id || item.ID;
+                    const text = item[displayField] || item[displayField.charAt(0).toUpperCase() + displayField.slice(1)];
+                    
+                    console.log(`Processing item ${index}:`, item);
+                    console.log(`ID field found: ${value}, Text field found: ${text}`);
+                    console.log(`All keys in item:`, Object.keys(item));
+                    
+                    if (!text) {
+                        console.error(`No text field found for item:`, item);
+                        return; // Skip this item
+                    }
+                    
+                    option.value = value;
+                    option.textContent = text;
+                    select.appendChild(option);
+                    
+                    console.log(`Added option: value=${value}, text=${text}`);
+                });
+                
+                console.log(`Dropdown ${selectId} populated with ${data.length} options`);
+                
+                // Debug: Check final dropdown state
+                console.log(`Final dropdown ${selectId} has ${select.children.length} children:`, Array.from(select.children).map(child => ({ value: child.value, text: child.textContent })));
+            }
+
+            setupEventListeners() {
+                // Form submission
+                document.getElementById('add-flower-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmit();
+                });
+
+                // Auto-update name preview
+                ['flower-type', 'flower-category', 'flower-color', 'flower-size'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', (e) => {
+                        console.log(`Dropdown ${id} changed to:`, e.target.value);
+                        this.updateNamePreview();
+                    });
+                });
+
+                // Image preview
+                document.getElementById('image-url').addEventListener('input', (e) => {
+                    this.updateImagePreview(e.target.value);
+                });
+            }
+
+            updateNamePreview() {
+                const typeSelect = document.getElementById('flower-type');
+                const categorySelect = document.getElementById('flower-category');
+                const colorSelect = document.getElementById('flower-color');
+                const sizeSelect = document.getElementById('flower-size');
+
+                if (typeSelect.value && categorySelect.value && colorSelect.value && sizeSelect.value) {
+                    const typeText = typeSelect.options[typeSelect.selectedIndex].text;
+                    const categoryText = categorySelect.options[categorySelect.selectedIndex].text;
+                    const colorText = colorSelect.options[colorSelect.selectedIndex].text;
+                    const sizeText = sizeSelect.options[sizeSelect.selectedIndex].text;
+
+                    const autoName = `${typeText} ${categoryText} ${colorText} ${sizeText}`;
+                    
+                    document.getElementById('preview-name').textContent = autoName;
+                    document.getElementById('auto-name-preview').style.display = 'block';
+                } else {
+                    document.getElementById('auto-name-preview').style.display = 'none';
+                }
+            }
+
+            updateImagePreview(imageUrl) {
+                const preview = document.getElementById('image-preview');
+                const previewImg = document.getElementById('preview-img');
+                
+                if (imageUrl && imageUrl.trim()) {
+                    previewImg.src = imageUrl;
+                    preview.style.display = 'block';
+                } else {
+                    preview.style.display = 'none';
+                }
+            }
+
+            async handleSubmit() {
+                try {
+                    this.showLoading(true);
+                    this.hideMessages();
+
+                    // Validate form data
+                    const validationError = this.validateForm();
+                    if (validationError) {
+                        this.showError(validationError);
+                        return;
+                    }
+
+                    const formData = this.getFormData();
+                    console.log('Form data to submit:', formData);
+                    
+                    // Get supplier ID
+                    let supplierId = 1; // Default for testing
+                    if (window.authManager && window.authManager.getCurrentUser()) {
+                        const currentUser = window.authManager.getCurrentUser();
+                        if (currentUser.supplierId) {
+                            supplierId = currentUser.supplierId;
+                        }
+                    }
+
+                    const response = await fetch(`${this.apiBaseUrl}/flower/${supplierId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showSuccess('Thêm hoa thành công!');
+                        this.resetForm();
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Lỗi khi thêm hoa');
+                    }
+
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                    this.showError('Lỗi khi thêm hoa: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            validateForm() {
+                const categoryId = document.getElementById('flower-category').value;
+                const typeId = document.getElementById('flower-type').value;
+                const colorId = document.getElementById('flower-color').value;
+                const size = document.getElementById('flower-size').value;
+                const imageUrl = document.getElementById('image-url').value;
+
+                if (!categoryId) return 'Vui lòng chọn danh mục hoa';
+                if (!typeId) return 'Vui lòng chọn loại hoa';
+                if (!colorId) return 'Vui lòng chọn màu sắc';
+                if (!size) return 'Vui lòng chọn kích thước';
+                if (!imageUrl.trim()) return 'Vui lòng nhập URL hình ảnh';
+
+                return null; // No validation errors
+            }
+
+            getFormData() {
+                // Get raw values first for debugging
+                const categoryValue = document.getElementById('flower-category').value;
+                const typeValue = document.getElementById('flower-type').value;
+                const colorValue = document.getElementById('flower-color').value;
+                
+                console.log('Raw form values:');
+                console.log('Category value:', categoryValue, 'Type:', typeof categoryValue);
+                console.log('Type value:', typeValue, 'Type:', typeof typeValue);
+                console.log('Color value:', colorValue, 'Type:', typeof colorValue);
+                
+                // Check if values are empty strings
+                if (!categoryValue || categoryValue === '') {
+                    console.error('Category is empty or null');
+                }
+                if (!typeValue || typeValue === '') {
+                    console.error('Type is empty or null');
+                }
+                if (!colorValue || colorValue === '') {
+                    console.error('Color is empty or null');
+                }
+                
+                const formData = {
+                    name: "", // Will be auto-generated by backend
+                    description: document.getElementById('description').value,
+                    flower_category_id: categoryValue ? parseInt(categoryValue) : null,
+                    flower_type_id: typeValue ? parseInt(typeValue) : null,
+                    flower_color_id: colorValue ? parseInt(colorValue) : null,
+                    size: document.getElementById('flower-size').value,
+                    flower_images: {
+                        image_url: document.getElementById('image-url').value,
+                        image_type: document.getElementById('image-type').value,
+                        is_primary: document.getElementById('is-primary').value === 'true',
+                        display_order: parseInt(document.getElementById('display-order').value)
+                    }
+                };
+                
+                console.log('Final form data:', formData);
+                return formData;
+            }
+
+            resetForm() {
+                document.getElementById('add-flower-form').reset();
+                document.getElementById('auto-name-preview').style.display = 'none';
+                document.getElementById('image-preview').style.display = 'none';
+            }
+
+            showLoading(show) {
+                document.getElementById('loading').style.display = show ? 'block' : 'none';
+            }
+
+            showError(message) {
+                const errorElement = document.getElementById('error-message');
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+
+            showSuccess(message) {
+                const successElement = document.getElementById('success-message');
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+            }
+
+            hideMessages() {
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('success-message').style.display = 'none';
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new AddFlowerManager();
+        });
+    </script>
 </body>
 </html>

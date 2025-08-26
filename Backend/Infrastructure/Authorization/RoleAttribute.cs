@@ -16,23 +16,18 @@ namespace FlowerSellingWebsite.Infrastructure.Authorization
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var user = context.HttpContext.User;
-            // Unauthorization
-
+            
+            // Check if user is authenticated
             if (!user.Identity?.IsAuthenticated ?? true)
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
+            
             // Check role
             var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
 
             if (userRole == null || !userRole.Contains(_role))
-            {
-                context.Result = new ForbidResult();
-                return;
-            }
-
-            if (!userRole.Contains(_role))
             {
                 context.Result = new ForbidResult();
                 return;

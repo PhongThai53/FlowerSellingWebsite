@@ -142,3 +142,47 @@
 
 /* Thêm icon font cho footer */
 @import url('https://cdn.linearicons.com/free/1.0.0/icon-font.min.css');
+
+/* User actions và logout */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.user-info {
+    color: #ff69b4;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+    .supplier-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .user-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

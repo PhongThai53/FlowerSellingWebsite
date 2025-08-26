@@ -125,6 +125,11 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
                 .ForMember(dest => dest.ColorName, opt => opt.MapFrom(src => src.ColorName))
                 .ForMember(dest => dest.HexCode, opt => opt.MapFrom(src => src.HexCode))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+
+            // Add direct entity mappings for dropdown data
+            CreateMap<FlowerCategories, FlowerCategoryResponse>();
+            CreateMap<FlowerTypes, FlowerTypeResponse>();
+            CreateMap<FlowerColors, FlowerColorResponse>();
         }
     }
 }
