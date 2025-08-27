@@ -1,7 +1,9 @@
 // Blog Management JavaScript Module
+import { API_CONFIG } from "./config/api-config.js";
+
 class BlogManager {
     constructor() {
-        this.apiBaseUrl = "http://localhost:5062/api";
+        this.apiBaseUrl = API_CONFIG.API_URL;
         this.currentPage = 1;
         this.pageSize = 6;
         this.totalPages = 0;

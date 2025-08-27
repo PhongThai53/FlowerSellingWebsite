@@ -1,7 +1,9 @@
+import { API_CONFIG } from "./api-config.js";
+
 // Configuration constants for the application
 export const CONFIG = {
-  // API Base URL - adjust this based on your backend configuration
-  API_BASE_URL: "https://localhost:7062/api", // Assuming this is your .NET API URL
+  // API Base URL - imported from api-config.js
+  API_BASE_URL: API_CONFIG.API_URL,
   // Pagination
   DEFAULT_PAGE_SIZE: 10,
   MAX_PAGE_SIZE: 50,
@@ -160,5 +162,3 @@ export const UTILS = {
     return temp.innerHTML;
   },
 };
-
-

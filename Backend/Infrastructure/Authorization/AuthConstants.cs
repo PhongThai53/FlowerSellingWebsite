@@ -6,7 +6,6 @@
         public const string User = "Users";
         public const string Staff = "Staff";
         public const string Supplier = "Supplier";
-        public const string Guest = "Guest";
     }
     public static class Permissions
     {
@@ -85,10 +84,6 @@
                     Permissions.UpdateProducts,
                     Permissions.ManageStock,
                     Permissions.ViewReports
-                },
-            [Roles.Guest] = new List<string>
-                {
-                    Permissions.ViewProducts
                 }
         };
     }

@@ -13,6 +13,7 @@ namespace FlowerSellingWebsite.Models.DTOs
         //public bool IsSupplier { get; set; }
         public string RoleName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
     }
 }
 

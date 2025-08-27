@@ -58,17 +58,22 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task<Users?> GetByPublicIdAsync(Guid publicId)
         {
             return await _context.Users
+                .IgnoreQueryFilters()
                 .Include(u => u.Role)
                 .ThenInclude(r => r.RolePermissions)
                 .ThenInclude(rp => rp.Permission)
-                .FirstOrDefaultAsync(u => u.PublicId == publicId && !u.IsDeleted);
+                .FirstOrDefaultAsync(u => u.PublicId == publicId);
         }
 
 
         // Admin
         public async Task<PagedResult<Users>> GetUsersAsync(UrlQueryParams urlQueryParams)
         {
-            var query = _context.Users.Include(u => u.Role).AsQueryable();
+            // Use IgnoreQueryFilters to include soft-deleted (deactivated) users in admin listing
+            var query = _context.Users
+                .IgnoreQueryFilters()
+                .Include(u => u.Role)
+                .AsQueryable();
 
             //Search value
             if (!string.IsNullOrWhiteSpace(urlQueryParams.SearchBy))

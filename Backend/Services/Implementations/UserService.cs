@@ -268,6 +268,17 @@ namespace FlowerSellingWebsite.Services.Implementations
                 user.Phone = request.PhoneNumber ?? user.Phone;
                 user.Address = request.Address ?? user.Address;
 
+                // Update role if RoleName provided
+                if (!string.IsNullOrWhiteSpace(request.RoleName))
+                {
+                    var role = await _userRepository.GetRoleByNameAsync(request.RoleName);
+                    if (role == null)
+                    {
+                        throw new InvalidOperationException($"Role '{request.RoleName}' not found");
+                    }
+                    user.RoleId = role.Id;
+                }
+
                 await _userRepository.UpdateAsync(user);
 
                 return MapToUserDTO(user);
@@ -347,7 +358,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                     PageSize = users.PageSize,
                     TotalItems = users.TotalItems,
                     TotalPages = users.TotalPages,
-                    Items = _mapper.Map<List<UserDTO>>(users.Items)
+                    Items = users.Items.Select(MapToUserDTO).ToList()
                 };
 
             }
@@ -382,7 +393,11 @@ namespace FlowerSellingWebsite.Services.Implementations
                     return false;
                 }
 
-                // Assuming there's an IsActive property or similar
+                // Activate user by setting IsDeleted to false
+                user.IsDeleted = false;
+                user.DeletedAt = null;
+                user.UpdatedAt = DateTime.UtcNow;
+                
                 await _userRepository.UpdateAsync(user);
                 return true;
             }
@@ -403,7 +418,11 @@ namespace FlowerSellingWebsite.Services.Implementations
                     return false;
                 }
 
-                // Assuming there's an IsActive property or similar
+                // Deactivate user by setting IsDeleted to true
+                user.IsDeleted = true;
+                user.DeletedAt = DateTime.UtcNow;
+                user.UpdatedAt = DateTime.UtcNow;
+                
                 await _userRepository.UpdateAsync(user);
                 return true;
             }
@@ -445,7 +464,8 @@ namespace FlowerSellingWebsite.Services.Implementations
                 PhoneNumber = user.Phone,
                 Address = user.Address,
                 RoleName = user.Role?.RoleName ?? string.Empty,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsActive = !user.IsDeleted
             };
         }
 

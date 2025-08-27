@@ -107,7 +107,7 @@ class AuthManager {
               // Kiểm tra vai trò của người dùng để chuyển hướng phù hợp
               const userRole = response.data.user.roleName;
               if (userRole === "Admin") {
-                window.location.href = "/html/admin/index.html";
+                window.location.href = "/html/common/homepage.html";
               } else if (userRole === "Supplier") {
                 window.location.href = "/html/supplier/view-flower-list.html";
               } else {

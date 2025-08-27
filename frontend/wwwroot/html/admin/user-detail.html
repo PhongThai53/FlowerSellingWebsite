@@ -7,11 +7,11 @@
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="../../images/favicon.ico" />
-    <link rel="stylesheet" href="../../css/backend-plugin.min.css">
-    <link rel="stylesheet" href="../../css/backend.css?v=1.0.0">
-    <link rel="stylesheet" href="../../css/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="../../css/line-awesome/dist/line-awesome/css/line-awesome.min.css">
-    <link rel="stylesheet" href="../../css/remixicon/fonts/remixicon.css">
+    <!-- Google fonts include -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear" rel="stylesheet">
+    <!-- Vendor & main styles to match homepage -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <link href="../../css/style.css" rel="stylesheet" />
 </head>
 <body>
     <!-- Loader -->
@@ -19,16 +19,14 @@
         <div id="loading-center"></div>
     </div>
     
-    <!-- Wrapper Start -->
-    <div class="wrapper">
-        <!-- Nav -->
-        <div id="nav-placeholder"></div>
-
-        <!-- Header -->
-        <div id="header-placeholder"></div>
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
         
-        <!-- Content Page -->
-        <div class="content-page">
+        <main class="section-space">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-12">
@@ -152,7 +150,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
     
     <!-- Loading Overlay -->
@@ -163,10 +161,16 @@
     </div>
     
     <!-- Scripts -->
-    <script>fetch('../product/nav.html').then(response => response.text()).then(data => { document.getElementById('nav-placeholder').innerHTML = data; });</script>
-    <script>fetch('../product/header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script> <!--nav--> <!--header--> <!-- Backend Bundle JavaScript -->
-    <script src="../../js/admin/backend-bundle.min.js"></script>
-    <script src="../../js/admin/app.js"></script>
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script type="module" src="../../js/component/header/HeaderManager.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/user-manager.js"></script>
     

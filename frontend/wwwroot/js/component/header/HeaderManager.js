@@ -239,11 +239,25 @@ export class HeaderManager {
     const adminUserManagement = document.getElementById(
       "admin-user-management"
     );
+    const adminProductManagement = document.getElementById(
+      "admin-product-management"
+    );
+    const mainMenuRoot = document.querySelector("nav.desktop-menu > ul");
+    const shopMenuItem = document
+      .querySelector('nav.desktop-menu a[href$="/html/common/shop.html"]')
+      ?.closest("li");
+    const contactMenuItem = document
+      .querySelector('nav.desktop-menu a[href$="/html/common/contact-us.html"]')
+      ?.closest("li");
+    const cartIconItem = document
+      .querySelector("a.minicart-btn")
+      ?.closest("li");
 
     console.log("User menu elements found:", {
       userMenu: !!userMenu,
       userDropdown: !!userDropdown,
       adminUserManagement: !!adminUserManagement,
+      adminProductManagement: !!adminProductManagement,
     });
 
     if (!userMenu || !userDropdown) {
@@ -262,6 +276,39 @@ export class HeaderManager {
     if (adminUserManagement) {
       adminUserManagement.style.display = isAdmin ? "block" : "none";
     }
+    if (adminProductManagement) {
+      adminProductManagement.style.display = isAdmin ? "block" : "none";
+    }
+
+    // If Admin: hide all other main menu items except admin menus and user dropdown
+    if (isAdmin && mainMenuRoot) {
+      // Hide Home, Shop, Contact, and any other items not admin*
+      Array.from(mainMenuRoot.children).forEach((li) => {
+        const isAdminItem =
+          li.id === "admin-user-management" ||
+          li.id === "admin-product-management";
+        if (!isAdminItem) {
+          li.style.display = "none";
+        }
+      });
+      // Also hide cart icon if present
+      if (cartIconItem) {
+        cartIconItem.style.display = "none";
+      }
+    } else if (mainMenuRoot) {
+      // Non-admin: ensure normal items visible and admin items hidden (already handled above)
+      Array.from(mainMenuRoot.children).forEach((li) => {
+        if (
+          li.id !== "admin-user-management" &&
+          li.id !== "admin-product-management"
+        ) {
+          li.style.display = "";
+        }
+      });
+      if (cartIconItem) {
+        cartIconItem.style.display = "";
+      }
+    }
 
     // Update user dropdown based on authentication status
     if (token && userData) {
@@ -278,7 +325,8 @@ export class HeaderManager {
 
     if (isAdmin) {
       userMenuItems += `
-        <li><a href="/html/user/user-list.html"><i class="fa fa-users"></i> User Management</a></li>
+        <li><a href="/html/admin/user-list.html"><i class="fa fa-users"></i> User Management</a></li>
+        <li><a href="/html/product/page-list-product.html"><i class="fa fa-box"></i> Product Management</a></li>
       `;
     }
 
@@ -333,15 +381,48 @@ export class HeaderManager {
       // Update user menu
       this.setupUserMenu();
 
+      // Notify app about auth change
+      document.dispatchEvent(new Event("authChanged"));
+
+      // Force refresh header markup to default (non-admin) state
+      this.refreshHeader();
+
       // Show success message
       this.showToast("You have been logged out.", "success");
 
-      // Redirect to home if on user pages
+      // Redirect to login page after logout
       setTimeout(() => {
-        if (window.location.pathname.includes("/user/")) {
-          window.location.href = "/html/common/homepage.html";
-        }
+        window.location.href = "/html/auth/login-register.html";
       }, 1000);
+    }
+  }
+
+  // Reload the header component and re-run setup
+  refreshHeader() {
+    try {
+      const headerElement =
+        document.querySelector("header.header-area") ||
+        document.getElementById("header-placeholder");
+      if (!headerElement) {
+        return;
+      }
+
+      // Always fetch absolute header path to avoid relative issues
+      fetch("/html/components/header.html")
+        .then((res) => res.text())
+        .then((html) => {
+          const container = document.createElement("div");
+          container.innerHTML = html;
+          const newHeader = container.querySelector("header");
+          if (newHeader && headerElement.parentNode) {
+            headerElement.parentNode.replaceChild(newHeader, headerElement);
+            // Ensure scripts/styles dependent behavior is restored
+            this.setupHeader();
+          }
+        })
+        .catch((e) => console.error("Failed to refresh header:", e));
+    } catch (e) {
+      console.error("Error refreshing header:", e);
     }
   }
 

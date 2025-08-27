@@ -136,7 +136,15 @@ builder.Services.AddCors(options =>
             "http://localhost:5062",
             "http://127.0.0.1:5062",
             "http://localhost:5081",
-            "http://127.0.0.1:5081")
+            "http://127.0.0.1:5081",
+            "https://localhost:5062",
+            "https://127.0.0.1:5062",
+            "https://localhost:5081",
+            "https://127.0.0.1:5081",
+            "https://localhost:7062",
+            "https://127.0.0.1:7062",
+            "https://localhost:7081",
+            "https://127.0.0.1:7081")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials()
@@ -224,8 +232,9 @@ app.UseSwaggerUI(options =>
     options.DefaultModelsExpandDepth(0);
 });
 
-app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 

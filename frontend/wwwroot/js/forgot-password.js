@@ -3,6 +3,8 @@
  * Handles the forgot password form submission and validation
  */
 
+import { API_CONFIG } from "./config/api-config.js";
+
 class ForgotPasswordManager {
   constructor() {
     this.initialize();
@@ -116,7 +118,7 @@ class ForgotPasswordManager {
 
     try {
       const response = await fetch(
-        "http://localhost:5062/api/auth/forgot-password",
+        `${API_CONFIG.API_URL}/auth/forgot-password`,
         {
           method: "POST",
           headers: {
@@ -176,7 +178,3 @@ class ForgotPasswordManager {
 document.addEventListener("DOMContentLoaded", () => {
   new ForgotPasswordManager();
 });
-
-
-
-

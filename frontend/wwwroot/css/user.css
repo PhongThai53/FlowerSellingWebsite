@@ -259,6 +259,110 @@ address strong {
   min-height: 70vh;
 }
 
+/* User Table Styles */
+.user-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+#user-list-table {
+  width: 100% !important;
+  margin: 0;
+  border: none;
+}
+
+#user-list-table thead th {
+  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+  color: white;
+  font-weight: 600;
+  padding: 15px 12px;
+  border: none;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#user-list-table thead th:first-child,
+#user-list-table thead th:last-child {
+  text-align: center;
+}
+
+#user-list-table tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+#user-list-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#user-list-table tbody td {
+  padding: 15px 12px;
+  vertical-align: middle;
+  border: none;
+  font-size: 14px;
+}
+
+#user-list-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+#user-list-table tbody tr:nth-child(even):hover {
+  background-color: #e9ecef;
+}
+
+/* Action buttons styling */
+.btn-group .btn {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-group .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .user-table-wrapper {
+    margin: 0 -15px;
+    border-radius: 0;
+  }
+
+  #user-list-table thead th,
+  #user-list-table tbody td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .btn-group .btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Empty state styling */
+#user-list-table tbody tr td[colspan="8"] {
+  padding: 40px 20px !important;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+#user-list-table tbody tr td[colspan="8"] i {
+  color: #adb5bd;
+  margin-bottom: 10px;
+}
+
 .user-card {
   border: 1px solid #eee;
   border-radius: 12px;

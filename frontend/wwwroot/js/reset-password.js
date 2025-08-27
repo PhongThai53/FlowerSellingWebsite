@@ -3,6 +3,8 @@
  * Handles the reset password form submission and validation
  */
 
+import { API_CONFIG } from "./config/api-config.js";
+
 class ResetPasswordManager {
   constructor() {
     this.initialize();
@@ -262,7 +264,7 @@ class ResetPasswordManager {
       };
 
       const response = await fetch(
-        "http://localhost:5062/api/auth/reset-password",
+        `${API_CONFIG.API_URL}/auth/reset-password`,
         {
           method: "POST",
           headers: {
