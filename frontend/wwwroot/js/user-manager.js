@@ -1029,7 +1029,7 @@ class UserManager {
 
   // Create user from modal
   async createUserFromModal() {
-    if (!this.validateAddUserForm()) return;
+    if (!(await this.validateAddUserFormAsync())) return;
 
     this.showLoading();
 
@@ -1063,12 +1063,23 @@ class UserManager {
         }, 1500);
       } else {
         const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || "Không thể tạo người dùng";
-        this.showError(errorMessage);
+        const msg = (
+          errorData?.message || "Không thể tạo người dùng"
+        ).toString();
+        if (/username/i.test(msg) && /exist|taken|duplicate/i.test(msg)) {
+          const username = document.getElementById("add-username");
+          if (username)
+            this.showValidationError(username, "Username đã tồn tại");
+        }
+        if (/email/i.test(msg) && /exist|registered|duplicate/i.test(msg)) {
+          const email = document.getElementById("add-email");
+          if (email) this.showValidationError(email, "Email đã tồn tại");
+        }
+        this.showModalAlert("addUserModal", msg, "danger");
       }
     } catch (error) {
       console.error("Error creating user:", error);
-      this.showError("Lỗi khi tạo người dùng");
+      this.showModalAlert("addUserModal", "Lỗi khi tạo người dùng", "danger");
     } finally {
       this.hideLoading();
     }
@@ -1295,11 +1306,254 @@ class UserManager {
     return re.test(username);
   }
 
-  // Validate phone number
+  // Strong password: >=8, 1 uppercase, 1 lowercase, 1 number, 1 special
+  isStrongPassword(password) {
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+    return re.test(password);
+  }
+
+  // Validate Vietnamese phone number (0|+84|84) + valid carrier + 8 digits
   isValidPhone(phone) {
-    // Allow Vietnamese phone numbers: +84, 84, 0 followed by 9-10 digits
-    const re = /^(\+84|84|0)?[0-9]{9,10}$/;
-    return re.test(phone);
+    const cleaned = phone.trim();
+    const re = /^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/;
+    return re.test(cleaned);
+  }
+
+  // Check empty or whitespace-only
+  isEmptyOrWhitespace(value) {
+    return !value || value.trim().length === 0;
+  }
+
+  // Async: check username uniqueness (optionally exclude a publicId when updating)
+  async isUsernameUnique(username, excludePublicId = null) {
+    try {
+      const url = new URL(`${this.apiBaseUrl}/user/check-username`);
+      url.searchParams.set("username", username);
+      if (excludePublicId) url.searchParams.set("excludeId", excludePublicId);
+      const res = await this.makeAuthenticatedRequest(url.toString());
+      if (res && res.ok) {
+        const data = await res.json().catch(() => null);
+        const val = data?.data ?? data?.isUnique ?? data?.unique ?? data;
+        if (typeof val === "boolean") return val;
+      }
+    } catch (_) {}
+    // Fallback: query list by exact username and see if any conflict remains
+    try {
+      const payload = {
+        page_index: 1,
+        page_size: 1,
+        sort_by: "username",
+        sort_direction: 0,
+        search_by: "username",
+        search_value: username,
+      };
+      const res = await this.makeAuthenticatedRequest(
+        `${this.apiBaseUrl}/user/list`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (res && res.ok) {
+        const result = await res.json();
+        const items = result?.items || [];
+        if (items.length === 0) return true;
+        if (excludePublicId) {
+          return items.every((u) => u.publicId === excludePublicId);
+        }
+        return false;
+      }
+    } catch (_) {}
+    return true; // be permissive if API not available
+  }
+
+  // Async: check email uniqueness (optionally exclude a publicId when updating)
+  async isEmailUnique(email, excludePublicId = null) {
+    try {
+      const url = new URL(`${this.apiBaseUrl}/user/check-email`);
+      url.searchParams.set("email", email);
+      if (excludePublicId) url.searchParams.set("excludeId", excludePublicId);
+      const res = await this.makeAuthenticatedRequest(url.toString());
+      if (res && res.ok) {
+        const data = await res.json().catch(() => null);
+        const val = data?.data ?? data?.isUnique ?? data?.unique ?? data;
+        if (typeof val === "boolean") return val;
+      }
+    } catch (_) {}
+    // Fallback via list
+    try {
+      const payload = {
+        page_index: 1,
+        page_size: 1,
+        sort_by: "email",
+        sort_direction: 0,
+        search_by: "email",
+        search_value: email,
+      };
+      const res = await this.makeAuthenticatedRequest(
+        `${this.apiBaseUrl}/user/list`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (res && res.ok) {
+        const result = await res.json();
+        const items = result?.items || [];
+        if (items.length === 0) return true;
+        if (excludePublicId) {
+          return items.every((u) => u.publicId === excludePublicId);
+        }
+        return false;
+      }
+    } catch (_) {}
+    return true;
+  }
+
+  // Async validation for Add User modal
+  async validateAddUserFormAsync() {
+    const form = document.getElementById("add-user-form");
+    if (!form) return false;
+
+    const get = (id) => document.getElementById(id);
+    const fullName = get("add-fullName");
+    const username = get("add-username");
+    const email = get("add-email");
+    const password = get("add-password");
+    const roleName = get("add-roleName");
+    const phone = get("add-phoneNumber");
+
+    let ok = true;
+    // Clear previous
+    [fullName, username, email, password, roleName, phone].forEach(
+      (el) => el && this.clearValidation(el)
+    );
+
+    if (!fullName || this.isEmptyOrWhitespace(fullName.value)) {
+      this.showValidationError(fullName, "Họ và tên là bắt buộc");
+      ok = false;
+    }
+    if (
+      !username ||
+      this.isEmptyOrWhitespace(username.value) ||
+      !this.isValidUsername(username.value.trim())
+    ) {
+      this.showValidationError(
+        username,
+        "Username 3-20 ký tự, chữ/số/underscore, không khoảng trắng"
+      );
+      ok = false;
+    }
+    if (
+      !email ||
+      this.isEmptyOrWhitespace(email.value) ||
+      !this.isValidEmail(email.value.trim())
+    ) {
+      this.showValidationError(email, "Email không hợp lệ");
+      ok = false;
+    }
+    if (!password || !this.isStrongPassword(password.value)) {
+      this.showValidationError(
+        password,
+        "Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+      );
+      ok = false;
+    }
+    if (!roleName || this.isEmptyOrWhitespace(roleName.value)) {
+      this.showValidationError(roleName, "Vai trò là bắt buộc");
+      ok = false;
+    }
+    if (phone && phone.value.trim() && !this.isValidPhone(phone.value.trim())) {
+      this.showValidationError(phone, "Số điện thoại VN không hợp lệ");
+      ok = false;
+    }
+
+    if (!ok) return false;
+
+    // Uniqueness checks
+    const [uOk, eOk] = await Promise.all([
+      this.isUsernameUnique(username.value.trim(), null),
+      this.isEmailUnique(email.value.trim(), null),
+    ]);
+    if (!uOk) {
+      this.showValidationError(username, "Username đã tồn tại");
+      ok = false;
+    }
+    if (!eOk) {
+      this.showValidationError(email, "Email đã tồn tại");
+      ok = false;
+    }
+
+    return ok;
+  }
+
+  // Async validation for Edit Modal
+  async validateEditUserFormAsync() {
+    const form = document.getElementById("edit-user-form");
+    if (!form) return false;
+
+    const get = (id) => document.getElementById(id);
+    const fullName = get("edit-fullName");
+    const username = get("edit-username");
+    const email = get("edit-email");
+    const phone = get("edit-phoneNumber");
+    const roleName = get("edit-roleName");
+    const publicId = get("edit-publicId")?.value || null;
+
+    let ok = true;
+    [fullName, username, email, phone, roleName].forEach(
+      (el) => el && this.clearValidation(el)
+    );
+
+    if (!fullName || this.isEmptyOrWhitespace(fullName.value)) {
+      this.showValidationError(fullName, "Họ và tên là bắt buộc");
+      ok = false;
+    }
+    if (
+      !username ||
+      this.isEmptyOrWhitespace(username.value) ||
+      !this.isValidUsername(username.value.trim())
+    ) {
+      this.showValidationError(
+        username,
+        "Username 3-20 ký tự, chữ/số/underscore, không khoảng trắng"
+      );
+      ok = false;
+    }
+    if (
+      !email ||
+      this.isEmptyOrWhitespace(email.value) ||
+      !this.isValidEmail(email.value.trim())
+    ) {
+      this.showValidationError(email, "Email không hợp lệ");
+      ok = false;
+    }
+    if (!roleName || this.isEmptyOrWhitespace(roleName.value)) {
+      this.showValidationError(roleName, "Vai trò là bắt buộc");
+      ok = false;
+    }
+    if (phone && phone.value.trim() && !this.isValidPhone(phone.value.trim())) {
+      this.showValidationError(phone, "Số điện thoại VN không hợp lệ");
+      ok = false;
+    }
+    if (!ok) return false;
+
+    // Uniqueness checks (exclude current user)
+    const [uOk, eOk] = await Promise.all([
+      this.isUsernameUnique(username.value.trim(), publicId),
+      this.isEmailUnique(email.value.trim(), publicId),
+    ]);
+    if (!uOk) {
+      this.showValidationError(username, "Username đã tồn tại");
+      ok = false;
+    }
+    if (!eOk) {
+      this.showValidationError(email, "Email đã tồn tại");
+      ok = false;
+    }
+    return ok;
   }
 
   // Delete user
@@ -1724,6 +1978,31 @@ class UserManager {
     }, 5000);
   }
 
+  // Show alert inside a specific modal (non-intrusive to the page)
+  showModalAlert(modalId, message, type = "danger") {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+      this.showAlert(message, type);
+      return;
+    }
+    const body = modal.querySelector(".modal-body") || modal;
+    let alertEl = body.querySelector(".modal-inline-alert");
+    if (!alertEl) {
+      alertEl = document.createElement("div");
+      alertEl.className = `alert alert-${type} modal-inline-alert`;
+      alertEl.style.marginBottom = "12px";
+      body.insertBefore(alertEl, body.firstChild);
+    }
+    alertEl.className = `alert alert-${type} modal-inline-alert`;
+    alertEl.textContent = message;
+    // Auto-hide after 5s
+    setTimeout(() => {
+      if (alertEl && alertEl.parentElement) {
+        alertEl.remove();
+      }
+    }, 5000);
+  }
+
   showSuccess(message) {
     this.showAlert(message, "success");
   }
@@ -1870,6 +2149,9 @@ class UserManager {
   }
 
   async updateUserFromModal() {
+    // Async validate edit modal (includes uniqueness, phone format, whitespace)
+    if (!(await this.validateEditUserFormAsync())) return;
+
     const form = document.getElementById("edit-user-form");
     if (!form.checkValidity()) {
       form.reportValidity();
@@ -1884,11 +2166,11 @@ class UserManager {
       );
     }
     const updateData = {
-      fullName: formData.get("fullName"),
-      userName: formData.get("username"),
-      phoneNumber: formData.get("phoneNumber"),
-      address: formData.get("address"),
-      roleName: formData.get("roleName"),
+      fullName: (formData.get("fullName") || "").toString().trim(),
+      userName: (formData.get("username") || "").toString().trim(),
+      phoneNumber: (formData.get("phoneNumber") || "").toString().trim(),
+      address: (formData.get("address") || "").toString().trim(),
+      roleName: (formData.get("roleName") || "").toString().trim(),
     };
     console.log("Submitting update with role:", updateData.roleName);
 
@@ -1911,10 +2193,21 @@ class UserManager {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
+        const errorData = await response.json().catch(() => null);
+        const msg = (
+          errorData?.message || `HTTP error! status: ${response.status}`
+        ).toString();
+        if (/username/i.test(msg) && /exist|taken|duplicate/i.test(msg)) {
+          const username = document.getElementById("edit-username");
+          if (username)
+            this.showValidationError(username, "Username đã tồn tại");
+        }
+        if (/email/i.test(msg) && /exist|registered|duplicate/i.test(msg)) {
+          const email = document.getElementById("edit-email");
+          if (email) this.showValidationError(email, "Email đã tồn tại");
+        }
+        this.showModalAlert("editUserModal", msg, "danger");
+        return;
       }
 
       const result = await response.json();
@@ -1934,7 +2227,11 @@ class UserManager {
       this.loadUsers();
     } catch (error) {
       console.error("Error updating user:", error);
-      this.showError(`Không thể cập nhật người dùng: ${error.message}`);
+      this.showModalAlert(
+        "editUserModal",
+        `Không thể cập nhật người dùng: ${error.message}`,
+        "danger"
+      );
     } finally {
       this.hideLoading();
     }

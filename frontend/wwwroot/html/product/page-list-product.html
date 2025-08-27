@@ -1230,7 +1230,7 @@
         const rowId = "flower-row-" + Date.now();
 
         const rowHtml = `
-          <div class="row mb-2" id="${rowId}">
+          <div class="row mb-2 flower-row" id="${rowId}">
             <div class="col-md-6">
               <select class="form-select flower-select" data-row="${rowId}">
                 <option value="">Chọn loại hoa</option>
@@ -1756,11 +1756,19 @@
           return false;
         }
 
-        // Validate flower recipe is required
-        const flowerRows = document.querySelectorAll(
+        // Validate flower recipe is required: must have at least 1 valid row
+        const rows = document.querySelectorAll(
           `#flowerSelectionContainer${modalId} .flower-row`
         );
-        if (flowerRows.length === 0) {
+        let validRowCount = 0;
+        rows.forEach((row) => {
+          const selectEl = row.querySelector(".flower-select");
+          const quantityEl = row.querySelector(".flower-quantity");
+          const hasFlower = !!(selectEl && selectEl.value);
+          const qty = quantityEl ? parseInt(quantityEl.value) : 0;
+          if (hasFlower && qty >= 1) validRowCount++;
+        });
+        if (validRowCount === 0) {
           showAlert(
             "Công thức hoa là bắt buộc. Vui lòng thêm ít nhất 1 loại hoa",
             "warning"
@@ -1798,7 +1806,8 @@
           submitBtn.disabled = true;
           spinner.classList.remove("d-none");
 
-          // Get form data
+          // Get form element and data
+          const form = document.getElementById("addProductForm");
           const formData = new FormData(form);
           const productData = {
             name: formData.get("name"),
@@ -1934,7 +1943,8 @@
           submitBtn.disabled = true;
           spinner.classList.remove("d-none");
 
-          // Get form data
+          // Get form element and data
+          const form = document.getElementById("updateProductForm");
           const formData = new FormData(form);
           const updateData = {
             name: formData.get("name"),
