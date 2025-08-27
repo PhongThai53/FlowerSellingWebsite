@@ -1,4 +1,5 @@
 ﻿using FlowerSellingWebsite.Models.Entities;
+using FlowerSellingWebsite.Models.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace FlowerSellingWebsite.Models.DTOs.Product
@@ -12,7 +13,6 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
         public string? Description { get; set; }
 
-        [Required(ErrorMessage = "Price is required")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal? Price { get; set; }
 
@@ -22,6 +22,7 @@ namespace FlowerSellingWebsite.Models.DTOs.Product
         [Range(0, int.MaxValue, ErrorMessage = "Stock must be 0 or greater")]
         public int? Stock { get; set; }
 
+        [Required(ErrorMessage = "Category ID is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Category ID must be greater than 0")]
         public int? CategoryId { get; set; }
 

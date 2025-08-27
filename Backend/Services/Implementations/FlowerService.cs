@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Flower;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Services.Interfaces;
 using FlowerSellingWebsite.Repositories.Interfaces;
@@ -139,7 +140,6 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<IEnumerable<FlowerCategoryResponse>> GetFlowerCategoriesAsync()
         {
-            // Query directly from FlowerCategories table
             var categories = await _context.FlowerCategories
                 .Where(x => !x.IsDeleted)
                 .Select(x => new FlowerCategoryResponse
@@ -155,7 +155,6 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<IEnumerable<FlowerTypeResponse>> GetFlowerTypesAsync()
         {
-            // Query directly from FlowerTypes table
             var types = await _context.FlowerTypes
                 .Where(x => !x.IsDeleted)
                 .Select(x => new FlowerTypeResponse
@@ -171,19 +170,40 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         public async Task<IEnumerable<FlowerColorResponse>> GetFlowerColorsAsync()
         {
-            // Query directly from FlowerColors table
             var colors = await _context.FlowerColors
                 .Where(x => !x.IsDeleted)
                 .Select(x => new FlowerColorResponse
                 {
                     Id = x.Id,
                     ColorName = x.ColorName,
-                    HexCode = x.HexCode,
                     Description = x.Description
                 })
                 .ToListAsync();
 
             return colors;
+        }
+
+        public async Task<IEnumerable<FlowerDTO>> GetAllFlowersAsync()
+        {
+            var flowers = await _context.Flowers
+                .Where(x => !x.IsDeleted)
+                .Select(x => new FlowerDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    Size = x.Size,
+                    ShelfLifeDays = x.ShelfLifeDays,
+                    FlowerCategoryId = x.FlowerCategoryId,
+                    CategoryName = x.FlowerCategory != null ? x.FlowerCategory.CategoryName : null,
+                    FlowerTypeId = x.FlowerTypeId,
+                    TypeName = x.FlowerType != null ? x.FlowerType.TypeName : null,
+                    FlowerColorId = x.FlowerColorId,
+                    ColorName = x.FlowerColor != null ? x.FlowerColor.ColorName : null
+                })
+                .ToListAsync();
+
+            return flowers;
         }
 
         public async Task<PagedResult<FlowerResponse>> GetListFlowerAsync(UrlQueryParams queryParams, int? supplierId = null)

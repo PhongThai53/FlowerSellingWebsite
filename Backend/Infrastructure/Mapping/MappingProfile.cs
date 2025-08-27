@@ -16,7 +16,8 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
             // ------------------ Products ------------------
             CreateMap<Products, ProductDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
-                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
+                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted));
 
             CreateMap<Products, ProductListDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ProductCategories.Name))
@@ -79,10 +80,15 @@ namespace FlowerSellingWebsite.Infrastructure.Mapping
 
             // ------------------ Create Product DTO ------------------
             CreateMap<CreateProductDTO, Products>()
-                .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos))
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore ID để tránh duplicate
+                .ForMember(dest => dest.ProductPhotos, opt => opt.Ignore()) // Handle manually
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            // Cần mapping này để map từ Products sang CreateProductDTO khi return
             CreateMap<Products, CreateProductDTO>()
                 .ForMember(dest => dest.ProductPhotos, opt => opt.MapFrom(src => src.ProductPhotos));
 

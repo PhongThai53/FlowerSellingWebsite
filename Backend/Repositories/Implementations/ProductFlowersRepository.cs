@@ -17,24 +17,22 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         public async Task<IEnumerable<ProductFlowers>> GetProductFlowers(int productId)
         {
             return await _context.ProductFlowers
-                .Include(pf => pf.Flower)
-                .Where(pf => pf.ProductId == productId)
+                .Where(pf => pf.ProductId == productId && !pf.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<ProductFlowers>> GetFlowerRequirementsForProductAsync(int productId)
         {
             return await _context.ProductFlowers
-                .Include(pf => pf.Flower)
-                .Where(pf => pf.ProductId == productId)
+                .Where(pf => pf.ProductId == productId && !pf.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<ProductFlowers?> GetProductFlowerAsync(int productId, int flowerId)
         {
             return await _context.ProductFlowers
-                .Include(pf => pf.Flower)
-                .FirstOrDefaultAsync(pf => pf.ProductId == productId && pf.FlowerId == flowerId);
+                .Where(pf => pf.ProductId == productId && pf.FlowerId == flowerId && !pf.IsDeleted)
+                .FirstOrDefaultAsync();
         }
     }
 }
