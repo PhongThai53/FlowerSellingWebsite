@@ -80,5 +80,23 @@ namespace FlowerSellingWebsite.Controllers
             var result = await _userService.DeactivateUserAsync(publicId);
             return result ? Ok(new { message = "User deactivated successfully" }) : NotFound();
         }
+
+        [HttpGet("check-username")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckUsername([FromQuery] string username, [FromQuery] Guid? excludeId)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return BadRequest(new { message = "username is required" });
+            var isUnique = await _userService.IsUsernameUniqueAsync(username, excludeId);
+            return Ok(new { isUnique });
+        }
+
+        [HttpGet("check-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckEmail([FromQuery] string email, [FromQuery] Guid? excludeId)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return BadRequest(new { message = "email is required" });
+            var isUnique = await _userService.IsEmailUniqueAsync(email, excludeId);
+            return Ok(new { isUnique });
+        }
     }
 }

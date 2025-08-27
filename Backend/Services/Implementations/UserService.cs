@@ -649,5 +649,25 @@ namespace FlowerSellingWebsite.Services.Implementations
                 return false;
             }
         }
+
+        public async Task<bool> IsUsernameUniqueAsync(string username, Guid? excludePublicId = null)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return false;
+
+            var existing = await _userRepository.GetByUsernameAsync(username);
+            if (existing == null) return true;
+            if (excludePublicId.HasValue && existing.PublicId == excludePublicId.Value) return true;
+            return false;
+        }
+
+        public async Task<bool> IsEmailUniqueAsync(string email, Guid? excludePublicId = null)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+
+            var existing = await _userRepository.GetByEmailAsync(email);
+            if (existing == null) return true;
+            if (excludePublicId.HasValue && existing.PublicId == excludePublicId.Value) return true;
+            return false;
+        }
     }
 }

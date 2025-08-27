@@ -28,5 +28,9 @@ namespace FlowerSellingWebsite.Services.Interfaces
         
         // Email existence check
         Task<bool> EmailExistsAsync(string email);
+
+        // Uniqueness checks with optional exclusion (for updates)
+        Task<bool> IsUsernameUniqueAsync(string username, Guid? excludePublicId = null);
+        Task<bool> IsEmailUniqueAsync(string email, Guid? excludePublicId = null);
     }
 }
