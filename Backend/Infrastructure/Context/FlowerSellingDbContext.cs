@@ -604,7 +604,7 @@ namespace FlowerSelling.Data
                 modelBuilder.Entity<FlowerCategories>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<FlowerTypes>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<FlowerColors>().HasQueryFilter(e => !e.IsDeleted);
-                modelBuilder.Entity<Products>().HasQueryFilter(e => !e.IsDeleted);
+                modelBuilder.Entity<Products>().HasQueryFilter(e => !e.IsDeleted); // Restored to protect shop from deleted products
                 modelBuilder.Entity<ProductCategories>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Orders>().HasQueryFilter(e => !e.IsDeleted);
                 modelBuilder.Entity<Suppliers>().HasQueryFilter(e => !e.IsDeleted);

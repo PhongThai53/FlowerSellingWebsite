@@ -1,287 +1,2791 @@
-
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>POS Dash | Responsive Bootstrap 4 Admin Dashboard Template</title>
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Quản lý sản phẩm | Flower Selling Website</title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="../../images/logo/favicon.ico" />
-    <link rel="stylesheet" href="../../css/backend-plugin.min.css">
-    <link rel="stylesheet" href="../../css/backend.css?v=1.0.0">
-    <link rel="stylesheet" href="../../css/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="../../css/line-awesome/dist/line-awesome/css/line-awesome.min.css">
-    <link rel="stylesheet" href="../../css/remixicon/fonts/remixicon.css">
-    <body class="  ">
-        <!-- loader Start -->
-        <div id="loading">
-            <div id="loading-center">
+    <link rel="shortcut icon" href="../../images/favicon.ico" />
+    <!-- Google fonts include -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,900%7CYesteryear"
+      rel="stylesheet"
+    />
+    <!-- Vendor & main styles to match homepage -->
+    <link href="../../css/vendor.css" rel="stylesheet" />
+    <link href="../../css/style.css" rel="stylesheet" />
+    <!-- HTMX -->
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loading">
+      <div id="loading-center"></div>
+    </div>
+
+    <header
+      id="header-placeholder"
+      hx-get="../components/header.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></header>
+
+    <!-- Wrapper Start -->
+    <div class="wrapper">
+      <!-- Content Page -->
+      <main class="section-space">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12">
+              <div
+                class="section-title d-flex align-items-center justify-content-between mb-3"
+              >
+                <h2 class="m-0">Quản lý sản phẩm</h2>
+                <button
+                  type="button"
+                  class="btn btn-maroon"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addProductModal"
+                >
+                  <i class="las la-plus me-2"></i>Thêm sản phẩm
+                </button>
+              </div>
+
+              <!-- Alert Container -->
+              <div id="alert-container"></div>
+
+              <!-- Filter: search by product name -->
+              <div class="mb-3">
+                <label class="form-label mb-1" for="productSearchInput">
+                  Tìm theo tên sản phẩm
+                </label>
+                <input
+                  type="search"
+                  class="form-control"
+                  id="productSearchInput"
+                  placeholder="Nhập tên sản phẩm..."
+                  aria-controls="productTable"
+                />
+              </div>
+
+              <!-- Products Table -->
+              <div class="table-responsive mt-2">
+                <table
+                  id="productTable"
+                  class="table table-striped"
+                  role="grid"
+                >
+                  <thead>
+                    <tr>
+                      <th style="white-space: nowrap">Hình ảnh</th>
+                      <th
+                        id="sortName"
+                        style="cursor: pointer; white-space: nowrap"
+                      >
+                        Tên sản phẩm ⬍
+                      </th>
+                      <th style="white-space: nowrap">Mô tả</th>
+                      <th
+                        id="sortId"
+                        style="cursor: pointer; white-space: nowrap"
+                      >
+                        Mã ⬍
+                      </th>
+                      <th style="white-space: nowrap">Danh mục</th>
+                      <th style="white-space: nowrap">Trạng thái</th>
+                      <th style="min-width: 180px; white-space: nowrap">
+                        Thao tác
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="ligth-body" id="tableBody">
+                    <!-- JS render rows -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="row justify-content-between mt-3">
+                <div class="col-md-6">
+                  <div id="product-page-info">
+                    <span>Đang tải dữ liệu...</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <nav aria-label="Page navigation">
+                    <ul
+                      class="pagination justify-content-end mb-0"
+                      id="pagination"
+                    >
+                      <!-- JS render pagination buttons -->
+                    </ul>
+                  </nav>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-        <!-- loader END -->
-        <!-- Wrapper Start -->
-        <div class="wrapper">
+      </main>
+    </div>
 
-            <!-- Nav -->
-            <div id="nav-placeholder"></div>
-
-            <!-- Header -->
-            <div id="header-placeholder"></div>
-
-
-            <div class="modal fade" id="new-order" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-body">
-                            <div class="popup text-left">
-                                <h4 class="mb-3">New Order</h4>
-                                <div class="content create-workform bg-body">
-                                    <div class="pb-3">
-                                        <label class="mb-2">Email</label>
-                                        <input type="text" class="form-control" placeholder="Enter Name or Email">
-                                    </div>
-                                    <div class="col-lg-12 mt-4">
-                                        <div class="d-flex flex-wrap align-items-ceter justify-content-center">
-                                            <div class="btn btn-primary mr-4" data-dismiss="modal">Cancel</div>
-                                            <div class="btn btn-outline-primary" data-dismiss="modal">Create</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Add Product Modal -->
+    <div
+      class="modal fade"
+      id="addProductModal"
+      tabindex="-1"
+      aria-labelledby="addProductModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="addProductForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="productName" class="form-label"
+                    >Tên sản phẩm <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="productName"
+                    name="name"
+                    required
+                    maxlength="100"
+                    placeholder="Nhập tên sản phẩm..."
+                  />
                 </div>
-            </div>      <div class="content-page">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
-                                <a href="page-add-product.html" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add Product</a>
-                            </div>
-                        </div>
-                        <div class="col-lg-12">
-                            <div class="table-responsive rounded mb-3">
-
-                                <!--Table data-->
-                                <table id="productTable" class="table mb-0 tbl-server-info">
-                                    <thead class="bg-white text-uppercase">
-                                        <tr class="ligth ligth-data">
-                                            <th>
-                                                <div class="checkbox d-inline-block">
-                                                    <input type="checkbox" class="checkbox-input" id="checkAll">
-                                                    <label for="checkAll" class="mb-0"></label>
-                                                </div>
-                                            </th>
-                                            <th id="sortName" style="cursor:pointer;">Product ⬍</th>
-                                            <th id="sortId" style="cursor:pointer;">Code ⬍</th>
-                                            <th>Category</th>
-                                            <th id="sortPrice" style="cursor:pointer;">Price ⬍</th>
-                                            <th>Quantity</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="ligth-body" id="tableBody">
-                                        <!-- JS render rows -->
-                                    </tbody>
-                                </table>
-                                <!-- Pagination -->
-
-                                <nav aria-label="Page navigation">
-                                    <ul style="padding-top:20px" class="pagination justify-content-center" id="pagination">
-                                        <!-- JS render pagination buttons -->
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Page end  -->
+                <div class="col-md-6 mb-3">
+                  <label for="productCategory" class="form-label"
+                    >Danh mục <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="productCategory"
+                    name="categoryId"
+                    required
+                  >
+                    <option value="">Chọn danh mục</option>
+                    <!-- Categories will be loaded here -->
+                  </select>
                 </div>
-                <!-- Modal Edit -->
-                <div class="modal fade" id="edit-note" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-body">
-                                <div class="popup text-left">
-                                    <div class="media align-items-top justify-content-between">
-                                        <h3 class="mb-3">Product</h3>
-                                        <div class="btn-cancel p-0" data-dismiss="modal"><i class="las la-times"></i></div>
-                                    </div>
-                                    <div class="content edit-notes">
-                                        <div class="card card-transparent card-block card-stretch event-note mb-0">
-                                            <div class="card-body px-0 bukmark">
-                                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
-                                                    <div class="quill-tool">
-                                                    </div>
-                                                </div>
-                                                <div id="quill-toolbar1">
-                                                    <p>Virtual Digital Marketing Course every week on Monday, Wednesday and Saturday.Virtual Digital Marketing Course every week on Monday</p>
-                                                </div>
-                                            </div>
-                                            <div class="card-footer border-0">
-                                                <div class="d-flex flex-wrap align-items-ceter justify-content-end">
-                                                    <div class="btn btn-primary mr-3" data-dismiss="modal">Cancel</div>
-                                                    <div class="btn btn-outline-primary" data-dismiss="modal">Save</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="productDescription" class="form-label">Mô tả</label>
+                <textarea
+                  class="form-control"
+                  id="productDescription"
+                  name="description"
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="Mô tả chi tiết về sản phẩm..."
+                ></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="primaryImage" class="form-label"
+                  >Ảnh chính <span class="text-danger">*</span></label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="primaryImage"
+                  name="primaryImage"
+                  accept="image/*"
+                  required
+                />
+                <div class="form-text">
+                  Ảnh chính sẽ được hiển thị trong shop và danh sách sản phẩm.
+                  Chỉ chọn 1 ảnh.
                 </div>
-            </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="additionalImages" class="form-label"
+                  >Ảnh phụ (tùy chọn)</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="additionalImages"
+                  name="additionalImages"
+                  multiple
+                  accept="image/*"
+                />
+                <div class="form-text">
+                  Có thể chọn nhiều ảnh phụ để hiển thị trong trang chi tiết sản
+                  phẩm.
+                </div>
+              </div>
+
+              <!-- Flower Recipe Section -->
+              <div class="mb-3">
+                <label class="form-label"
+                  >Công thức hoa <span class="text-danger">*</span></label
+                >
+                <div class="border rounded p-3 bg-light">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <h6 class="mb-0">Chọn hoa cần thiết:</h6>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary btn-sm"
+                      id="addFlowerRowAddModal"
+                    >
+                      <i class="las la-plus me-1"></i>Thêm hoa
+                    </button>
+                  </div>
+                  <div id="flowerSelectionContainerAddModal">
+                    <!-- Flower selection rows will be added here -->
+                  </div>
+                  <div class="text-muted small mt-2">
+                    <i class="las la-info-circle me-1"></i>
+                    Thêm ít nhất 1 loại hoa để tạo công thức cho sản phẩm.
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <button type="button" class="btn btn-maroon" id="submitAddProduct">
+              <span
+                class="spinner-border spinner-border-sm d-none"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Thêm sản phẩm
+            </button>
+          </div>
         </div>
-        <!-- Wrapper End-->
-        <footer class="iq-footer">
-            <div class="container-fluid">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <ul class="list-inline mb-0">
-                                    <li class="list-inline-item"><a href="../backend/privacy-policy.html">Privacy Policy</a></li>
-                                    <li class="list-inline-item"><a href="../backend/terms-of-service.html">Terms of Use</a></li>
-                                </ul>
-                            </div>
-                            <div class="col-lg-6 text-right">
-                                <span class="mr-1">
-                                    <script>document.write(new Date().getFullYear())</script>©
-                                </span> <a href="#" class="">POS Dash</a>.
-                            </div>
-                        </div>
-                    </div>
+      </div>
+    </div>
+
+    <!-- Update Product Modal -->
+    <div
+      class="modal fade"
+      id="updateProductModal"
+      tabindex="-1"
+      aria-labelledby="updateProductModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateProductModalLabel">
+              Cập nhật sản phẩm
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="updateProductForm">
+              <input type="hidden" id="updateProductId" name="id" />
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="updateProductName" class="form-label"
+                    >Tên sản phẩm <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="updateProductName"
+                    name="name"
+                    required
+                    maxlength="100"
+                    placeholder="Nhập tên sản phẩm..."
+                  />
                 </div>
-            </div>
-        </footer>
-        <script>fetch('nav.html').then(response => response.text()).then(data => { document.getElementById('nav-placeholder').innerHTML = data; });</script>
-        <script>fetch('header.html').then(response => response.text()).then(data => { document.getElementById('header-placeholder').innerHTML = data; });</script> <!--nav--> <!--header--> <!-- Backend Bundle JavaScript -->
+                <div class="col-md-6 mb-3">
+                  <label for="updateProductCategory" class="form-label"
+                    >Danh mục <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="updateProductCategory"
+                    name="categoryId"
+                    required
+                  >
+                    <option value="">Chọn danh mục</option>
+                    <!-- Categories will be loaded here -->
+                  </select>
+                </div>
+              </div>
 
+              <div class="mb-3">
+                <label for="updateProductDescription" class="form-label"
+                  >Mô tả</label
+                >
+                <textarea
+                  class="form-control"
+                  id="updateProductDescription"
+                  name="description"
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="Mô tả chi tiết về sản phẩm..."
+                ></textarea>
+              </div>
 
-        <script>
-            const API_BASE = "https://localhost:7062/api";
-            let products = [], currentSort = { key: null, asc: true }, currentPage = 1, totalPages = 1, pageSize = 10;
+              <div class="mb-3">
+                <label for="updatePrimaryImage" class="form-label"
+                  >Ảnh chính mới (tùy chọn)</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="updatePrimaryImage"
+                  name="primaryImage"
+                  accept="image/*"
+                />
+                <div class="form-text">
+                  Chỉ chọn ảnh mới nếu muốn thay đổi ảnh chính.
+                </div>
+              </div>
 
-            const productImage = id => `${API_BASE.replace('/api', '')}/Image/products/${id}/primary.jpg`;
+              <div class="mb-3">
+                <label for="updateAdditionalImages" class="form-label"
+                  >Ảnh phụ mới (tùy chọn)</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="updateAdditionalImages"
+                  name="additionalImages"
+                  multiple
+                  accept="image/*"
+                />
+                <div class="form-text">
+                  Chỉ chọn ảnh mới nếu muốn thay đổi ảnh phụ.
+                </div>
+              </div>
 
-            async function loadProducts(pageNumber = 1, pageSizeParam = 10) {
-                try {
-                    currentPage = pageNumber; pageSize = pageSizeParam;
-                    const url = `${API_BASE}/Product?pageNumber=${pageNumber}&pageSize=${pageSize}&categoryId=0&min=0&max=500000&asc=true`;
-                    const res = await fetch(url), json = await res.json();
-                    if (!json.succeeded) { console.error("API error:", json.message); return; }
-                    products = json.data.items || [];
-                    totalPages = json.data.totalPages ?? Math.ceil((json.data.totalCount ?? products.length) / pageSize);
-                    renderTable(); renderPagination();
-                } catch (e) { console.error("Fetch error:", e); }
-            }
+              <!-- Flower Recipe Section -->
+              <div class="mb-3">
+                <label class="form-label"
+                  >Công thức hoa <span class="text-danger">*</span></label
+                >
+                <div class="border rounded p-3 bg-light">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <h6 class="mb-0">Chọn hoa cần thiết:</h6>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary btn-sm"
+                      id="addFlowerRowUpdateModal"
+                    >
+                      <i class="las la-plus me-1"></i>Thêm hoa
+                    </button>
+                  </div>
+                  <div id="flowerSelectionContainerUpdateModal">
+                    <!-- Flower selection rows will be added here -->
+                  </div>
+                  <div class="text-muted small mt-2">
+                    <i class="las la-info-circle me-1"></i>
+                    Thêm ít nhất 1 loại hoa để tạo công thức cho sản phẩm.
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="submitUpdateProduct"
+            >
+              <span
+                class="spinner-border spinner-border-sm d-none"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Cập nhật sản phẩm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            function renderTable() {
-                const tbody = document.getElementById("tableBody");
-                tbody.innerHTML = "";
-                products.forEach(p => {
-                    const tr = document.createElement("tr");
-                    const photoUrl = `${API_BASE.replace('/api', '')}${p.url}`;
-                    tr.innerHTML = `
+    <!-- Loading Overlay -->
+    <div
+      id="loading-overlay"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div class="spinner-border text-light" role="status">
+        <span class="sr-only">Đang tải...</span>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <footer
+      id="footer-placeholder"
+      hx-get="../components/footer.html"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></footer>
+    <script src="../../js/vendor.js"></script>
+    <script src="../../js/active.js"></script>
+    <script type="module" src="../../js/services/ApiService.js"></script>
+    <script
+      type="module"
+      src="../../js/component/header/HeaderManager.js"
+    ></script>
+    <script src="../../js/auth.js"></script>
+
+    <script>
+      const API_BASE = "https://localhost:7062/api";
+      let products = [],
+        currentSort = { key: null, asc: true },
+        currentPage = 1,
+        totalPages = 1,
+        pageSize = 10;
+
+      const productImage = (id) =>
+        `${API_BASE.replace(
+          "/api",
+          ""
+        )}/images/products/${id}/primary.jpg?v=${Date.now()}`;
+
+      async function loadProducts(pageNumber = 1, pageSizeParam = 10) {
+        try {
+          currentPage = pageNumber;
+          pageSize = pageSizeParam;
+          // Use admin endpoint to get all products including deleted ones
+          const url = `${API_BASE}/Product/admin/all?pageNumber=${pageNumber}&pageSize=${pageSize}&categoryId=0&min=0&max=500000&asc=true`;
+          const res = await fetch(url),
+            json = await res.json();
+          if (!json.succeeded) {
+            console.error("API error:", json.message);
+            return;
+          }
+          products = json.data.items || [];
+          totalPages =
+            json.data.totalPages ??
+            Math.ceil((json.data.totalCount ?? products.length) / pageSize);
+          renderTable();
+          renderPagination();
+          updatePageInfo();
+        } catch (e) {
+          console.error("Fetch error:", e);
+        }
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        products.forEach((p) => {
+          const tr = document.createElement("tr");
+
+          // Sử dụng cùng logic hiển thị hình ảnh như shop.html
+          const imageUrl = productImage(p.id);
+
+          // Debug logging for button rendering
+          console.log(`Rendering product ${p.id}: isDeleted = ${p.isDeleted}`);
+
+          tr.innerHTML = `
 <td>
-                          <div class="checkbox d-inline-block">
-                            <input type="checkbox" class="checkbox-input row-check" id="checkbox_${p.id}">
-                            <label for="checkbox_${p.id}" class="mb-0"></label>
+              <div class="product-image-container">
+                <img src="${imageUrl}" 
+                     class="product-image" 
+                     alt="${p.name || "Sản phẩm"}"
+                     onerror="this.src='${API_BASE.replace(
+                       "/api",
+                       ""
+                     )}/images/products/default/default.jpg?v=${Date.now()}'"
+                     loading="lazy">
                           </div>
 </td>
 <td>
-                          <div class="d-flex align-items-center">
-                            <img src="${photoUrl || productImage(p.id)}" class="img-fluid rounded avatar-50 mr-3" alt="image">
-                            <div>${p.name}</div>
+              <div class="product-name">
+                <strong>${p.name || "Không có tên"}</strong>
                           </div>
 </td>
-<td>${p.id}</td>
-<td>${p.categoryName || "-"}</td>
-<td>${p.price ? p.price.toLocaleString() + "₫" : "-"}</td>
-<td>${p.stock ?? 0}</td>
+            <td>
+              <div class="product-description">
+                ${
+                  p.description
+                    ? p.description.substring(0, 80) +
+                      (p.description.length > 80 ? "..." : "")
+                    : "Không có mô tả"
+                }
+              </div>
+            </td>
+            <td>
+              <span class="product-id">#${p.id}</span>
+            </td>
+            <td>
+              <span class="product-category">${
+                p.categoryName || "Chưa phân loại"
+              }</span>
+            </td>
+            <td>
+              <span class="product-status ${
+                p.isDeleted ? "status-deleted" : "status-active"
+              }">
+                ${p.isDeleted ? "Không hoạt động" : "Hoạt động"}
+              </span>
+            </td>
 <td>
                           <div class="d-flex align-items-center list-action">
-                            
-                            <a class="badge bg-success mr-2" data-toggle="tooltip" href="page-edit-product.html?id=${p.id}" title="Edit"><i class="ri-pencil-line mr-0"></i></a>
-                            <a class="badge bg-warning mr-2 delete-btn" href="#" data-id="${p.id}" title="Delete"><i class="ri-delete-bin-line mr-0"></i></a>
+                <button class="badge bg-primary mr-2 update-btn" 
+                        data-toggle="tooltip" 
+                        data-id="${p.id}" 
+                        title="Cập nhật">
+                  <i class="ri-edit-line mr-0"></i> Cập nhật
+                </button>
+                <button class="badge ${
+                  p.isDeleted ? "bg-success" : "bg-warning"
+                } mr-2 toggle-status-btn" 
+                        data-toggle="tooltip" 
+                        data-id="${p.id}" 
+                        data-status="${p.isDeleted ? "deactivated" : "active"}"
+                        title="${p.isDeleted ? "Kích hoạt" : "Vô hiệu hóa"}">
+                  <i class="ri-${
+                    p.isDeleted ? "check-line" : "close-line"
+                  } mr-0"></i> ${p.isDeleted ? "Kích hoạt" : "Vô hiệu hóa"}
+                </button>
                           </div>
 </td>`;
-                    tbody.appendChild(tr);
-                });
-            }
 
-            function renderPagination() {
-                const el = document.getElementById("pagination"); el.innerHTML = "";
-                const makeLi = (html, disabled = false) => { const li = document.createElement("li"); li.className = "page-item" + (disabled ? " disabled" : ""); li.innerHTML = html; return li; };
-
-                el.appendChild(makeLi(`<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>`, currentPage === 1));
-                let startPage = Math.max(1, currentPage - 2), endPage = Math.min(totalPages, currentPage + 2);
-                if (currentPage <= 3) endPage = Math.min(5, totalPages);
-                if (currentPage > totalPages - 3) startPage = Math.max(1, totalPages - 4);
-
-                if (startPage > 1) { el.appendChild(makeLi(`<a class="page-link" href="#" onclick="changePage(1)">1</a>`)); if (startPage > 2) el.appendChild(makeLi(`<span class="page-link">...</span>`, true)); }
-
-                for (let i = startPage; i <= endPage; i++) {
-                    const active = i === currentPage ? " active" : "";
-                    const li = document.createElement("li"); li.className = `page-item${active}`; li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`; el.appendChild(li);
-                }
-
-                if (endPage < totalPages) { if (endPage < totalPages - 1) el.appendChild(makeLi(`<span class="page-link">...</span>`, true)); el.appendChild(makeLi(`<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`)); }
-
-                el.appendChild(makeLi(`<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>`, currentPage === totalPages));
-            }
-
-            function changePage(page) { if (page < 1 || page > totalPages || page === currentPage) return; loadProducts(page, pageSize); }
-            function changePageSize(newPageSize) { pageSize = newPageSize; currentPage = 1; loadProducts(1, pageSize); }
-
-            function sortBy(key) {
-                if (currentSort.key === key) currentSort.asc = !currentSort.asc; else currentSort = { key, asc: true };
-                products.sort((a, b) => {
-                    let A = a[key], B = b[key];
-                    if (typeof A === "string") A = A.toLowerCase();
-                    if (typeof B === "string") B = B.toLowerCase();
-                    if (A < B) return currentSort.asc ? -1 : 1;
-                    if (A > B) return currentSort.asc ? 1 : -1;
-                    return 0;
-                });
-                renderTable();
-            }
-
-            document.getElementById("checkAll").addEventListener("change", function () { document.querySelectorAll(".row-check").forEach(cb => cb.checked = this.checked); });
-            document.getElementById("sortId").addEventListener("click", () => sortBy("id"));
-            document.getElementById("sortName").addEventListener("click", () => sortBy("name"));
-            document.getElementById("sortPrice").addEventListener("click", () => sortBy("price"));
-
-            document.getElementById("tableBody").addEventListener("click", e => {
-                const del = e.target.closest(".delete-btn"); if (!del) return; e.preventDefault();
-                const id = Number(del.dataset.id); if (!id) return; deleteProduct(id);
+          // Debug logging for button attributes
+          const toggleBtn = tr.querySelector(".toggle-status-btn");
+          if (toggleBtn) {
+            console.log(`Button ${p.id} attributes:`, {
+              id: toggleBtn.getAttribute("data-id"),
+              status: toggleBtn.getAttribute("data-status"),
+              classes: toggleBtn.className,
             });
+          }
 
-            async function deleteProduct(id) {
-                try {
-                    if (!confirm("Bạn có chắc muốn xóa sản phẩm này không?")) return;
-                    const res = await fetch(`${API_BASE}/Product/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
-                    const text = await res.text();
-                    let json = null;
-                    try { json = JSON.parse(text); } catch (_) { }
-                    if (!res.ok || (json && json.succeeded === false)) { alert("Xóa thất bại: " + ((json && json.message) || text || res.statusText)); return; }
-                    await loadProducts(currentPage, pageSize);
-                    if (currentPage > totalPages && totalPages > 0) { currentPage = totalPages; await loadProducts(currentPage, pageSize); }
-                } catch (e) { console.error("Delete error:", e); alert("Có lỗi khi xóa sản phẩm."); }
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderPagination() {
+        const el = document.getElementById("pagination");
+        el.innerHTML = "";
+        const makeLi = (html, disabled = false) => {
+          const li = document.createElement("li");
+          li.className = "page-item" + (disabled ? " disabled" : "");
+          li.innerHTML = html;
+          return li;
+        };
+
+        el.appendChild(
+          makeLi(
+            `<a class="page-link" href="#" onclick="changePage(${
+              currentPage - 1
+            })">Trước</a>`,
+            currentPage === 1
+          )
+        );
+        let startPage = Math.max(1, currentPage - 2),
+          endPage = Math.min(totalPages, currentPage + 2);
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage > totalPages - 3)
+          startPage = Math.max(1, totalPages - 4);
+
+        if (startPage > 1) {
+          el.appendChild(
+            makeLi(
+              `<a class="page-link" href="#" onclick="changePage(1)">1</a>`
+            )
+          );
+          if (startPage > 2)
+            el.appendChild(makeLi(`<span class="page-link">...</span>`, true));
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+          const active = i === currentPage ? " active" : "";
+          const li = document.createElement("li");
+          li.className = `page-item${active}`;
+          li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+          el.appendChild(li);
+        }
+
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1)
+            el.appendChild(makeLi(`<span class="page-link">...</span>`, true));
+          el.appendChild(
+            makeLi(
+              `<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`
+            )
+          );
+        }
+
+        el.appendChild(
+          makeLi(
+            `<a class="page-link" href="#" onclick="changePage(${
+              currentPage + 1
+            })">Tiếp</a>`,
+            currentPage === totalPages
+          )
+        );
+      }
+
+      function updatePageInfo() {
+        const pageInfo = document.getElementById("product-page-info");
+        if (products.length > 0) {
+          const startItem = (currentPage - 1) * pageSize + 1;
+          const endItem = Math.min(currentPage * pageSize, products.length);
+          pageInfo.innerHTML = `<span>Hiển thị ${startItem}-${endItem} trong tổng số sản phẩm</span>`;
+        } else {
+          pageInfo.innerHTML = `<span>Không có sản phẩm nào</span>`;
+        }
+      }
+
+      function changePage(page) {
+        if (page < 1 || page > totalPages || page === currentPage) return;
+        loadProducts(page, pageSize);
+      }
+
+      function changePageSize(newPageSize) {
+        pageSize = newPageSize;
+        currentPage = 1;
+        loadProducts(1, pageSize);
+      }
+
+      function sortBy(key) {
+        if (currentSort.key === key) currentSort.asc = !currentSort.asc;
+        else currentSort = { key, asc: true };
+        products.sort((a, b) => {
+          let A = a[key],
+            B = b[key];
+          if (typeof A === "string") A = A.toLowerCase();
+          if (typeof B === "string") B = B.toLowerCase();
+          if (A < B) return currentSort.asc ? -1 : 1;
+          if (A > B) return currentSort.asc ? 1 : -1;
+          return 0;
+        });
+        renderTable();
+      }
+
+      // Event listeners
+      document
+        .getElementById("sortId")
+        .addEventListener("click", () => sortBy("id"));
+      document
+        .getElementById("sortName")
+        .addEventListener("click", () => sortBy("name"));
+
+      document.addEventListener("click", (e) => {
+        console.log("Click event triggered on:", e.target);
+        console.log("Target classes:", e.target.classList);
+
+        // Find the closest toggle-status-btn or update-btn
+        let targetButton = e.target;
+        while (
+          targetButton &&
+          !targetButton.classList.contains("toggle-status-btn") &&
+          !targetButton.classList.contains("update-btn")
+        ) {
+          targetButton = targetButton.parentElement;
+        }
+
+        if (
+          targetButton &&
+          targetButton.classList.contains("toggle-status-btn")
+        ) {
+          console.log("Toggle status button clicked!");
+          const id = targetButton.getAttribute("data-id");
+          const status = targetButton.getAttribute("data-status");
+          console.log("Data ID:", id);
+          console.log("Data Status:", status);
+
+          if (!id) {
+            console.error("No ID found!");
+            return;
+          }
+          console.log("Calling toggleProductStatus...");
+          toggleProductStatus(id, status);
+        }
+
+        if (targetButton && targetButton.classList.contains("update-btn")) {
+          const id = targetButton.getAttribute("data-id");
+          if (!id) return;
+          openUpdateModal(id);
+        }
+      });
+
+      // Add flower row button for Add Product Modal
+      document
+        .getElementById("addFlowerRowAddModal")
+        .addEventListener("click", () => addFlowerRow("addModal"));
+
+      // Add flower row button for Update Modal
+      document
+        .getElementById("addFlowerRowUpdateModal")
+        .addEventListener("click", () => addFlowerRow("updateModal"));
+
+      // Submit add product button
+      document
+        .getElementById("submitAddProduct")
+        .addEventListener("click", submitAddProduct);
+
+      // Submit update product button
+      document
+        .getElementById("submitUpdateProduct")
+        .addEventListener("click", submitUpdateProduct);
+
+      // Toggle product status function (deactivate/activate)
+      async function toggleProductStatus(id, currentStatus) {
+        try {
+          console.log("=== TOGGLE PRODUCT STATUS START ===");
+          console.log("Product ID:", id);
+          console.log("Current Status:", currentStatus);
+
+          const isDeactivated = currentStatus === "deactivated";
+          const action = isDeactivated ? "kích hoạt" : "vô hiệu hóa";
+
+          console.log("Is Deactivated:", isDeactivated);
+          console.log("Action:", action);
+
+          if (!confirm(`Bạn có chắc muốn ${action} sản phẩm này không?`))
+            return;
+
+          let url, method;
+          if (isDeactivated) {
+            // Activate product
+            url = `${API_BASE}/Product/${id}/activate`;
+            method = "PUT";
+          } else {
+            // Deactivate product
+            url = `${API_BASE}/Product/${id}`;
+            method = "DELETE";
+          }
+
+          console.log("API URL:", url);
+          console.log("HTTP Method:", method);
+
+          console.log("Making API call...");
+          const res = await fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+          });
+
+          console.log("Response status:", res.status);
+          console.log("Response ok:", res.ok);
+
+          const text = await res.text();
+          console.log("Response text:", text);
+
+          let json = null;
+          try {
+            json = JSON.parse(text);
+            console.log("Parsed JSON:", json);
+          } catch (_) {
+            console.log("Failed to parse JSON");
+          }
+
+          if (!res.ok || (json && json.succeeded === false)) {
+            const errorMessage =
+              `${action.charAt(0).toUpperCase() + action.slice(1)} thất bại: ` +
+              ((json && json.message) || text || res.statusText);
+            console.error("API Error:", errorMessage);
+            alert(errorMessage);
+            return;
+          }
+
+          console.log("API call successful, reloading products...");
+
+          // Reload products to update the table
+          await loadProducts(currentPage, pageSize);
+          if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+            await loadProducts(currentPage, pageSize);
+          }
+
+          // Show success message
+          const successMessage = isDeactivated
+            ? "Sản phẩm đã được kích hoạt thành công!"
+            : "Sản phẩm đã được vô hiệu hóa thành công!";
+          console.log("Success message:", successMessage);
+          showAlert(successMessage, "success");
+
+          console.log("=== TOGGLE PRODUCT STATUS END ===");
+        } catch (e) {
+          console.error("Toggle status error:", e);
+          alert(`Có lỗi khi ${action} sản phẩm.`);
+        }
+      }
+
+      // Search functionality
+      document
+        .getElementById("productSearchInput")
+        .addEventListener("input", function (e) {
+          const searchTerm = (e.target.value || "").toLowerCase().trim();
+          const rows = document.querySelectorAll("#tableBody tr");
+          let matchCount = 0;
+
+          rows.forEach((row) => {
+            const productName =
+              row
+                .querySelector("td:nth-child(2) .product-name strong")
+                ?.textContent?.toLowerCase() || "";
+            const show = !searchTerm || productName.includes(searchTerm);
+            row.style.display = show ? "" : "none";
+            if (show) matchCount++;
+          });
+
+          // Hide pagination during search
+          const pagination = document.getElementById("pagination");
+          if (pagination) pagination.style.display = searchTerm ? "none" : "";
+
+          // Update page info during search
+          const pageInfo = document.getElementById("product-page-info");
+          if (pageInfo) {
+            if (searchTerm)
+              pageInfo.innerHTML = `<span>Tìm thấy ${matchCount} sản phẩm</span>`;
+            else updatePageInfo();
+          }
+        });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadProducts();
+        loadCategories();
+        loadAllFlowers(); // Load flowers for recipe modal
+      });
+
+      // Add Product Modal Functions
+      let categories = [];
+
+      // Load categories when modal opens
+      document
+        .getElementById("addProductModal")
+        .addEventListener("show.bs.modal", async function () {
+          // Load flowers when modal opens
+          if (allFlowers.length === 0) {
+            await loadAllFlowers();
+          }
+
+          await loadCategories();
+          resetAddProductForm();
+
+          // Disable nice-select for this modal
+          const select = document.getElementById("productCategory");
+          if (
+            select &&
+            select.nextElementSibling &&
+            select.nextElementSibling.classList.contains("nice-select")
+          ) {
+            select.nextElementSibling.remove();
+            select.style.display = "block";
+            select.style.opacity = "1";
+            select.style.visibility = "visible";
+          }
+        });
+
+      // Also disable nice-select when modal is shown
+      document
+        .getElementById("addProductModal")
+        .addEventListener("shown.bs.modal", function () {
+          const select = document.getElementById("productCategory");
+          if (
+            select &&
+            select.nextElementSibling &&
+            select.nextElementSibling.classList.contains("nice-select")
+          ) {
+            select.nextElementSibling.remove();
+            select.style.display = "block";
+            select.style.opacity = "1";
+            select.style.visibility = "visible";
+          }
+
+          // Force destroy nice-select if jQuery is available
+          if (typeof $ !== "undefined" && $.fn.niceSelect) {
+            try {
+              $("#productCategory").niceSelect("destroy");
+            } catch (e) {
+              console.log("Nice-select destroy failed:", e);
             }
+          }
+        });
 
-            document.addEventListener("DOMContentLoaded", () => loadProducts());
+      // Prevent nice-select from being applied to modal selects
+      document
+        .getElementById("addProductModal")
+        .addEventListener("DOMNodeInserted", function (e) {
+          if (
+            e.target.classList &&
+            e.target.classList.contains("nice-select")
+          ) {
+            e.target.remove();
+          }
+        });
 
+      // Load categories from API
+      async function loadCategories() {
+        try {
+          const response = await fetch(`${API_BASE}/ProductCategory`);
+          const result = await response.json();
 
-        </script>
+          if (result.succeeded) {
+            categories = result.data || [];
+            renderCategoryOptions();
+          } else {
+            console.error("Failed to load categories:", result.message);
+          }
+        } catch (error) {
+          console.error("Error loading categories:", error);
+        }
+      }
 
+      // Render category options in select
+      function renderCategoryOptions() {
+        const select = document.getElementById("productCategory");
+        select.innerHTML = '<option value="">Chọn danh mục</option>';
 
-        <script src="../../js/admin/backend-bundle.min.js"></script> <!-- Table Treeview JavaScript -->
-        <script src="../../js/admin/table-treeview.js"></script> <!-- Chart Custom JavaScript -->
-        <script src="../../js/admin/customizer.js"></script> <!-- Chart Custom JavaScript -->
-        <script async src="../../js/admin/chart-custom.js"></script> <!-- app JavaScript -->
-        <script src="../../js/admin/app.js"></script>
+        categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category.id;
+          option.textContent = category.name;
+          select.appendChild(option);
+        });
+      }
 
-    </body>
+      // Render category options for update modal
+      function renderCategoryOptionsForUpdate() {
+        const select = document.getElementById("updateProductCategory");
+        select.innerHTML = '<option value="">Chọn danh mục</option>';
+
+        categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category.id;
+          option.textContent = category.name;
+          select.appendChild(option);
+        });
+      }
+
+      // Reset form when modal opens
+      function resetAddProductForm() {
+        document.getElementById("addProductForm").reset();
+        document.getElementById("primaryImage").value = "";
+        document.getElementById("additionalImages").value = "";
+
+        // Clear flower selections
+        selectedFlowers = [];
+        document.getElementById("flowerSelectionContainerAddModal").innerHTML =
+          "";
+
+        // Add first flower row
+        addFlowerRow("addModal");
+      }
+
+      // Handle form submission - REMOVED DUPLICATE, using submitAddProduct function instead
+      // document
+      //   .getElementById("submitAddProduct")
+      //   .addEventListener("click", async function () { ... });
+
+      // Upload primary image
+      async function uploadProductImage(productId, file, isPrimary = false) {
+        try {
+          console.log(`=== UPLOAD PRODUCT IMAGE ===`);
+          console.log(`Product ID: ${productId}`);
+          console.log(`File: ${file.name}`);
+          console.log(`Is Primary: ${isPrimary}`);
+          console.log(`Is Primary type: ${typeof isPrimary}`);
+
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("isPrimary", isPrimary.toString());
+
+          console.log(`FormData isPrimary: ${formData.get("isPrimary")}`);
+          console.log(`FormData file: ${formData.get("file")?.name}`);
+
+          const response = await fetch(
+            `${API_BASE}/Product/${productId}/upload-image`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Upload hình ảnh chính thất bại");
+          }
+
+          // Backend already updates the product URL, no need to call updateProductUrl here
+          return true;
+        } catch (error) {
+          console.error("Error uploading primary image:", error);
+          showAlert(
+            "Lỗi upload hình ảnh chính, nhưng sản phẩm đã được tạo",
+            "warning"
+          );
+          return false;
+        }
+      }
+
+      // Upload additional images to ProductPhotos
+      async function uploadProductImages(productId, files, isUpdate = false) {
+        try {
+          const formData = new FormData();
+          Array.from(files).forEach((file, index) => {
+            formData.append("files", file);
+          });
+
+          const method = isUpdate ? "PUT" : "POST";
+          const response = await fetch(
+            `${API_BASE}/Image/products/${productId}`,
+            {
+              method: method,
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Upload hình ảnh phụ thất bại");
+          }
+
+          const result = await response.json();
+          if (result.succeeded) {
+            // Create ProductPhotos records
+            await createProductPhotos(productId, result.data);
+          }
+
+          return true;
+        } catch (error) {
+          console.error("Error uploading additional images:", error);
+          showAlert(
+            "Lỗi upload hình ảnh phụ, nhưng sản phẩm đã được tạo",
+            "warning"
+          );
+          return false;
+        }
+      }
+
+      // Update product URL to point to primary image
+      async function updateProductUrl(productId, primaryImageUrl) {
+        try {
+          const response = await fetch(`${API_BASE}/Product/${productId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: productId,
+              url: primaryImageUrl,
+            }),
+          });
+
+          if (!response.ok) {
+            console.warn("Failed to update product URL");
+          }
+        } catch (error) {
+          console.error("Error updating product URL:", error);
+        }
+      }
+
+      // Create ProductPhotos records for additional images
+      async function createProductPhotos(productId, imageUrls) {
+        try {
+          const productPhotos = imageUrls.map((url) => ({
+            productId: productId,
+            url: url,
+            isPrimary: false,
+          }));
+
+          const response = await fetch(
+            `${API_BASE}/Product/${productId}/photos`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(productPhotos),
+            }
+          );
+
+          if (!response.ok) {
+            console.warn("Failed to create ProductPhotos records");
+          }
+        } catch (error) {
+          console.error("Error creating ProductPhotos:", error);
+        }
+      }
+
+      // Show alert message
+      function showAlert(message, type = "info") {
+        const alertContainer = document.getElementById("alert-container");
+        const alertId = "alert-" + Date.now();
+
+        const alertHtml = `
+          <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+
+        alertContainer.innerHTML = alertHtml;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          const alert = document.getElementById(alertId);
+          if (alert) {
+            alert.remove();
+          }
+        }, 5000);
+      }
+
+      // Product Recipe Modal Functions
+      let allFlowers = [];
+      let currentProductId = null;
+      let selectedFlowers = [];
+
+      // Load all flowers from backend
+      async function loadAllFlowers() {
+        try {
+          console.log("Loading flowers from:", `${API_BASE}/flower/all`);
+          const response = await fetch(`${API_BASE}/flower/all`);
+          if (!response.ok) {
+            throw new Error(
+              `Failed to load flowers: ${response.status} ${response.statusText}`
+            );
+          }
+          const result = await response.json();
+          console.log("Flowers API response:", result);
+          if (result.succeeded) {
+            allFlowers = result.data || [];
+            console.log("Loaded flowers:", allFlowers);
+            console.log("Total flowers loaded:", allFlowers.length);
+          } else {
+            console.error("API returned success=false:", result.message);
+          }
+        } catch (error) {
+          console.error("Error loading flowers:", error);
+          showAlert("Lỗi tải danh sách hoa: " + error.message, "danger");
+        }
+      }
+
+      // Add flower selection row
+      function addFlowerRow(
+        modalType = "addModal",
+        flowerId = null,
+        quantity = null
+      ) {
+        console.log("Adding flower row for modal:", modalType);
+        console.log("Available flowers:", allFlowers);
+
+        let containerId;
+        if (modalType === "addModal") {
+          containerId = "flowerSelectionContainerAddModal";
+        } else if (modalType === "updateModal") {
+          containerId = "flowerSelectionContainerUpdateModal";
+        } else {
+          containerId = "flowerSelectionContainerRecipeModal";
+        }
+        const container = document.getElementById(containerId);
+
+        if (!container) {
+          console.error("Container not found:", containerId);
+          return;
+        }
+
+        const rowId = "flower-row-" + Date.now();
+
+        const rowHtml = `
+          <div class="row mb-2" id="${rowId}">
+            <div class="col-md-6">
+              <select class="form-select flower-select" data-row="${rowId}">
+                <option value="">Chọn loại hoa</option>
+                ${allFlowers
+                  .map(
+                    (flower) =>
+                      `<option value="${flower.id}" data-category="${
+                        flower.categoryName || ""
+                      }" data-type="${flower.typeName || ""}" data-color="${
+                        flower.colorName || ""
+                      }">
+                    ${flower.name}
+                  </option>`
+                  )
+                  .join("")}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <input type="number" class="form-control flower-quantity" placeholder="Số lượng" min="1" step="1" data-row="${rowId}" oninput="validateQuantity(this)">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-danger btn-sm remove-flower" data-row="${rowId}" title="Xóa">
+                <i class="ri-delete-bin-line me-1"></i>Xóa
+              </button>
+            </div>
+          </div>
+        `;
+
+        container.insertAdjacentHTML("beforeend", rowHtml);
+        console.log("Added flower row with ID:", rowId);
+
+        // Pre-populate if flowerId and quantity are provided
+        if (flowerId && quantity) {
+          console.log(
+            `Pre-populating flower row ${rowId} with flowerId: ${flowerId}, quantity: ${quantity}`
+          );
+
+          const flowerSelect = document.querySelector(
+            `#${rowId} .flower-select`
+          );
+          const quantityInput = document.querySelector(
+            `#${rowId} .flower-quantity`
+          );
+
+          console.log("Found flowerSelect:", flowerSelect);
+          console.log("Found quantityInput:", quantityInput);
+
+          if (flowerSelect && quantityInput) {
+            flowerSelect.value = flowerId;
+            quantityInput.value = quantity;
+            console.log(`Set flowerSelect.value = ${flowerId}`);
+            console.log(`Set quantityInput.value = ${quantity}`);
+
+            // Update selectedFlowers with rowId for updateModal
+            if (modalType === "updateModal") {
+              console.log(
+                "Modal type is updateModal, updating selectedFlowers"
+              );
+              const flower = allFlowers.find((f) => f.id == flowerId);
+              console.log("Found flower in allFlowers:", flower);
+
+              if (flower) {
+                // Find and update the entry that was loaded with rowId: null
+                const existingIndex = selectedFlowers.findIndex(
+                  (f) => f.flowerId === flowerId && f.rowId === null
+                );
+                console.log(
+                  "Found existing index in selectedFlowers:",
+                  existingIndex
+                );
+
+                if (existingIndex >= 0) {
+                  selectedFlowers[existingIndex].rowId = rowId;
+                  console.log(
+                    "Updated selectedFlowers entry with rowId:",
+                    selectedFlowers[existingIndex]
+                  );
+                } else {
+                  console.log(
+                    "No existing entry found in selectedFlowers for flowerId:",
+                    flowerId
+                  );
+                }
+              }
+            }
+          } else {
+            console.error(
+              "Could not find flowerSelect or quantityInput elements"
+            );
+          }
+        } else {
+          console.log("No flowerId or quantity provided, not pre-populating");
+        }
+
+        // Add event listeners
+        document
+          .querySelector(`#${rowId} .flower-select`)
+          .addEventListener("change", () => updateSelectedFlowers(modalType));
+        document
+          .querySelector(`#${rowId} .flower-quantity`)
+          .addEventListener("input", () => updateSelectedFlowers(modalType));
+        document
+          .querySelector(`#${rowId} .remove-flower`)
+          .addEventListener("click", () => removeFlowerRow(rowId, modalType));
+      }
+
+      // Remove flower row
+      function removeFlowerRow(rowId, modalType = "addModal") {
+        const row = document.getElementById(rowId);
+        if (row) {
+          row.remove();
+          // Update selected flowers after removing row
+          updateSelectedFlowers(modalType);
+        }
+      }
+
+      // Update selected flowers list
+      function updateSelectedFlowers(modalType = "addModal") {
+        console.log(`=== UPDATE SELECTED FLOWERS - Modal: ${modalType} ===`);
+        console.log("Current selectedFlowers before update:", selectedFlowers);
+
+        // Don't reset selectedFlowers for updateModal to preserve existing data
+        if (modalType !== "updateModal") {
+          console.log("Resetting selectedFlowers for non-updateModal");
+          selectedFlowers = [];
+        } else {
+          console.log("Preserving selectedFlowers for updateModal");
+        }
+
+        let containerSelector;
+        if (modalType === "addModal") {
+          containerSelector = "#flowerSelectionContainerAddModal";
+        } else if (modalType === "updateModal") {
+          containerSelector = "#flowerSelectionContainerUpdateModal";
+        } else {
+          containerSelector = "#flowerSelectionContainerRecipeModal";
+        }
+        console.log("Container selector:", containerSelector);
+
+        const rows = document.querySelectorAll(`${containerSelector} .row`);
+        console.log("Found rows:", rows.length);
+
+        // For updateModal, update the existing selectedFlowers instead of replacing
+        if (modalType === "updateModal") {
+          console.log("Processing updateModal rows");
+          // Find and update existing entries
+          rows.forEach((row, index) => {
+            console.log(`Processing row ${index}:`, row.id);
+            const flowerSelect = row.querySelector(".flower-select");
+            const quantityInput = row.querySelector(".flower-quantity");
+            const rowId = row.id;
+
+            console.log(
+              `Row ${index} - flowerSelect.value:`,
+              flowerSelect?.value
+            );
+            console.log(
+              `Row ${index} - quantityInput.value:`,
+              quantityInput?.value
+            );
+
+            if (flowerSelect.value && quantityInput.value) {
+              const flower = allFlowers.find((f) => f.id == flowerSelect.value);
+              console.log(`Row ${index} - found flower:`, flower);
+
+              if (flower) {
+                // Find existing entry or create new one
+                const existingIndex = selectedFlowers.findIndex(
+                  (f) => f.rowId === rowId
+                );
+                console.log(
+                  `Row ${index} - existing index in selectedFlowers:`,
+                  existingIndex
+                );
+
+                if (existingIndex >= 0) {
+                  // Update existing entry
+                  console.log(
+                    `Row ${index} - updating existing entry at index ${existingIndex}`
+                  );
+                  selectedFlowers[existingIndex] = {
+                    flowerId: flower.id,
+                    flowerName: flower.name,
+                    quantityNeeded: parseInt(quantityInput.value),
+                    rowId: rowId,
+                  };
+                } else {
+                  // Add new entry
+                  console.log(`Row ${index} - adding new entry`);
+                  selectedFlowers.push({
+                    flowerId: flower.id,
+                    flowerName: flower.name,
+                    quantityNeeded: parseInt(quantityInput.value),
+                    rowId: rowId,
+                  });
+                }
+              }
+            } else {
+              console.log(
+                `Row ${index} - missing flowerSelect.value or quantityInput.value`
+              );
+            }
+          });
+        } else {
+          console.log("Processing non-updateModal rows");
+          // For other modals, use the old logic
+          rows.forEach((row, index) => {
+            const flowerSelect = row.querySelector(".flower-select");
+            const quantityInput = row.querySelector(".flower-quantity");
+
+            if (flowerSelect.value && quantityInput.value) {
+              const flower = allFlowers.find((f) => f.id == flowerSelect.value);
+              if (flower) {
+                selectedFlowers.push({
+                  flowerId: flower.id,
+                  flowerName: flower.name,
+                  quantityNeeded: parseInt(quantityInput.value),
+                });
+              }
+            }
+          });
+        }
+
+        console.log("Final selectedFlowers after update:", selectedFlowers);
+        // No need to render selected flowers list since we removed it
+      }
+
+      // Render selected flowers list
+      function renderSelectedFlowers(modalType = "addModal") {
+        const containerId =
+          modalType === "addModal"
+            ? "selectedFlowersListAddModal"
+            : "selectedFlowersListRecipeModal";
+        const container = document.getElementById(containerId);
+
+        if (selectedFlowers.length === 0) {
+          container.innerHTML = '<p class="text-muted">Chưa chọn hoa nào</p>';
+          return;
+        }
+
+        const flowersHtml = selectedFlowers
+          .map(
+            (flower, index) => `
+          <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+            <div>
+              <strong>${flower.flowerName}</strong><br>
+              <small class="text-muted">Số lượng: ${flower.quantityNeeded}</small>
+            </div>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSelectedFlower(${index}, '${modalType}')" title="Xóa">
+              <i class="ri-delete-bin-line me-1"></i>Xóa
+            </button>
+          </div>
+        `
+          )
+          .join("");
+
+        container.innerHTML = flowersHtml;
+      }
+
+      // Remove selected flower
+      function removeSelectedFlower(index, modalType = "addModal") {
+        selectedFlowers.splice(index, 1);
+        // No need to render selected flowers list since we removed it
+      }
+
+      // Validate quantity input to prevent negative numbers
+      function validateQuantity(input) {
+        const value = parseInt(input.value);
+        if (value < 1) {
+          input.value = 1;
+          showAlert("Số lượng phải lớn hơn 0", "warning");
+        }
+      }
+
+      // Open update modal and load product data
+      async function openUpdateModal(productId) {
+        try {
+          // Show loading
+          document.getElementById("loading-overlay").style.display = "flex";
+
+          // Load product data
+          const response = await fetch(`${API_BASE}/Product/${productId}`);
+          if (!response.ok) {
+            throw new Error("Failed to load product data");
+          }
+
+          const result = await response.json();
+          if (!result.succeeded) {
+            throw new Error(result.message || "Failed to load product data");
+          }
+
+          const product = result.data;
+
+          // Populate form fields
+          document.getElementById("updateProductId").value = product.id;
+          document.getElementById("updateProductName").value =
+            product.name || "";
+          document.getElementById("updateProductDescription").value =
+            product.description || "";
+          document.getElementById("updateProductCategory").value =
+            product.categoryId || "";
+
+          // Load categories if not loaded
+          if (categories.length === 0) {
+            await loadCategories();
+          }
+
+          // Render category options first
+          renderCategoryOptionsForUpdate();
+
+          // Then set selected value after a short delay to ensure DOM is ready
+          setTimeout(() => {
+            document.getElementById("updateProductCategory").value =
+              product.categoryId || "";
+          }, 100);
+
+          // Load flowers if not loaded
+          if (allFlowers.length === 0) {
+            await loadAllFlowers();
+          }
+
+          // Load existing flower recipe
+          try {
+            console.log("=== LOADING EXISTING FLOWER RECIPE ===");
+            console.log("API URL:", `${API_BASE}/Product/${productId}/flowers`);
+
+            const flowerResponse = await fetch(
+              `${API_BASE}/Product/${productId}/flowers`
+            );
+            console.log("Flower response status:", flowerResponse.status);
+            console.log("Flower response headers:", flowerResponse.headers);
+
+            if (flowerResponse.ok) {
+              const flowerResult = await flowerResponse.json();
+              console.log("Flower result:", flowerResult);
+              console.log("Flower result.succeeded:", flowerResult.succeeded);
+              console.log("Flower result.data:", flowerResult.data);
+              console.log(
+                "Flower result.data.length:",
+                flowerResult.data?.length
+              );
+
+              if (
+                flowerResult.succeeded &&
+                flowerResult.data &&
+                flowerResult.data.length > 0
+              ) {
+                console.log(
+                  "Found existing flower recipe with",
+                  flowerResult.data.length,
+                  "flowers"
+                );
+
+                // Clear previous flower selections
+                document.getElementById(
+                  "flowerSelectionContainerUpdateModal"
+                ).innerHTML = "";
+
+                // Add existing flower rows
+                flowerResult.data.forEach((flowerRecipe, index) => {
+                  console.log(`Adding flower row ${index}:`, flowerRecipe);
+                  addFlowerRow(
+                    "updateModal",
+                    flowerRecipe.flowerId,
+                    flowerRecipe.quantityNeeded
+                  );
+                });
+
+                // Update selectedFlowers array
+                selectedFlowers = flowerResult.data.map((recipe) => ({
+                  flowerId: recipe.flowerId,
+                  quantityNeeded: recipe.quantityNeeded,
+                  rowId: null, // Will be set when row is created
+                }));
+                console.log("Updated selectedFlowers:", selectedFlowers);
+              } else {
+                console.log(
+                  "No existing flower recipe found - data is empty or null"
+                );
+                console.log("flowerResult.succeeded:", flowerResult.succeeded);
+                console.log("flowerResult.data:", flowerResult.data);
+                // Clear previous flower selections
+                document.getElementById(
+                  "flowerSelectionContainerUpdateModal"
+                ).innerHTML = "";
+                // Add first flower row
+                addFlowerRow("updateModal");
+              }
+            } else {
+              console.log(
+                "Flower response not OK - status:",
+                flowerResponse.status
+              );
+              console.log("Response text:", await flowerResponse.text());
+              // Clear previous flower selections
+              document.getElementById(
+                "flowerSelectionContainerUpdateModal"
+              ).innerHTML = "";
+              // Add first flower row
+              addFlowerRow("updateModal");
+            }
+          } catch (error) {
+            console.error("Error loading flower recipe:", error);
+            console.error("Error details:", {
+              message: error.message,
+              stack: error.stack,
+              name: error.name,
+            });
+            // Clear previous flower selections
+            document.getElementById(
+              "flowerSelectionContainerUpdateModal"
+            ).innerHTML = "";
+            // Add first flower row
+            addFlowerRow("updateModal");
+          }
+
+          // Show modal
+          const modal = new bootstrap.Modal(
+            document.getElementById("updateProductModal")
+          );
+          modal.show();
+        } catch (error) {
+          console.error("Error opening update modal:", error);
+          showAlert("Lỗi tải dữ liệu sản phẩm: " + error.message, "danger");
+        } finally {
+          // Hide loading
+          document.getElementById("loading-overlay").style.display = "none";
+        }
+      }
+
+      // Save product recipe
+      async function saveProductRecipe() {
+        if (selectedFlowers.length === 0) {
+          showAlert("Vui lòng chọn ít nhất một loại hoa", "warning");
+          return;
+        }
+
+        try {
+          const saveButton = document.getElementById("saveRecipe");
+          const spinner = saveButton.querySelector(".spinner-border-sm");
+
+          saveButton.disabled = true;
+          spinner.classList.remove("d-none");
+
+          const flowerDtos = selectedFlowers.map((flower) => ({
+            flowerId: flower.flowerId,
+            quantityNeeded: flower.quantityNeeded,
+          }));
+
+          const response = await fetch(
+            `${API_BASE}/Product/${currentProductId}/flowers`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(flowerDtos),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to save recipe");
+          }
+
+          const result = await response.json();
+          if (result.succeeded) {
+            showAlert("Công thức sản phẩm đã được lưu thành công!", "success");
+            $("#productRecipeModal").modal("hide");
+          } else {
+            throw new Error(result.message || "Failed to save recipe");
+          }
+        } catch (error) {
+          console.error("Error saving recipe:", error);
+          showAlert("Lỗi lưu công thức: " + error.message, "error");
+        } finally {
+          const saveButton = document.getElementById("saveRecipe");
+          const spinner = saveButton.querySelector(".spinner-border-sm");
+
+          saveButton.disabled = false;
+          spinner.classList.add("d-none");
+        }
+      }
+
+      // Open recipe modal
+      function openRecipeModal(productId) {
+        currentProductId = productId;
+        selectedFlowers = [];
+
+        // Clear previous selections
+        document.getElementById(
+          "flowerSelectionContainerRecipeModal"
+        ).innerHTML = "";
+        document.getElementById("selectedFlowersListRecipeModal").innerHTML =
+          '<p class="text-muted">Chưa chọn hoa nào</p>';
+
+        // Add first flower row
+        addFlowerRow("recipeModal");
+
+        // Show modal
+        $("#productRecipeModal").modal("show");
+      }
+
+      // Validate product form
+      function validateProductForm(formType) {
+        const form = document.getElementById(
+          formType === "add" ? "addProductForm" : "updateProductForm"
+        );
+        const modalId = formType === "add" ? "AddModal" : "UpdateModal";
+
+        // Validate required fields
+        const name = form.querySelector('[name="name"]').value.trim();
+        const categoryId = form.querySelector('[name="categoryId"]').value;
+
+        if (!name) {
+          showAlert("Tên sản phẩm là bắt buộc", "warning");
+          form.querySelector('[name="name"]').focus();
+          return false;
+        }
+
+        if (!categoryId) {
+          showAlert("Danh mục là bắt buộc", "warning");
+          form.querySelector('[name="categoryId"]').focus();
+          return false;
+        }
+
+        // Validate flower recipe is required
+        const flowerRows = document.querySelectorAll(
+          `#flowerSelectionContainer${modalId} .flower-row`
+        );
+        if (flowerRows.length === 0) {
+          showAlert(
+            "Công thức hoa là bắt buộc. Vui lòng thêm ít nhất 1 loại hoa",
+            "warning"
+          );
+          return false;
+        }
+
+        // Validate flower quantities
+        const quantityInputs = document.querySelectorAll(
+          `#flowerSelectionContainer${modalId} .flower-quantity`
+        );
+        let hasInvalidQuantity = false;
+
+        quantityInputs.forEach((input) => {
+          if (input.value && parseInt(input.value) < 1) {
+            input.focus();
+            showAlert("Số lượng hoa phải lớn hơn 0", "warning");
+            hasInvalidQuantity = true;
+          }
+        });
+
+        if (hasInvalidQuantity) return false;
+
+        return true;
+      }
+
+      // Submit add product form
+      async function submitAddProduct() {
+        if (!validateProductForm("add")) return;
+
+        try {
+          const submitBtn = document.getElementById("submitAddProduct");
+          const spinner = submitBtn.querySelector(".spinner-border-sm");
+
+          submitBtn.disabled = true;
+          spinner.classList.remove("d-none");
+
+          // Get form data
+          const formData = new FormData(form);
+          const productData = {
+            name: formData.get("name"),
+            categoryId: parseInt(formData.get("categoryId")),
+            description: formData.get("description"),
+            url: "", // Empty initially, will be updated after image upload
+            productPhotos: [], // Empty initially, will be updated after image upload
+          };
+
+          console.log("Creating product with data:", productData);
+
+          // Create product first
+          const createResponse = await fetch(`${API_BASE}/Product`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(productData),
+          });
+
+          if (!createResponse.ok) {
+            throw new Error("Failed to create product");
+          }
+
+          const createResult = await createResponse.json();
+          if (!createResult.succeeded) {
+            throw new Error(createResult.message || "Failed to create product");
+          }
+
+          const productId = createResult.data.id;
+          console.log("Product created with ID:", productId);
+
+          // Upload primary image
+          const primaryImageFile = formData.get("primaryImage");
+          if (primaryImageFile && primaryImageFile.size > 0) {
+            await uploadProductImage(productId, primaryImageFile, true);
+          }
+
+          // Upload additional images
+          const additionalImagesFiles = formData.getAll("additionalImages");
+          if (additionalImagesFiles.length > 0) {
+            await uploadProductImages(productId, additionalImagesFiles, false);
+          }
+
+          // Create flower recipe if flowers are selected
+          if (selectedFlowers.length > 0) {
+            await createProductFlowers(productId, selectedFlowers);
+          }
+
+          showAlert("Sản phẩm đã được tạo thành công!", "success");
+          $("#addProductModal").modal("hide");
+          resetAddProductForm();
+          await loadProducts(currentPage, pageSize);
+        } catch (error) {
+          console.error("Error creating product:", error);
+          showAlert("Lỗi tạo sản phẩm: " + error.message, "error");
+        } finally {
+          const submitBtn = document.getElementById("submitAddProduct");
+          const spinner = submitBtn.querySelector(".spinner-border-sm");
+
+          submitBtn.disabled = false;
+          spinner.classList.add("d-none");
+        }
+      }
+
+      // Create ProductFlowers records for flower recipe
+      async function createProductFlowers(productId, flowers) {
+        try {
+          console.log("=== CREATE FLOWER RECIPE ===");
+          console.log("Product ID:", productId);
+          console.log("Flowers to create:", flowers);
+
+          const flowerDtos = flowers.map((flower) => ({
+            flowerId: flower.flowerId,
+            quantityNeeded: flower.quantityNeeded,
+          }));
+
+          console.log("Flower DTOs:", flowerDtos);
+
+          const response = await fetch(
+            `${API_BASE}/Product/${productId}/flowers`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(flowerDtos),
+            }
+          );
+
+          console.log("Create response status:", response.status);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Create error response:", errorText);
+            throw new Error("Failed to create flower recipe");
+          }
+
+          const result = await response.json();
+          console.log("Create response result:", result);
+
+          if (result.succeeded) {
+            console.log("Flower recipe created successfully");
+          } else {
+            throw new Error(result.message || "Failed to create flower recipe");
+          }
+        } catch (error) {
+          console.error("Error creating flower recipe:", error);
+          showAlert("Lỗi tạo công thức hoa: " + error.message, "warning");
+        }
+      }
+
+      // Submit update product form
+      async function submitUpdateProduct() {
+        const productId = document.getElementById("updateProductId").value;
+        if (!productId) {
+          showAlert("Không tìm thấy ID sản phẩm", "danger");
+          return;
+        }
+
+        if (!validateProductForm("update")) return;
+
+        // Update selectedFlowers with current values before validation
+        console.log("=== VALIDATING FLOWER QUANTITIES ===");
+        console.log("SelectedFlowers before validation:", selectedFlowers);
+        updateSelectedFlowers("updateModal");
+        console.log("SelectedFlowers after update:", selectedFlowers);
+
+        try {
+          const submitBtn = document.getElementById("submitUpdateProduct");
+          const spinner = submitBtn.querySelector(".spinner-border-sm");
+
+          submitBtn.disabled = true;
+          spinner.classList.remove("d-none");
+
+          // Get form data
+          const formData = new FormData(form);
+          const updateData = {
+            name: formData.get("name"),
+            description: formData.get("description") || "",
+            categoryId: parseInt(formData.get("categoryId")),
+            url: "", // Will be updated if new image is uploaded
+            productPhotos: [], // Will be updated if new images are uploaded
+          };
+
+          // Update product
+          const response = await fetch(`${API_BASE}/Product/${productId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to update product");
+          }
+
+          const result = await response.json();
+          if (!result.succeeded) {
+            throw new Error(result.message || "Failed to update product");
+          }
+
+          // Handle image uploads if any
+          const primaryImageFile =
+            document.getElementById("updatePrimaryImage").files[0];
+          const additionalImagesFiles = document.getElementById(
+            "updateAdditionalImages"
+          ).files;
+
+          if (primaryImageFile) {
+            await uploadProductImage(productId, primaryImageFile, true);
+          }
+
+          if (additionalImagesFiles.length > 0) {
+            await uploadProductImages(productId, additionalImagesFiles, true);
+          }
+
+          // Always delete existing flower recipe first
+          console.log("=== FLOWER RECIPE UPDATE START ===");
+          console.log("Product ID:", productId);
+          console.log("Selected flowers:", selectedFlowers);
+
+          try {
+            console.log("Deleting existing flower recipe...");
+            const deleteResponse = await fetch(
+              `${API_BASE}/Product/${productId}/flowers`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            console.log("Delete response status:", deleteResponse.status);
+            if (!deleteResponse.ok) {
+              console.warn("Failed to delete existing flower recipe");
+              const errorText = await deleteResponse.text();
+              console.warn("Delete error details:", errorText);
+            } else {
+              console.log("Existing flower recipe deleted successfully");
+            }
+          } catch (error) {
+            console.error("Error deleting existing flower recipe:", error);
+          }
+
+          // Create new flower recipe if flowers are selected
+          if (selectedFlowers.length > 0) {
+            console.log(
+              "Creating new flower recipe with",
+              selectedFlowers.length,
+              "flowers"
+            );
+            console.log(
+              "Flowers data to send:",
+              selectedFlowers.map((f) => ({
+                flowerId: f.flowerId,
+                quantityNeeded: f.quantityNeeded,
+              }))
+            );
+            await createProductFlowers(productId, selectedFlowers);
+          } else {
+            console.log("No flowers selected, skipping recipe creation");
+          }
+
+          console.log("=== FLOWER RECIPE UPDATE END ===");
+
+          showAlert("Sản phẩm đã được cập nhật thành công!", "success");
+
+          // Close modal
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("updateProductModal")
+          );
+          modal.hide();
+
+          // Reload products list to show updated data
+          console.log("=== RELOADING PRODUCTS LIST ===");
+          await loadProducts(currentPage, pageSize);
+          console.log("Products list reloaded");
+
+          // Show success message
+          showAlert("Sản phẩm đã được cập nhật thành công!", "success");
+        } catch (error) {
+          console.error("Error updating product:", error);
+          showAlert("Lỗi cập nhật sản phẩm: " + error.message, "danger");
+        } finally {
+          const submitBtn = document.getElementById("submitUpdateProduct");
+          const spinner = submitBtn.querySelector(".spinner-border-sm");
+
+          submitBtn.disabled = false;
+          spinner.classList.add("d-none");
+        }
+      }
+
+      // Show alert function
+      function showAlert(message, type = "info") {
+        const alertContainer = document.getElementById("alert-container");
+        const alertId = "alert-" + Date.now();
+
+        const alertHtml = `
+          <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+
+        alertContainer.innerHTML = alertHtml;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          const alert = document.getElementById(alertId);
+          if (alert) {
+            alert.remove();
+          }
+        }, 5000);
+      }
+    </script>
+
+    <style>
+      .avatar-50 {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      /* Product table specific styles */
+      .product-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 8px;
+      }
+
+      .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+      }
+
+      .product-image:hover {
+        transform: scale(1.1);
+        border-color: #dc3545;
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+      }
+
+      .product-name {
+        max-width: 200px;
+      }
+
+      .product-name strong {
+        color: #495057;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .product-description {
+        max-width: 250px;
+        color: #6c757d;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
+
+      .product-id {
+        font-family: "Courier New", monospace;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+      }
+
+      .product-category {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-block;
+      }
+
+      .product-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-block;
+      }
+
+      .status-active {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .status-deleted {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+
+      .list-action .btn {
+        margin: 0 2px;
+      }
+
+      .list-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+      }
+
+      .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        text-align: center;
+        vertical-align: middle;
+        padding: 12px 8px;
+      }
+
+      .table th:first-child {
+        text-align: center;
+      }
+
+      .table th:nth-child(2),
+      .table th:nth-child(3) {
+        text-align: left;
+      }
+
+      .table td {
+        vertical-align: middle;
+        padding: 12px 8px;
+        text-align: center;
+      }
+
+      .table td:nth-child(2),
+      .table td:nth-child(3) {
+        text-align: left;
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.75em;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease-in-out;
+        text-decoration: none;
+      }
+
+      .badge.bg-info {
+        background-color: #17a2b8 !important;
+        color: white !important;
+        font-weight: 500 !important;
+      }
+
+      .badge.bg-info:hover {
+        background-color: #138496 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+      }
+
+      .badge.bg-success {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: 500 !important;
+      }
+
+      .badge.bg-success:hover {
+        background-color: #218838 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+      }
+
+      .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+        font-weight: 500 !important;
+      }
+
+      .badge.bg-warning:hover {
+        background-color: #e0a800 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+      }
+
+      .badge.bg-primary {
+        background-color: #007bff !important;
+        color: white !important;
+        font-weight: 500 !important;
+      }
+
+      .badge.bg-primary:hover {
+        background-color: #0056b3 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+      }
+
+      .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .btn-maroon {
+        background-color: #dc3545;
+        border: none;
+        color: #fff;
+        padding: 12px 24px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        border-radius: 2px;
+        text-transform: none;
+      }
+
+      .btn-maroon:hover {
+        background-color: #c82333;
+        color: #fff;
+      }
+
+      .form-control:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+      }
+
+      .form-control {
+        border-radius: 6px;
+        border: 1px solid #e1e5e9;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:hover {
+        border-color: #dc3545;
+      }
+
+      .pagination .page-link {
+        color: #dc3545;
+        border-color: #dee2e6;
+      }
+
+      .pagination .page-item.active .page-link {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+      }
+
+      .pagination .page-link:hover {
+        color: #c82333;
+        border-color: #dee2e6;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .table-responsive {
+          font-size: 0.875rem;
+        }
+
+        .product-image {
+          width: 50px;
+          height: 50px;
+        }
+
+        .product-name {
+          max-width: 150px;
+        }
+
+        .list-action {
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .table th,
+        .table td {
+          padding: 8px 4px;
+        }
+
+        /* Mobile flower button adjustments */
+        .remove-flower {
+          min-width: 70px;
+          font-size: 0.75rem;
+          padding: 0.4rem 0.6rem;
+        }
+
+        #selectedFlowersListAddModal .btn-outline-danger,
+        #selectedFlowersListRecipeModal .btn-outline-danger {
+          min-width: 60px;
+          font-size: 0.75rem;
+          padding: 0.3rem 0.5rem;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .product-image {
+          width: 40px;
+          height: 40px;
+        }
+
+        .product-name {
+          max-width: 120px;
+        }
+
+        .product-category {
+          font-size: 0.75rem;
+          padding: 2px 8px;
+        }
+      }
+
+      /* Modal specific styles */
+      .modal-content {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+
+      .modal-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1.5rem 2rem 1rem;
+        position: relative;
+      }
+
+      .modal-header .btn-close {
+        position: absolute;
+        right: 1.5rem;
+        top: 1.5rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6c757d;
+        opacity: 0.7;
+        transition: all 0.2s ease;
+      }
+
+      .modal-header .btn-close:hover {
+        opacity: 1;
+        color: #dc3545;
+        transform: scale(1.1);
+      }
+
+      .modal-header .btn-close::before {
+        content: "×";
+        font-weight: 300;
+      }
+
+      .modal-body {
+        padding: 2rem;
+        background: #ffffff;
+      }
+
+      .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1.5rem 2rem;
+        background: #f8f9fa;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .form-control,
+      .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #ffffff;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #e9ecef;
+        box-shadow: none;
+        background: #ffffff;
+      }
+
+      .form-control:hover,
+      .form-select:hover {
+        border-color: #e9ecef;
+      }
+
+      .form-control::placeholder {
+        color: #adb5bd;
+        font-style: italic;
+      }
+
+      .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-left: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+      }
+
+      .input-group .form-control {
+        border-right: none;
+      }
+
+      .input-group .form-control:focus {
+        border-right: 2px solid #e9ecef;
+      }
+
+      .form-text {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+      }
+
+      .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        border: 2px solid #6c757d;
+        color: #ffffff;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+        border-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+      }
+
+      .btn-maroon {
+        background: #dc3545;
+        border: 2px solid #dc3545;
+        color: #ffffff;
+      }
+
+      .btn-maroon:hover {
+        background: #c82333;
+        border-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Remove flower button styling */
+      .remove-flower {
+        min-width: 80px;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+        border: 2px solid #dc3545;
+        transition: all 0.3s ease;
+      }
+
+      .remove-flower:hover {
+        background-color: #dc3545;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+      }
+
+      .remove-flower:active {
+        transform: translateY(0);
+      }
+
+      /* Selected flower remove button styling */
+      #selectedFlowersListAddModal .btn-outline-danger,
+      #selectedFlowersListRecipeModal .btn-outline-danger {
+        min-width: 70px;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        border: 2px solid #dc3545;
+        transition: all 0.3s ease;
+      }
+
+      #selectedFlowersListAddModal .btn-outline-danger:hover,
+      #selectedFlowersListRecipeModal .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+      }
+
+      .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+      }
+
+      /* Ensure form-select looks clean */
+      .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+      }
+
+      .form-select:focus {
+        background-image: none;
+      }
+
+      /* Bỏ cái mũi tên mặc định của Bootstrap */
+      .form-select {
+        background-image: none !important;
+      }
+
+      /* Đảm bảo nút Cập nhật luôn có màu xanh */
+      #submitUpdateProduct.btn-primary {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: white !important;
+      }
+
+      #submitUpdateProduct.btn-primary:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+        color: white !important;
+      }
+
+      /* Disable nice-select for modal */
+      #addProductModal .nice-select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+      }
+
+      #addProductModal select.form-select {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        background: #ffffff !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem !important;
+        color: #495057 !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
+        z-index: 1000 !important;
+      }
+
+      #addProductModal select.form-select:focus {
+        border-color: #e9ecef !important;
+        box-shadow: none !important;
+      }
+
+      #addProductModal select.form-select:hover {
+        border-color: #e9ecef !important;
+      }
+
+      /* Force hide any nice-select that might be created */
+      #addProductModal .nice-select,
+      #addProductModal .nice-select * {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Global override to prevent nice-select from working on this page */
+      .nice-select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Ensure all selects are visible */
+      select {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      /* File input styling */
+      .form-control[type="file"] {
+        padding: 0.5rem;
+        line-height: 1.5;
+      }
+
+      .form-control[type="file"]::-webkit-file-upload-button {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        margin-right: 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .form-control[type="file"]::-webkit-file-upload-button:hover {
+        background: #c82333;
+        transform: translateY(-1px);
+      }
+
+      /* Responsive modal adjustments */
+      @media (max-width: 768px) {
+        .modal-dialog {
+          margin: 1rem;
+        }
+
+        .modal-body {
+          padding: 1.5rem;
+        }
+
+        .modal-footer {
+          padding: 1rem 1.5rem;
+        }
+
+        .btn {
+          padding: 0.6rem 1.5rem;
+          font-size: 0.85rem;
+        }
+      }
+
+      /* Additional professional touches */
+      .modal-content {
+        animation: modalSlideIn 0.3s ease-out;
+      }
+
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-30px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        transform: translateY(-1px);
+      }
+
+      .btn:active {
+        transform: translateY(0) !important;
+      }
+
+      /* Smooth transitions for all interactive elements */
+      .modal-content * {
+        transition: all 0.2s ease;
+      }
+
+      /* Enhanced spacing and typography */
+      .modal-body .row {
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+      }
+
+      .modal-body .col-md-6 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .form-label .text-danger {
+        color: #dc3545 !important;
+        font-weight: 700;
+      }
+
+      .alert {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+
+      .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+    </style>
+  </body>
 </html>

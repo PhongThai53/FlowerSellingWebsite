@@ -22,9 +22,33 @@ namespace FlowerSellingWebsite.Repositories.Implementations
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
+            // Get existing product images to determine next number
+            var existingFiles = Directory.GetFiles(folderPath)
+                .Where(f => Path.GetFileName(f).StartsWith("product"))
+                .Select(f => Path.GetFileName(f))
+                .ToList();
+
+            int nextNumber = 1;
+            if (existingFiles.Any())
+            {
+                var numbers = existingFiles
+                    .Select(f => Path.GetFileNameWithoutExtension(f))
+                    .Where(f => f.StartsWith("product"))
+                    .Select(f => f.Replace("product", ""))
+                    .Where(n => int.TryParse(n, out _))
+                    .Select(int.Parse)
+                    .ToList();
+                
+                if (numbers.Any())
+                {
+                    nextNumber = numbers.Max() + 1;
+                }
+            }
+
             foreach (var file in files)
             {
-                var fileName = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                var extension = Path.GetExtension(file.FileName);
+                var fileName = $"product{nextNumber}{extension}";
                 var filePath = Path.Combine(folderPath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -32,7 +56,9 @@ namespace FlowerSellingWebsite.Repositories.Implementations
                     await file.CopyToAsync(stream);
                 }
 
-                savedPaths.Add($"/images/products/{productId}/{fileName}");
+                // Return only filename, not full path
+                savedPaths.Add(fileName);
+                nextNumber++;
             }
 
             return savedPaths;
@@ -44,9 +70,14 @@ namespace FlowerSellingWebsite.Repositories.Implementations
 
             if (Directory.Exists(folderPath))
             {
+                // Delete only product*.jpg files, keep primary.jpg
                 foreach (var oldFile in Directory.GetFiles(folderPath))
                 {
-                    try { File.Delete(oldFile); } catch { }
+                    var fileName = Path.GetFileName(oldFile);
+                    if (fileName.StartsWith("product"))
+                    {
+                        try { File.Delete(oldFile); } catch { }
+                    }
                 }
             }
             else

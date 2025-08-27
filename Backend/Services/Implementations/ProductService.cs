@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlowerSellingWebsite.Exceptions;
 using FlowerSellingWebsite.Models.DTOs.Product;
+using FlowerSellingWebsite.Models.DTOs.ProductPhoto;
 using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Repositories.Interfaces;
 using FlowerSellingWebsite.Services.Interfaces;
@@ -59,8 +60,76 @@ namespace FlowerSellingWebsite.Services.Implementations
                 sortBy,
                 asc);
 
-            // Map DTO
-            var dtoItems = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
+            // Map manually to avoid circular reference
+            var dtoItems = result.Items.Select(product => new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Url = product.Url,
+                stock = 0, // Default value
+                CategoryId = product.CategoryId,
+                CategoryName = product.ProductCategories?.Name ?? "",
+                ProductPhotos = product.ProductPhotos?.Select(pp => new ProductPhotoDTO
+                {
+                    Id = pp.Id,
+                    ProductId = pp.ProductId,
+                    Url = pp.Url,
+                    IsPrimary = pp.IsPrimary
+                }).ToList() ?? new List<ProductPhotoDTO>(),
+                IsDeleted = product.IsDeleted
+            });
+
+            return (dtoItems, result.TotalPages, result.TotalCount, result.Min, result.Max, result.DbMax);
+        }
+
+        // Admin method to get all products including deleted ones
+        public async Task<(IEnumerable<ProductDTO> Items, int TotalPages, int TotalCount, int Min, int Max, int DbMax)> GetAllProductsIncludingDeletedAsync(
+            int pageNumber,
+            int pageSize,
+            int categoryId,
+            int min,
+            int max,
+            string? search,
+            string? sortBy,
+            bool asc = true)
+        {
+            // Validation 
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize <= 0 || pageSize > 30 ? 10 : pageSize;
+
+            // Get Data including deleted products
+            var result = await _productRepository.GetAllProductsIncludingDeletedAsync(
+                pageNumber,
+                pageSize,
+                categoryId,
+                min,
+                max,
+                search,
+                sortBy,
+                asc);
+
+            // Map manually to avoid circular reference
+            var dtoItems = result.Items.Select(product => new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Url = product.Url,
+                stock = 0, // Default value
+                CategoryId = product.CategoryId,
+                CategoryName = product.ProductCategories?.Name ?? "",
+                ProductPhotos = product.ProductPhotos?.Select(pp => new ProductPhotoDTO
+                {
+                    Id = pp.Id,
+                    ProductId = pp.ProductId,
+                    Url = pp.Url,
+                    IsPrimary = pp.IsPrimary
+                }).ToList() ?? new List<ProductPhotoDTO>(),
+                IsDeleted = product.IsDeleted
+            });
 
             return (dtoItems, result.TotalPages, result.TotalCount, result.Min, result.Max, result.DbMax);
         }
@@ -68,7 +137,30 @@ namespace FlowerSellingWebsite.Services.Implementations
         public async Task<ProductDTO?> GetProductByIdAsync(int id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
-            return product != null ? _mapper.Map<ProductDTO>(product) : null;
+            if (product == null) return null;
+
+            // Map manually to avoid circular reference
+            var productDto = new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Url = product.Url,
+                stock = 0, // Default value
+                CategoryId = product.CategoryId,
+                CategoryName = product.ProductCategories?.Name ?? "",
+                ProductPhotos = product.ProductPhotos?.Select(pp => new ProductPhotoDTO
+                {
+                    Id = pp.Id,
+                    ProductId = pp.ProductId,
+                    Url = pp.Url,
+                    IsPrimary = pp.IsPrimary
+                }).ToList() ?? new List<ProductPhotoDTO>(),
+                IsDeleted = product.IsDeleted
+            };
+
+            return productDto;
         }
 
         public async Task<UpdateProductDTO?> UpdateProductAsync(int id, UpdateProductDTO dto)
@@ -109,30 +201,59 @@ namespace FlowerSellingWebsite.Services.Implementations
                 return null;
 
             ValidateDataAnnotations(dto);
-            ValidateProductPhotos(dto.ProductPhotos);
+            
+            // Only validate ProductPhotos if they exist
+            if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
+            {
+                ValidateProductPhotos(dto.ProductPhotos);
+            }
 
             var product = _mapper.Map<Products>(dto);
+            
+            // Đảm bảo ID = 0 để Entity Framework tự tạo
+            product.Id = 0;
+            product.CreatedAt = DateTime.UtcNow;
+            product.UpdatedAt = DateTime.UtcNow;
+            product.IsDeleted = false;
+            
+            // Đảm bảo PublicId là unique
+            product.PublicId = Guid.NewGuid();
+            
             var createdProduct = await _productRepository.CreateProductAsync(product);
 
+            // Handle product photos manually thay vì qua AutoMapper
             if (dto.ProductPhotos != null && dto.ProductPhotos.Any())
             {
                 await HandleProductPhotos(dto.ProductPhotos, createdProduct.Id);
             }
 
-            // Map Entity back to DTO
-            var result = _mapper.Map<CreateProductDTO>(createdProduct);
-            result.ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>();
+            // Không cần map lại từ entity sang DTO, trả về DTO gốc với ID mới
+            var result = new CreateProductDTO
+            {
+                Id = createdProduct.Id, // Set ID mới
+                Name = createdProduct.Name,
+                Description = createdProduct.Description,
+                Price = createdProduct.Price,
+                Url = createdProduct.Url,
+                CategoryId = createdProduct.CategoryId,
+                ProductPhotos = dto.ProductPhotos ?? new List<ProductPhotos>()
+            };
 
             return result;
         }
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var existing = await _productRepository.GetProductByIdAsync(id);
-            if (existing == null)
-                return false;
-
+            // Không cần kiểm tra existing vì repository sẽ handle
+            // Repository đã có .IgnoreQueryFilters() để bypass global filter
             return await _productRepository.DeleteProductAsync(id);
+        }
+
+        public async Task<bool> ActivateProductAsync(int id)
+        {
+            // Không cần kiểm tra existing vì repository sẽ handle
+            // Repository đã có .IgnoreQueryFilters() để bypass global filter
+            return await _productRepository.ActivateProductAsync(id);
         }
 
         public async Task<ProductAvailabilityDTO> CheckProductAvailabilityAsync(int productId, int quantity)

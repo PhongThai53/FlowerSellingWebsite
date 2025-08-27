@@ -1,4 +1,6 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Flower;
+using FlowerSellingWebsite.Models.Entities;
 using FlowerSellingWebsite.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -79,6 +81,21 @@ namespace FlowerSellingWebsite.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error getting flower colors", error = ex.Message });
+            }
+        }
+
+        // Get all flowers for product recipe
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllFlowers()
+        {
+            try
+            {
+                var flowers = await _flowerService.GetAllFlowersAsync();
+                return Ok(ApiResponse<IEnumerable<FlowerDTO>>.Ok(flowers, "Flowers retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error getting flowers", error = ex.Message });
             }
         }
     }

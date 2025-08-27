@@ -1,4 +1,6 @@
 ﻿using FlowerSellingWebsite.Models.DTOs;
+using FlowerSellingWebsite.Models.DTOs.Flower;
+using FlowerSellingWebsite.Models.Entities;
 
 namespace FlowerSellingWebsite.Services.Interfaces
 {
@@ -12,5 +14,6 @@ namespace FlowerSellingWebsite.Services.Interfaces
         Task<IEnumerable<FlowerCategoryResponse>> GetFlowerCategoriesAsync();
         Task<IEnumerable<FlowerTypeResponse>> GetFlowerTypesAsync();
         Task<IEnumerable<FlowerColorResponse>> GetFlowerColorsAsync();
+        Task<IEnumerable<FlowerDTO>> GetAllFlowersAsync();
     }
 }

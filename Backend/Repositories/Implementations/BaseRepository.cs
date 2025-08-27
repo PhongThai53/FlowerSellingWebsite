@@ -19,6 +19,12 @@ namespace FlowerSellingWebsite.Repositories.Implementations
         }
         public async Task<T> createAsync(T entity)
         {
+            // Ensure entity is not tracked before adding
+            if (_context.Entry(entity).State != EntityState.Detached)
+            {
+                _context.Entry(entity).State = EntityState.Detached;
+            }
+            
             await _context.Set<T>().AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
