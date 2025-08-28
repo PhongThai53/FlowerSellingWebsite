@@ -446,6 +446,7 @@ namespace FlowerSellingWebsite.Services.Implementations
                     {
                         Index = allocationIndex,
                         SupplierId = supplier.SupplierId,
+                        SupplierListingId = supplier.Id, // Add this line to track the actual supplier listing
                         SupplierName = supplier.Supplier?.SupplierName ?? "Unknown",
                         FlowerId = flowerId,
                         Quantity = quantityToTake,
@@ -508,8 +509,9 @@ namespace FlowerSellingWebsite.Services.Implementations
 
                         flowerReqInfo.SupplierAllocations.Add(new SupplierAllocationInfo
                         {
-                            SupplierListingId = 0, // Not applicable for checkout
+                            SupplierListingId = allocation.SupplierListingId, // Use the actual supplier listing ID
                             SupplierId = allocation.SupplierId,
+                            FlowerId = flowerReq.FlowerId, // Add the flower ID
                             SupplierName = allocation.SupplierName,
                             Quantity = quantityToTake,
                             UnitPrice = allocation.UnitPrice,
@@ -545,20 +547,41 @@ namespace FlowerSellingWebsite.Services.Implementations
 
         private async Task CreatePurchaseOrdersAsync(List<FlowerRequirementInfo> flowerRequirements, int orderId)
         {
+            // Consolidate flower requirements by supplier listing to avoid duplicate deductions
+            var consolidatedAllocations = new Dictionary<int, ConsolidatedAllocation>();
+            
+            foreach (var flowerReq in flowerRequirements)
+            {
+                foreach (var allocation in flowerReq.SupplierAllocations)
+                {
+                    var key = allocation.SupplierListingId;
+                    if (!consolidatedAllocations.ContainsKey(key))
+                    {
+                        consolidatedAllocations[key] = new ConsolidatedAllocation
+                        {
+                            SupplierListingId = allocation.SupplierListingId,
+                            SupplierId = allocation.SupplierId,
+                            FlowerId = allocation.FlowerId,
+                            TotalQuantity = 0,
+                            UnitPrice = allocation.UnitPrice,
+                            TotalAmount = 0
+                        };
+                    }
+                    
+                    consolidatedAllocations[key].TotalQuantity += allocation.Quantity;
+                    consolidatedAllocations[key].TotalAmount += allocation.LineTotal;
+                }
+            }
+
             // Group by supplier
-            var supplierGroups = flowerRequirements
-                .SelectMany(fr => fr.SupplierAllocations.Select(sa => new { 
-                    SupplierId = sa.SupplierId, 
-                    FlowerId = fr.FlowerId,
-                    Allocation = sa 
-                }))
+            var supplierGroups = consolidatedAllocations.Values
                 .GroupBy(x => x.SupplierId)
                 .ToList();
 
             foreach (var supplierGroup in supplierGroups)
             {
                 var supplierId = supplierGroup.Key;
-                var totalAmount = supplierGroup.Sum(x => x.Allocation.LineTotal);
+                var totalAmount = supplierGroup.Sum(x => x.TotalAmount);
 
                 var purchaseOrder = new PurchaseOrders
                 {
@@ -579,19 +602,19 @@ namespace FlowerSellingWebsite.Services.Implementations
                     {
                         PurchaseOrderId = createdPO.Id,
                         FlowerId = item.FlowerId,
-                        Quantity = item.Allocation.Quantity,
-                        UnitPrice = item.Allocation.UnitPrice,
-                        LineTotal = item.Allocation.LineTotal
+                        Quantity = item.TotalQuantity,
+                        UnitPrice = item.UnitPrice,
+                        LineTotal = item.TotalAmount
                     };
 
                     await _purchaseOrderDetailsRepository.createAsync(poDetail);
 
-                    // Deduct from supplier listing stock if tracked
-                    if (item.Allocation.SupplierListingId > 0)
+                    // Deduct from supplier listing stock (now consolidated, so only deduct once per listing)
+                    if (item.SupplierListingId > 0)
                     {
                         await _supplierListingsRepository.DeductAvailableQuantityAsync(
-                            item.Allocation.SupplierListingId,
-                            item.Allocation.Quantity
+                            item.SupplierListingId,
+                            item.TotalQuantity
                         );
                     }
                 }
@@ -648,6 +671,7 @@ namespace FlowerSellingWebsite.Services.Implementations
     {
         public int SupplierListingId { get; set; }
         public int SupplierId { get; set; }
+        public int FlowerId { get; set; } // Add FlowerId to track which flower this allocation is for
         public string SupplierName { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
@@ -659,10 +683,22 @@ namespace FlowerSellingWebsite.Services.Implementations
     {
         public int Index { get; set; }
         public int SupplierId { get; set; }
+        public int SupplierListingId { get; set; } // Add this property to track the actual supplier listing ID
         public string SupplierName { get; set; } = string.Empty;
         public int FlowerId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal LineTotal { get; set; }
+    }
+
+    // Helper class for consolidated allocations
+    public class ConsolidatedAllocation
+    {
+        public int SupplierListingId { get; set; }
+        public int SupplierId { get; set; }
+        public int FlowerId { get; set; }
+        public int TotalQuantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalAmount { get; set; }
     }
 }
