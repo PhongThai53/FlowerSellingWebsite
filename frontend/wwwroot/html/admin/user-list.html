@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <title>Quản lý người dùng | Flower Selling Website</title>
+    <title>User Management | Flower Selling Website</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="../../images/favicon.ico" />
@@ -48,13 +48,13 @@
               <div
                 class="section-title d-flex align-items-center justify-content-between mb-3"
               >
-                <h2 class="m-0">Quản lý người dùng</h2>
+                <h2 class="m-0">User Management</h2>
                 <button
                   type="button"
                   class="btn btn-maroon"
                   onclick="userManager.openAddUserModal()"
                 >
-                  <i class="las la-plus me-2"></i>Thêm người dùng
+                  <i class="las la-plus me-2"></i>Add User
                 </button>
               </div>
 
@@ -67,13 +67,13 @@
               <!-- Filter: only search by username -->
               <div class="mb-3">
                 <label class="form-label mb-1" for="exampleInputSearch"
-                  >Tìm theo tên người dùng</label
+                  >Search by username</label
                 >
                 <input
                   type="search"
                   class="form-control"
                   id="exampleInputSearch"
-                  placeholder="Nhập tên người dùng..."
+                  placeholder="Enter username..."
                   aria-controls="user-list-table"
                 />
               </div>
@@ -87,15 +87,15 @@
                 >
                   <thead>
                     <tr>
-                      <th style="white-space: nowrap">Họ tên</th>
+                      <th style="white-space: nowrap">Full Name</th>
                       <th style="white-space: nowrap">Username</th>
                       <th style="white-space: nowrap">Email</th>
-                      <th style="white-space: nowrap">Số điện thoại</th>
-                      <th style="white-space: nowrap">Vai trò</th>
-                      <th style="white-space: nowrap">Địa chỉ</th>
-                      <th style="white-space: nowrap">Trạng thái</th>
+                      <th style="white-space: nowrap">Phone Number</th>
+                      <th style="white-space: nowrap">Role</th>
+                      <th style="white-space: nowrap">Address</th>
+                      <th style="white-space: nowrap">Status</th>
                       <th style="min-width: 180px; white-space: nowrap">
-                        Thao tác
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -109,7 +109,7 @@
               <div class="row justify-content-between mt-3">
                 <div class="col-md-6">
                   <div id="user-list-page-info">
-                    <span>Đang tải dữ liệu...</span>
+                    <span>Loading data...</span>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -153,7 +153,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="add-fullName" class="form-label"
-                      >Họ và tên <span class="text-danger">*</span></label
+                      >Full Name <span class="text-danger">*</span></label
                     >
                     <input
                       type="text"
@@ -200,7 +200,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="add-password" class="form-label"
-                      >Mật khẩu <span class="text-danger">*</span></label
+                      >Password <span class="text-danger">*</span></label
                     >
                     <div class="input-group">
                       <input
@@ -226,7 +226,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="add-phoneNumber" class="form-label"
-                      >Số điện thoại</label
+                      >Phone Number</label
                     >
                     <input
                       type="tel"
@@ -240,7 +240,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="add-roleName" class="form-label"
-                      >Vai trò <span class="text-danger">*</span></label
+                      >Role <span class="text-danger">*</span></label
                     >
                     <select
                       class="form-control"
@@ -250,7 +250,7 @@
                       data-nice-select="false"
                       style="background-color: white; color: #495057"
                     >
-                      <option value="">Chọn vai trò</option>
+                      <option value="">Select role</option>
                     </select>
                     <div class="invalid-feedback"></div>
                   </div>
@@ -259,7 +259,7 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group mb-3">
-                    <label for="add-address" class="form-label">Địa chỉ</label>
+                    <label for="add-address" class="form-label">Address</label>
                     <textarea
                       class="form-control"
                       id="add-address"
@@ -280,7 +280,7 @@
               class="btn btn-maroon"
               onclick="userManager.createUserFromModal()"
             >
-              Thêm người dùng
+              Add User
             </button>
           </div>
         </div>
@@ -316,7 +316,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="edit-fullName" class="form-label"
-                      >Họ và tên <span class="text-danger">*</span></label
+                      >Full Name <span class="text-danger">*</span></label
                     >
                     <input
                       type="text"
@@ -357,13 +357,13 @@
                       name="email"
                       disabled
                     />
-                    <small class="text-muted">Email không thể thay đổi</small>
+                    <small class="text-muted">Email cannot be changed</small>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="edit-phoneNumber" class="form-label"
-                      >Số điện thoại</label
+                      >Phone Number</label
                     >
                     <input
                       type="tel"
@@ -379,7 +379,7 @@
                 <div class="col-md-6">
                   <div class="form-group mb-3">
                     <label for="edit-roleName" class="form-label"
-                      >Vai trò <span class="text-danger">*</span></label
+                      >Role <span class="text-danger">*</span></label
                     >
                     <select
                       class="form-control"
@@ -389,14 +389,14 @@
                       data-nice-select="false"
                       style="background-color: white; color: #495057"
                     >
-                      <option value="">Chọn vai trò</option>
+                      <option value="">Select role</option>
                     </select>
                     <div class="invalid-feedback"></div>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group mb-3">
-                    <label for="edit-address" class="form-label">Địa chỉ</label>
+                    <label for="edit-address" class="form-label">Address</label>
                     <textarea
                       class="form-control"
                       id="edit-address"
@@ -417,14 +417,14 @@
               class="btn btn-secondary me-2"
               data-bs-dismiss="modal"
             >
-              <i class="las la-times me-1"></i>Hủy
+              <i class="las la-times me-1"></i>Cancel
             </button>
             <button
               type="button"
               class="btn btn-maroon"
               onclick="userManager.updateUserFromModal()"
             >
-              <i class="las la-save me-1"></i>Cập nhật
+              <i class="las la-save me-1"></i>Update
             </button>
           </div>
         </div>
@@ -443,7 +443,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="deleteModalTitle">
-              Xác nhận vô hiệu hóa
+              Confirm Deactivation
             </h5>
             <button
               type="button"
@@ -454,10 +454,10 @@
           </div>
           <div class="modal-body" id="deleteModalBody">
             <p>
-              Bạn có chắc chắn muốn vô hiệu hóa người dùng
-              <strong id="deleteUserName"></strong> không?
+              Are you sure you want to deactivate user
+              <strong id="deleteUserName"></strong>?
             </p>
-            <p>Người dùng này sẽ không thể đăng nhập vào hệ thống.</p>
+            <p>This user will not be able to log into the system.</p>
           </div>
           <div class="modal-footer">
             <button
@@ -497,7 +497,7 @@
       "
     >
       <div class="spinner-border text-light" role="status">
-        <span class="sr-only">Đang tải...</span>
+        <span class="sr-only">Loading...</span>
       </div>
     </div>
 
